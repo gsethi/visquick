@@ -10,16 +10,6 @@ vq.CircVis.Wedge.prototype = pv.extend(vq.Vis);
 
 vq.CircVis.Wedge.prototype._setOptionDefaults = function(options) {
 
-    if (options.height != null) {this.height(options.height); }
-
-    if (options.width != null) { this.width(options.width); }
-
-    if (options.vertical_padding != null) { this.vertical_padding(options.vertical_padding);    }
-
-    if (options.horizontal_padding != null) { this.horizontal_padding(options.horizontal_padding);}
-
-    if (options.container) {  this.container(options.container);   }
-
 };
 /**
  *
@@ -32,7 +22,6 @@ vq.CircVis.prototype.draw = function(data) {
     var vis_data = new vq.models.CircVisData(data);
 
     if (vis_data.isDataReady()) {
-        this._setOptionDefaults(vis_data);
         this.chromoData = vis_data;
         this._render();
     } else {
@@ -40,11 +29,40 @@ vq.CircVis.prototype.draw = function(data) {
     }
 };
 
+vq.CircVis.prototype.render = function() {
+
+    var dataObj = this.chromoData;
+    var width = dataObj._plot.width, height = dataObj._plot.height;
+    var outerRadius = height/2;
+
+    if (dataObj.ticks._data_array != undefined) {
+        this._add_ticks(outerRadius);
+        tick_padding =  dataObj.ticks.outer_padding + dataObj.ticks.height;
+    }
+
+    d3.select(dataObj._plot.container)
+        .append('svg:svg')
+        .attr('width',width)
+        .attr('height',height)
+        .append('svg:g')
+        .transform('translate('+width/2+',' + height/2+')');
+
+        if (dataObj._wedge != undefined) {
+        for(var i = 0; i < dataObj._wedge.length; i++){
+            var wedge_outerRadius =
+                    outerRadius -
+                            (pv.sum(dataObj._wedge.slice(0,i), function(a) { return a._plot.height;}) + pv.sum(dataObj._wedge.slice(0,i), function(a) { return a._outer_padding;})) -
+                            (tick_padding);
+            this._add_wedge(i,wedge_outerRadius);
+        }
+}
+};
+
 
 /**private **/
 vq.CircVis.prototype._add_wedge = function(index,outerRadius) {
     var dataObj = this.chromoData, dot;
-    var width = this.width(), height = this.height();
+    var width = dataObj._plot.width, height = dataObj._plot.height;
     var outerPlotRadius = outerRadius - dataObj._wedge[index]._outer_padding;
     var innerRadius = outerPlotRadius - dataObj._wedge[index]._plot_height;
 
@@ -91,9 +109,9 @@ vq.CircVis.prototype._add_wedge = function(index,outerRadius) {
     var thresholded_outerRadius = function(d) { return Math.min(y_axis(Math.max(d,range_mean)),outerPlotRadius); };
     var thresholded_value_to_radius = function(d) { return Math.min(Math.max(y_axis(d),innerRadius),outerPlotRadius); };
     var thresholded_radius = function(d) { return Math.min(Math.max(d,innerRadius),outerPlotRadius); };
-    var thresholded_tile_innerRadius = function(c,d) { return innerRadius + (d._tile_height + d._tile_padding) * c.level;};
-    var thresholded_tile_outerRadius = function(c,d) { return innerRadius + ((d._tile_height + d._tile_padding) * c.level) + d._tile_height;};
-    var glyph_distance = function(c,d) { return (((d._tile_height + d._tile_padding) * c.level)
+    var thresholded_tile_innerRadius = function(c,d) { return innerRadius + (d._tile.height + d._tile.padding) * c.level;};
+    var thresholded_tile_outerRadius = function(c,d) { return innerRadius + ((d._tile.height + d._tile.padding) * c.level) + d._tile.height;};
+    var glyph_distance = function(c,d) { return (((d._tile.height + d._tile.padding) * c.level)
         + innerRadius + (d._radius() * 2));};
     var checked_endAngle = function(c,d) {
 	if (dataObj._chrom.keys.length == 1) {
@@ -281,13 +299,11 @@ vq.models.CircVisData.WedgeData = function(data) {
 
 vq.models.CircVisData.WedgeData.prototype = pv.extend(vq.models.VisData);
 
-
 vq.models.CircVisData.WedgeData.prototype.setDataModel = function() {
  this._dataModel = [
      {label : '_data', id: 'DATA.data_array', defaultValue : [ {"chr": "1", "end": 12784268, "start": 644269,
          "value": -0.058664}]},
      {label : '_value_key', id: 'DATA.value_key', defaultValue : 'value',cast: String },
-
      {label : 'listener', id: 'OPTIONS.listener', defaultValue :  function(a,b) {} },
      {label : '_plot_type', id: 'PLOT.type', defaultValue : 'histogram' },
      {label : '_plot_height', id: 'PLOT.height', cast: Number, defaultValue : 100 },
@@ -306,10 +322,10 @@ vq.models.CircVisData.WedgeData.prototype.setDataModel = function() {
          defaultValue : function(c,d) { return "Chr " + d + "\nStart: " + c.start + "\nEnd: " + c.end;}   },
      {label : '_tooltipItems', id: 'OPTIONS.tooltip_items',  defaultValue : {Chr:'chr',Start:'start',End:'end',Value:'value'} },
      {label : '_tooltipLinks', id: 'OPTIONS.tooltip_links',  defaultValue : {} },
-     {label : '_tile_padding', id: 'OPTIONS.tile_padding', cast: Number, defaultValue : 5 },
-     {label : '_tile_overlap_distance', id: 'OPTIONS.tile_overlap_distance', cast: Number, defaultValue : 0.1 },
-     {label : '_tile_height', id: 'OPTIONS.tile_height', cast: Number, defaultValue : 5 },
-     {label : '_tile_show_all_tiles', id: 'OPTIONS.tile_show_all_tiles', cast: Boolean, defaultValue : false }
+     {label : '_tile.padding', id: 'OPTIONS.tile_padding', cast: Number, defaultValue : 5 },
+     {label : '_tile.overlap_distance', id: 'OPTIONS.tile_overlap_distance', cast: Number, defaultValue : 0.1 },
+     {label : '_tile.height', id: 'OPTIONS.tile_height', cast: Number, defaultValue : 5 },
+     {label : '_tile.show_all_tiles', id: 'OPTIONS.tile_show_all_tiles', cast: Boolean, defaultValue : false }
     ];
 };
 

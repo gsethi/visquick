@@ -31,8 +31,6 @@ vq.Vis.prototype
     .property("width", Number)
     .property("height", Number)
     .property("container",  function(c) {
-            return (typeof c == "string")
-            ? document.getElementById(c)
-            : c; // assume that c is the passed-in element
+            return (vq.utils.VisUtils.divify(c)); // assume that c is the passed-in element
       });
 

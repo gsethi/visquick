@@ -13,6 +13,17 @@ vq.utils = {};
  */
 
 vq.utils.VisUtils =  {};
+
+    vq.utils.VisUtils.divify =  function(c) {
+        var result = null;
+             if (typeof c == "string")  {
+             result = document.getElementById(c) === undefined ? null : c ;
+             } else if (typeof c == 'function' ) {
+                 var val = c.call() + '';
+                 result = document.getElementById(val) === undefined ? null : val ;
+             }
+        return result;
+    };
     /**
      * Utility function for the creation of a div with specified parameters.  Useful in structuring interface for
      * multi-panel cooperating visualizations.
