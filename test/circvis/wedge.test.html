@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<title>Circvis Demo</title>
+<title>Wedge Demo</title>
 <script type="text/javascript" src="../../lib/protovis/protovis-d3.3.1.js"></script>
     <script type="text/javascript" src="../../lib/d3/d3.js"></script>
     <script type="text/javascript" src="../../lib/underscore/underscore.js"></script>
@@ -18,7 +18,7 @@
 </head>
 <body>
 
-<div id="wedge" style="margin:100px"></div></div>
+<div id="wedge" style="font: 10px sans-serif;margin:10px"></div>
 
 <script type="text/javascript">
     var circle;
@@ -46,8 +46,8 @@ function wedge_plot(div) {
             container: div,
             width : width,
             height: height,
-            vertical_padding : 40,
-            horizontal_padding: 40,
+            vertical_padding : 10,
+            horizontal_padding: 10,
             enable_pan : false,
             enable_zoom : false,
             show_legend: true,
@@ -106,7 +106,8 @@ function wedge_plot(div) {
                     type : 'scatterplot'
                 },
                 DATA:{
-                    data_array : link_density
+                    data_array : link_density,
+                    value_key : 'value'
                 },
                 OPTIONS: {
                     legend_label : 'Link Density',
