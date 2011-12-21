@@ -142,7 +142,7 @@ vq.ChromaVis.prototype._render = function() {
 
 
     this.context_posX = pv.Scale.linear(that.min_x_axis_value(), that.max_x_axis_value()).range(0,that.visibleWidth);
-    that.window = {x:that.context_posX.range()[0],dx:(that.context_posX.range()[1] - that.context_posX.range()[0]) *.6};
+    that.window = {x:(that.context_posX.range()[1] - that.context_posX.range[0])* .2,dx:(that.context_posX.range()[1] - that.context_posX.range()[0]) *.6};
     that.posX.domain(that.context_posX.invert(that.window.x),that.context_posX.invert(that.window.x + that.window.dx));
     that.focus_window = {x:0,dx:0};
 
