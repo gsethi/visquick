@@ -50,10 +50,13 @@ vq.js: \
 	src/core/pv.behavior.flextip.js
 
 vq.circvis.js: \
-	src/circvis/circvis.js 
+	src/circvis/circvis.old.js
 
 vq.wedge.js: \
-	src/circvis/wedge.js
+	src/circvis/circvis.js \
+	src/circvis/wedge.js \
+	src/circvis/circvisdata.js \
+	src/circvis/wedgedata.js
 
 vq.linear_browser.js: \
 	src/linear_browser/linear_browser.js 
