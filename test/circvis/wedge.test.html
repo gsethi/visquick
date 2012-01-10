@@ -30,7 +30,7 @@ function wedge_plot(div) {
     var	cnv_ring_height = 60;
 
       var tick_keys = ['METH','CNV','hsa-miR','Other'],
-        color_scale = pv.Scale.ordinal(tick_keys).range(pv.Colors.category10().range().slice(0,tick_keys.length));
+        color_scale = d3.scale.category10().domain(tick_keys);
 
     var tick_colors = function(data) {
            var tick_key = 'Other';

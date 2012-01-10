@@ -55,6 +55,8 @@ vq.circvis.js: \
 vq.wedge.js: \
 	src/circvis/circvis.js \
 	src/circvis/wedge.js \
+	src/circvis/ticks.js \
+	src/circvis/network.js \
 	src/circvis/circvisdata.js \
 	src/circvis/wedgedata.js
 

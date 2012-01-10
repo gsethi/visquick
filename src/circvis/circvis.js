@@ -30,10 +30,10 @@ vq.CircVis.prototype._render = function() {
 
     var dataObj = this.chromoData;
     var width = dataObj._plot.width, height = dataObj._plot.height;
-    var outerRadius = height / 2;
 
-    if (dataObj.ticks._data_array != undefined) {
-        tick_padding = dataObj.ticks.outer_padding + dataObj.ticks.height;
+    function fade(opacity) { return function(d,i) {
+        d3.select(this).transition().delay(100).duration(300).attr('opacity',opacity);
+    };
     }
 
     var svg = d3.select(dataObj._plot.container)
@@ -43,32 +43,25 @@ vq.CircVis.prototype._render = function() {
         .append('svg:g')
         .attr('class', 'circvis')
         .attr("transform", 'translate(' + width / 2 + ',' + height / 2 + ')');
-        
+
 var ideograms = svg.selectAll("svg.circvis")
         .data(dataObj._chrom.keys)
         .enter().append('svg:g')
-            .attr('class',function(d) {return 'ideogram';})
+            .attr('class','ideogram')
+            .attr('opacity',1.0)
             .each(draw_ideogram_rings);
+    var f = fade(0.1);
+    var unf=fade(1.0);
+
+    ideograms.on("mouseover", f)
+        .on("mouseout", unf);
 
 function draw_ideogram_rings(d) {
 
     var ideogram = d3.select(this);
-        function fade(opacity) {
-        return function(g, i) {
-            svg.selectAll("g.ideogram")
-                .filter(function(d, i2) {
-                    return d != g;
-                })
-                .transition()
-                .style("opacity", opacity);
-        };
-    }
-
-    ideogram
-        .on("mouseover", fade(0.1))
-        .on("mouseout", fade(1.0));
 
                that._add_wedge(ideogram, d);
+                that._add_ticks(ideogram, d);
     
 }
 

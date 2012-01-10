@@ -101,10 +101,10 @@ vq.models.CircVisData.prototype.setDataModel = function() {
         {label : 'ticks.tile_ticks', id: 'TICKS.OPTIONS.tile_ticks', cast : Boolean, defaultValue: true },
         {label : 'ticks.overlap_distance', id: 'TICKS.OPTIONS.overlap_distance', cast : Number, optional: true},
         {label : 'ticks.fill_style', id: 'TICKS.OPTIONS.fill_style', cast : vq.utils.VisUtils.wrapProperty, defaultValue : function() {
-            return pv.color('red');
+            return 'red';
         }},
         {label : 'ticks.stroke_style', id: 'TICKS.OPTIONS.stroke_style', cast : vq.utils.VisUtils.wrapProperty, defaultValue : function() {
-            return pv.color('white');
+            return 'white';
         }},
         {label : '_wedge' , id:'WEDGE', optional : true}
     ];
