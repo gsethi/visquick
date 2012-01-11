@@ -32,7 +32,25 @@ vq.CircVis.prototype._render = function() {
     var width = dataObj._plot.width, height = dataObj._plot.height;
 
     function fade(opacity) { return function(d,i) {
-        d3.select(this).transition().delay(100).duration(300).attr('opacity',opacity);
+        d3.selectAll('g.ideogram')
+            .filter(function(g,i2) { return i != i2;})
+            .transition()
+            .delay(100)
+            .duration(300)
+            .attr('opacity',opacity);
+
+        d3.selectAll('path.link').filter('!.t_'+d)
+            .transition()
+            .delay(100)
+            .duration(300)
+            .attr('opacity',opacity);
+
+           d3.selectAll('path.p_'+d)
+            .transition()
+            .delay(100)
+            .duration(300)
+            .attr('opacity',opacity);
+
     };
     }
 
@@ -44,11 +62,12 @@ vq.CircVis.prototype._render = function() {
         .attr('class', 'circvis')
         .attr("transform", 'translate(' + width / 2 + ',' + height / 2 + ')');
 
-var ideograms = svg.selectAll("svg.circvis")
+var ideograms = svg.selectAll('g.ideogram')
         .data(dataObj._chrom.keys)
         .enter().append('svg:g')
             .attr('class','ideogram')
             .attr('opacity',1.0)
+            .attr('transform',function(key) { return 'rotate(' + dataObj._chrom.groups[key].startAngle * 180 / Math.PI + ')';})
             .each(draw_ideogram_rings);
     var f = fade(0.1);
     var unf=fade(1.0);
@@ -62,8 +81,11 @@ function draw_ideogram_rings(d) {
 
                that._add_wedge(ideogram, d);
                 that._add_ticks(ideogram, d);
+                that._add_network_nodes(ideogram, d);
     
 }
+
+    that._add_network_links(svg.append('svg:g').attr('class','links'));
 
 var graph = svg.selectAll("svg.circvis")
 

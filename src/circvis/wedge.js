@@ -45,8 +45,8 @@ vq.CircVis.prototype._add_wedge = function(ideogram_obj, chr) {
         .attr("d",d3.svg.arc()
             .innerRadius(  function(ring_index) { return innerRadius(ring_index); })
             .outerRadius( function(ring_index) { return outerRadius(ring_index);} )
-            .startAngle(dataObj._chrom.groups[chr].startAngle)
-            .endAngle( dataObj._chrom.groups[chr].endAngle)
+            .startAngle(0)
+            .endAngle( dataObj._chrom.groups[chr].angle)
         );
 
     ideogram_obj.selectAll("g.wedge")
@@ -95,9 +95,9 @@ vq.CircVis.prototype._drawWedge_withRange = function(wedge_obj, chr, wedge_index
         //add a new panel each time we want to draw on top of the previously created image.
         var p = dataObj._chrom.groups[chr];
         var startAngle = p.startAngle;
-        var endAngle = p.endAngle;
+        var endAngle = p.angle;
 
-        var angles = _.range(startAngle,endAngle,0.01);
+        var angles = _.range(0,endAngle,0.01);
         var radii = wedge_params._y_linear.ticks(4);
         var cross = _.map(radii, function(d) { return pv.cross(angles,[d]);});
 
@@ -172,8 +172,8 @@ vq.CircVis.prototype._drawWedgeData_histogram = function(wedge_obj, chr, wedge_i
         .attr('d',d3.svg.arc()
         .innerRadius(function(point) { return wedge_params._thresholded_innerRadius(point[value_key]);})
         .outerRadius(function(point) { return wedge_params._thresholded_outerRadius(point[value_key]);})
-        .startAngle(function(point) { return that.chromoData._ideograms[chr]._feature_angle(point.start);})
-        .endAngle(function(point) { return that.chromoData._ideograms[chr]._feature_angle(point.end);})
+        .startAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.start);})
+        .endAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.end);})
     );
 };
 
@@ -191,13 +191,8 @@ vq.CircVis.prototype._drawWedgeData_scatterplot = function(wedge_obj, chr, wedge
         .attr('fill',wedge_params._fillStyle)
         .attr('stroke',wedge_params._strokeStyle)
         .attr("transform",function(point) {
-            return "translate(" +
-                wedge_params._thresholded_value_to_radius(point[value_key]) *
-                    Math.cos(that.chromoData._ideograms[chr]._feature_angle(point.start) - Math.PI / 2) +
-                "," +
-                wedge_params._thresholded_value_to_radius(point[value_key]) *
-                    Math.sin(that.chromoData._ideograms[chr]._feature_angle(point.start) -  Math.PI / 2) +
-                ")";} )
+            return "rotate(" + ((that.chromoData._ideograms[chr].theta(point.start) * 180 / Math.PI) - 90)+ ")translate(" +
+                wedge_params._thresholded_value_to_radius(point[value_key]) + ")";} )
         .attr('d',d3.svg.symbol()
         .type(wedge_params._shape)
         .size(Math.pow(wedge_params._radius(),2)) );
@@ -219,8 +214,8 @@ vq.CircVis.prototype._drawWedgeData_band = function(wedge_obj, chr, wedge_index)
         .attr('d',d3.svg.arc()
         .innerRadius( wedge_params._innerRadius)
         .outerRadius( wedge_params._outerPlotRadius)
-        .startAngle(function(point) { return that.chromoData._ideograms[chr]._feature_angle(point.start);})
-        .endAngle(function(point) { return that.chromoData._ideograms[chr]._feature_angle(point.end);})
+        .startAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.start);})
+        .endAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.end);})
     );
 };
 
@@ -240,10 +235,10 @@ vq.CircVis.prototype._drawWedgeData_glyph = function(wedge_obj, chr, wedge_index
         .attr("transform",function(point) {
             return "translate(" +
                 wedge_params._glyph_distance(point,wedge_params) *
-                    Math.cos(that.chromoData._ideograms[chr]._feature_angle(point.start) - Math.PI / 2) +
+                    Math.cos(that.chromoData._ideograms[chr].theta(point.start) ) +
                 "," +
                 wedge_params._glyph_distance(point,wedge_params) *
-                    Math.sin(that.chromoData._ideograms[chr]._feature_angle(point.start) -  Math.PI / 2) +
+                    Math.sin(that.chromoData._ideograms[chr].theta(point.start)) +
                 ")";} )
         .attr('d',d3.svg.symbol()
         .type(wedge_params._shape)
@@ -265,8 +260,8 @@ vq.CircVis.prototype._drawWedgeData_tile = function(wedge_obj, chr, wedge_index)
         .attr('d',d3.svg.arc()
         .innerRadius( function(point) { return wedge_params._thresholded_tile_innerRadius(point,wedge_params);})
         .outerRadius( function(point) { return wedge_params._thresholded_tile_outerRadius(point,wedge_params);})
-        .startAngle(function(point) { return that.chromoData._ideograms[chr]._feature_angle(point.start);})
-        .endAngle(function(point) { return that.chromoData._ideograms[chr]._feature_angle(point.end);})
+        .startAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.start);})
+        .endAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.end);})
     );
 };
 
@@ -285,8 +280,8 @@ vq.CircVis.prototype._drawWedgeData_karyotype = function(wedge_obj, chr, wedge_i
         .attr('d',d3.svg.arc()
         .innerRadius( wedge_params._innerRadius)
         .outerRadius( wedge_params._outerPlotRadius)
-        .startAngle(function(point) { return that.chromoData._ideograms[chr]._feature_angle(point.start);})
-        .endAngle(function(point) { return that.chromoData._ideograms[chr]._feature_angle(point.end);})
+        .startAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.start);})
+        .endAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.end);})
     );
 };
 
@@ -305,7 +300,7 @@ vq.CircVis.prototype._drawWedgeData_heatmap = function(wedge_obj, chr, wedge_ind
         .attr('d',d3.svg.arc()
         .innerRadius( wedge_params._innerRadius)
         .outerRadius( wedge_params._outerPlotRadius)
-        .startAngle(function(point) { return that.chromoData._ideograms[chr]._feature_angle(point.start);})
-        .endAngle(function(point) { return that.chromoData._ideograms[chr]._feature_angle(point.end);})
+        .startAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.start);})
+        .endAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.end);})
     );
 };

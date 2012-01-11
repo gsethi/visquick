@@ -195,12 +195,13 @@ vq.models.CircVisData.prototype._setupData = function() {
                 .range(0, 2 * Math.PI * normalizedLength[d]);
 
         }
-        chrom_groups[d]={key:d, startAngle: startAngle[d], endAngle: startAngle[d] + 2 * Math.PI * normalizedLength[d], theta:theta[d] };
+        chrom_groups[d]={key:d, startAngle: startAngle[d], endAngle: startAngle[d] + 2 * Math.PI * normalizedLength[d], theta:theta[d],
+        angle: 2 * Math.PI * normalizedLength[d]};
     });
 
 
     startAngle_map = pv.dict(chrom_keys_array, (function(d) {
-        return startAngle[d] - (Math.PI / 2) + rotation;
+        return startAngle[d] + rotation;
     } ));
     this.startAngle_map = startAngle_map;
     this._chrom.groups = chrom_groups;
@@ -293,7 +294,16 @@ vq.models.CircVisData.prototype._setupData = function() {
     var nodes = pv.dict(this._chrom.keys, function() {
         return {};
     });
-    var node_array = [];
+    var node_parent_map = {};
+    var node_array = [{parent:null, chr:null, radius:0, angle:0,children:[]}];
+    chrom_keys_array.forEach(function(key,index) {
+         var network_radius = that._wedge[that._ideograms[key].wedge.length-1]._innerRadius - that._network._outer_padding;
+        node_parent_map[key] = index + 1;
+        var node = {chr:key,parent:node_array[0],children:[],radius: network_radius / 2,
+                angle : (that._chrom.groups[key].startAngle + (that._chrom.groups[key].angle /2))};
+        node_array[0].children.push(node);
+        node_array.push(node);
+});
     var links_array = [];
     var length;
     var index1,index2;
@@ -306,7 +316,9 @@ vq.models.CircVisData.prototype._setupData = function() {
                     nodes[d.node1.chr][d.node1.start] = {};
                     if (nodes[d.node1.chr][d.node1.start][d.node1.end] === undefined) {
                         var temp_node = d.node1;
-                        temp_node.nodeName = d.node1.chr;
+                        temp_node.nodeName =  temp_node.parent = d.node1.chr;
+                        temp_node.parent = node_array[node_parent_map[d.node1.chr]];
+                        node_array[node_parent_map[d.node1.chr]].children.push(temp_node);
                         length = node_array.push(temp_node);
                         index1 = length - 1;
                         nodes[d.node1.chr][d.node1.start][d.node1.end] = index1;
@@ -323,6 +335,8 @@ vq.models.CircVisData.prototype._setupData = function() {
                     if (nodes[d.node2.chr][d.node2.start][d.node2.end] === undefined) {
                         var temp_node = d.node2;
                         temp_node.nodeName = d.node2.chr;
+                        temp_node.parent = node_array[node_parent_map[d.node2.chr]];
+                        node_array[node_parent_map[d.node2.chr]].children.push(temp_node);
                         length = node_array.push(temp_node);
                         index2 = length - 1;
                         nodes[d.node2.chr][d.node2.start][d.node2.end] = index2;
@@ -336,7 +350,7 @@ vq.models.CircVisData.prototype._setupData = function() {
 
             if (index1 != null && index2 != null) {
                 //copy out useful properties
-                var node = {source : index1, target : index2};
+                var node = {source : node_array[index1], target : node_array[index2]};
                 for (var p in d) {
                     if (p != 'node1' && p != 'node2') {
                         node[p] = d[p];

@@ -27,14 +27,12 @@ vq.CircVis.prototype._add_ticks = function(ideogram_obj,chr) {
 
     function tick_translate(tick) {
         var radius = (outer(tick) + inner(tick)) / 2;
-        return "translate(" + radius * Math.cos(that.chromoData._ideograms[chr]._feature_angle(tick.start) - Math.PI / 2) +
-                "," +
-                radius *
-                    Math.sin(that.chromoData._ideograms[chr]._feature_angle(tick.start) -  Math.PI / 2) +
-                ")";}
+        var angle =  ((that.chromoData._ideograms[chr].theta(tick.start + (tick_angle(tick) / 2)) * 180 / Math.PI) - 90);
+        var tick_rotation = (that.chromoData._ideograms[chr].startAngle + that.chromoData._ideograms[chr].theta(tick.start) >= Math.PI ? 180 : 0);
+        return "rotate(" + angle + ")translate(" +  radius + ")rotate("+tick_rotation+")";}
 
     function tick_rotate(tick) {
-        return "rotate(" + (-1 * that.chromoData._ideograms[chr]._feature_angle(tick.start)) +")";}
+        return "rotate(" + that.chromoData._ideograms[chr].theta(tick.start) +")";}
 
 
    var ticks =  ideogram_obj
@@ -49,15 +47,14 @@ vq.CircVis.prototype._add_ticks = function(ideogram_obj,chr) {
                 .attr('d',d3.svg.arc()
                 .innerRadius( inner)
                 .outerRadius( outer)
-                .startAngle(function(point) { return that.chromoData._ideograms[chr]._feature_angle(point.start);})
+                .startAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.start);})
                 .endAngle(function(point) {
-                            return that.chromoData._ideograms[chr]._feature_angle(point.start) +
+                            return that.chromoData._ideograms[chr].theta(point.start) +
                             tick_angle(point);})
                 );
 
              ticks.append('text')
-                   .attr('transform', function(tick)  { return tick_translate(tick) +
-                     tick_rotate(tick);})
+                   .attr('transform', function(tick)  { return tick_translate(tick);})
                     .attr("x",8)
                     .attr("dy",".35em")
                     .attr('stroke','black')
