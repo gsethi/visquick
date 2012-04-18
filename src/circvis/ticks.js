@@ -27,7 +27,7 @@ vq.CircVis.prototype._add_ticks = function(ideogram_obj,chr) {
 
     function tick_translate(tick) {
         var radius = (outer(tick) + inner(tick)) / 2;
-        var angle =  ((that.chromoData._ideograms[chr].theta(tick.start + (tick_angle(tick) / 2)) * 180 / Math.PI) - 90);
+        var angle =  ((that.chromoData._ideograms[chr].theta(tick.start) * 180 / Math.PI) - 90);
         var tick_rotation = (that.chromoData._ideograms[chr].startAngle + that.chromoData._ideograms[chr].theta(tick.start) >= Math.PI ? 180 : 0);
         return "rotate(" + angle + ")translate(" +  radius + ")rotate("+tick_rotation+")";}
 
@@ -36,12 +36,14 @@ vq.CircVis.prototype._add_ticks = function(ideogram_obj,chr) {
 
 
    var ticks =  ideogram_obj
-                .selectAll('g.ticks')
-                .data(dataObj.ticks.data_map[chr])
-                .enter().append('svg:g')
+                .append('svg:g')
                 .attr('class','ticks');
 
-       ticks.append('svg:path')
+
+          ticks.selectAll('svg.path')
+               .data(dataObj.ticks.data_map[chr])
+               .enter().append('svg:path')
+                .attr('class',function(tick) { return tick[label_key];})
                 .attr('fill',tick_fill)
                 .attr('stroke',tick_stroke)
                 .attr('d',d3.svg.arc()
@@ -51,14 +53,27 @@ vq.CircVis.prototype._add_ticks = function(ideogram_obj,chr) {
                 .endAngle(function(point) {
                             return that.chromoData._ideograms[chr].theta(point.start) +
                             tick_angle(point);})
-                );
+                ).on('mouseover',function(d){
+                                    d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','visible');
+                                })
+                                .on('mouseout',function(d){
+                                    d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','hidden');
+                                });
 
-             ticks.append('text')
+    var labels = ticks
+                .selectAll('svg.text')
+                .data(dataObj.ticks.data_map[chr])
+                        .enter()
+
+             .append('text')
                    .attr('transform', function(tick)  { return tick_translate(tick);})
                     .attr("x",8)
+                    .attr('data-label',function(d) { return d[label_key];})
+                 .attr('class','labels')
                     .attr("dy",".35em")
                     .attr('stroke','black')
                     .attr("text-anchor","middle")
+                 .attr('visibility','hidden')
                     .text(function(d) { return d[label_key];});
 //
 //

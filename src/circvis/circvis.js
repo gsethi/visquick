@@ -72,8 +72,8 @@ var ideograms = svg.selectAll('g.ideogram')
     var f = fade(0.1);
     var unf=fade(1.0);
 
-    ideograms.on("mouseover", f)
-        .on("mouseout", unf);
+//    ideograms.on("mouseover", f)
+//        .on("mouseout", unf);
 
 function draw_ideogram_rings(d) {
 
