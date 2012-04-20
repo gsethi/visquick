@@ -1,10 +1,14 @@
 
 /** private **/
-vq.CircVis.prototype._add_ticks = function(ideogram_obj,chr) {
-    var that = this;
-    var dataObj = that.chromoData;
-    var outerRadius  = (dataObj._plot.height / 2);
+vq.CircVis.prototype._add_ticks = function(chr,append) {
+    var append = append || Boolean(false);
 
+    var that = this;
+
+    var ideogram_obj = d3.select('.ideogram[data-region="'+chr+'"]');
+    var dataObj = that.chromoData;
+
+    var outerRadius  = (dataObj._plot.height / 2);
     var outerTickRadius = outerRadius - dataObj.ticks.outer_padding;
     var innerRadius = outerTickRadius - dataObj.ticks.height;
     var inner = dataObj.ticks.tile_ticks ?  function(feature) {
@@ -31,8 +35,53 @@ vq.CircVis.prototype._add_ticks = function(ideogram_obj,chr) {
         var tick_rotation = (that.chromoData._ideograms[chr].startAngle + that.chromoData._ideograms[chr].theta(tick.start) >= Math.PI ? 180 : 0);
         return "rotate(" + angle + ")translate(" +  radius + ")rotate("+tick_rotation+")";}
 
-    function tick_rotate(tick) {
-        return "rotate(" + that.chromoData._ideograms[chr].theta(tick.start) +")";}
+    var tick_key = dataObj.ticks.tick_key = function(tick) { return tick.chr+':'+tick.start + ':' + tick.end + ':' + tick[label_key]};
+    if (append) {
+        ideogram_obj.selectAll('.ticks path')
+                    .data(dataObj.ticks.data_map[chr],tick_key)
+                    .enter().append('svg:path')
+                    .attr('transform','scale(4)')
+                    .attr('class',function(tick) { return tick[label_key];})
+                            .attr('fill',tick_fill)
+                            .attr('stroke',tick_stroke)
+                            .attr('d',d3.svg.arc()
+                            .innerRadius( inner)
+                            .outerRadius( outer)
+                            .startAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.start);})
+                            .endAngle(function(point) {
+                                        return that.chromoData._ideograms[chr].theta(point.start) +
+                                        tick_angle(point);})
+                            ).on('mouseover',function(d){
+                                                d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','visible');
+                                            })
+                                            .on('mouseout',function(d){
+                                                d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','hidden');
+                                            })
+                    .transition()
+                    .delay(100)
+                    .duration(1200)
+                    .attrTween('transform',function() {
+                        var i =d3.interpolate(4,1);
+                        return function(t) {return 'scale('+i(t)+')'};
+                        });
+
+        ideogram_obj.selectAll('.ticks path')   //label
+                        .selectAll('svg.text')
+                        .data(dataObj.ticks.data_map[chr],tick_key)
+                           .enter()
+                           .append('text')
+                           .attr('transform', function(tick)  { return tick_translate(tick);})
+                           .attr("x",8)
+                           .attr('data-label',function(d) { return d[label_key];})
+                           .attr('class','labels')
+                           .attr("dy",".35em")
+                           .attr('stroke','black')
+                           .attr("text-anchor","middle")
+                           .attr('visibility','hidden')
+                           .text(function(d) { return d[label_key];});
+
+        return;
+                    }
 
 
    var ticks =  ideogram_obj
@@ -40,7 +89,7 @@ vq.CircVis.prototype._add_ticks = function(ideogram_obj,chr) {
                 .attr('class','ticks');
 
 
-          ticks.selectAll('svg.path')
+          var tick_wedges= ticks.selectAll('svg.path')
                .data(dataObj.ticks.data_map[chr])
                .enter().append('svg:path')
                 .attr('class',function(tick) { return tick[label_key];})
@@ -60,63 +109,30 @@ vq.CircVis.prototype._add_ticks = function(ideogram_obj,chr) {
                                     d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','hidden');
                                 });
 
+
     var labels = ticks
                 .selectAll('svg.text')
                 .data(dataObj.ticks.data_map[chr])
-                        .enter()
-
-             .append('text')
+                   .enter()
+                   .append('text')
                    .attr('transform', function(tick)  { return tick_translate(tick);})
-                    .attr("x",8)
-                    .attr('data-label',function(d) { return d[label_key];})
-                 .attr('class','labels')
-                    .attr("dy",".35em")
-                    .attr('stroke','black')
-                    .attr("text-anchor","middle")
-                 .attr('visibility','hidden')
-                    .text(function(d) { return d[label_key];});
-//
-//
-//    if (dataObj.ticks.display_legend){
-//
-//        var corner = dataObj.ticks.legend_corner;
-//
-//        var legend = this.event_panel.add(pv.Panel)
-//                .height(dataObj.ticks.label_map.length * 14)
-//                .width(60)
-//                .title('Tick Legend');
-//
-//        switch(corner) {
-//            case 'ne' :
-//                legend.right(0).top(0);
-//                break;
-//            case 'se' :
-//                legend.right(0).bottom(0);
-//                break;
-//            case 'sw' :
-//                legend.left(0).bottom(0);
-//                break;
-//            case 'nw' :
-//            default :
-//                legend.left(0).top(0);
-//        }
-//
-//        legend.add(pv.Label)
-//                .top(10)
-//                .left(10)
-//                .font("11px helvetica")
-//                .text("Tick Legend");
-//        legend.add(pv.Bar)
-//                .data(dataObj.ticks.label_map)
-//                .left(10)
-//                .top(function() {return 20 + 15*this.index;} )
-//                .fillStyle(function(d) {return tick_fill(d.key);})
-//                .width(36)
-//                .height(12)
-//                .anchor("right").add(pv.Label)
-//                .text(function(d) { return d.label;})
-//                .font("11px helvetica")
-//                .textMargin(6)
-//                .textAlign("left");
-//    }
+                   .attr("x",8)
+                   .attr('data-label',function(d) { return d[label_key];})
+                   .attr('class','labels')
+                   .attr("dy",".35em")
+                   .attr('stroke','black')
+                   .attr("text-anchor","middle")
+                   .attr('visibility','hidden')
+                   .text(function(d) { return d[label_key];});
+
+};
+
+
+vq.CircVis.prototype._draw_ticks = function() {
+
+//    d3.selectAll('.ticks')
+//       .transition()
+//       .duration(1200)
+//       .attr('opacity',1.0)
+
 };

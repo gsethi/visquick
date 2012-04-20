@@ -1,8 +1,11 @@
 
 
 /** private **/
-vq.CircVis.prototype._add_network_nodes = function (ideogram_obj, chr) {
+vq.CircVis.prototype._add_network_nodes = function (chr,append) {
+    var append = append || Boolean(false);
     var     dataObj = this.chromoData;
+
+    var ideogram_obj = d3.select('.ideogram[data-region="'+chr+'"]');
     var network_radius = dataObj._wedge[dataObj._ideograms[chr].wedge.length-1]._innerRadius - dataObj._network._outer_padding;
 //    var node_behavior = function(d) {
 //       return (pv.Behavior.hovercard(
@@ -182,8 +185,9 @@ vq.CircVis.prototype._add_network_nodes = function (ideogram_obj, chr) {
 //    });
 };
 
-vq.CircVis.prototype._add_network_links= function(svg_obj) {
-     var     dataObj = this.chromoData;
+vq.CircVis.prototype._add_network_links= function(svg_obj, append) {
+    var append = append || Boolean(false);
+    var dataObj = this.chromoData;
 
     var bundle = d3.layout.bundle();
 

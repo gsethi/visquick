@@ -54,18 +54,42 @@ vq.CircVis.prototype._render = function() {
     };
     }
 
+    function dragmove(d,u) {
+        var transform = d3.transform(d3.select(this).attr('transform'));
+        var translate = transform.translate;
+        var rotation = transform.rotate;
+        var p = [d3.event.x - width /2, d3.event.y - height/2];
+        var q = [d3.event.x - d3.event.dx - width/2, d3.event.y - d3.event.dy - height/2];
+        function cross(a, b) { return a[0] * b[1] - a[1] * b[0]; }
+        function dot(a, b) { return a[0] * b[0] + a[1] * b[1]; }
+        var angle = Math.atan2(cross(q,p),dot(q,p)) * 180 / Math.PI;
+        console.log('['+p[0] + ',' + p[1] + '] [' +d3.event.dx+','+d3.event.dy+'],' +angle+'');
+        rotation += angle;
+        d3.select(this).attr('transform','translate(' + translate[0]+','+translate[1]+')rotate('+rotation+')');
+    }
+
+    function dragstart(d,u) {}
+    function dragend(d,u) {}
+
+    var drag = d3.behavior.drag()
+        .on("dragstart", dragstart)
+        .on("drag", dragmove)
+        .on("dragend", dragend);
+
     var svg = d3.select(dataObj._plot.container)
         .append('svg:svg')
         .attr('width', width)
         .attr('height', height)
         .append('svg:g')
         .attr('class', 'circvis')
-        .attr("transform", 'translate(' + width / 2 + ',' + height / 2 + ')');
+        .attr("transform", 'translate(' + width / 2 + ',' + height / 2 + ')')
+        .call(drag);
 
 var ideograms = svg.selectAll('g.ideogram')
         .data(dataObj._chrom.keys)
         .enter().append('svg:g')
             .attr('class','ideogram')
+            .attr('data-region',function(d) { return d;})
             .attr('opacity',1.0)
             .attr('transform',function(key) { return 'rotate(' + dataObj._chrom.groups[key].startAngle * 180 / Math.PI + ')';})
             .each(draw_ideogram_rings);
@@ -80,11 +104,12 @@ function draw_ideogram_rings(d) {
     var ideogram = d3.select(this);
 
                that._add_wedge(ideogram, d);
-                that._add_ticks(ideogram, d);
-                that._add_network_nodes(ideogram, d);
+                that._add_ticks( d);
+                that._add_network_nodes( d);
     
 }
 
+    that._draw_ticks();
     that._add_network_links(svg.append('svg:g').attr('class','links'));
 
 var graph = svg.selectAll("svg.circvis")
