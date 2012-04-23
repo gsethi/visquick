@@ -205,7 +205,8 @@ vq.CircVis.prototype._add_network_links= function(svg_obj, append) {
          .attr("class", function(d) { return "link t_" + d[0].chr + " p_"+ d[d.length-1].chr; })
          .attr('fill','none')
          .attr('stroke','steelblue')
-         .attr('stroke-opacity',0.8)
+         //.attr('stoke-width',2.5)
+         //.attr('stroke-opacity',0.8)
          .attr("d", line);
 
 

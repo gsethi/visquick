@@ -17,10 +17,10 @@ vq.CircVis.prototype._add_ticks = function(chr,append) {
                 function(feature) { return innerRadius;};
 
     var outer = function(feature) { return inner(feature) + dataObj.ticks.wedge_height;};
-    var tick_fill = function(c) { return dataObj.ticks.fill_style(c);};
-    var tick_stroke = function(c) { return dataObj.ticks.stroke_style(c);};
     var label_key = dataObj.ticks.label_key;
 
+    var tick_fill = function(c) { return dataObj.ticks.fill_style(c,label_key);};
+    var tick_stroke = function(c) { return dataObj.ticks.stroke_style(c,label_key);};
     var tick_angle = function(tick) { var angle = tick_length / inner(tick); return  isNodeActive(tick) ? angle * 2 : angle; };
     var isNodeActive = function(c) { return true;};
 //    ( c.active ||

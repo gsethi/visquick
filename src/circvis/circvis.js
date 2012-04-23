@@ -103,7 +103,7 @@ function draw_ideogram_rings(d) {
 
     var ideogram = d3.select(this);
 
-               that._add_wedge(ideogram, d);
+               that._add_wedge( d);
                 that._add_ticks( d);
                 that._add_network_nodes( d);
     
