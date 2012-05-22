@@ -230,6 +230,7 @@ vq.utils.VisUtils.pivotArray = function(array,pivot_on,group_by,value_id,aggrega
 
 };
 
+
 vq.utils.VisUtils.layoutChrTiles = function(tiles,overlap, max_level, treat_as_points) {
     var points = treat_as_points || Boolean(false);
     var new_tiles = [], chr_arr = [];
@@ -238,19 +239,22 @@ vq.utils.VisUtils.layoutChrTiles = function(tiles,overlap, max_level, treat_as_p
         new_tiles = pv.blend([new_tiles,
                 vq.utils.VisUtils.layoutTiles(tiles.filter(function(tile) { return tile.chr == chr;}),overlap,max_level,points)]);
     });
-    tiles.forEach(function(tile) {
-        var match = null,
-        index= 0,
-        props = pv.keys(tile);
-        do {
-             match = props.every(function(prop) { return ((tile[prop] == new_tiles[index][prop]) ||
-                        (isNaN(tile[prop] && isNaN(new_tiles[index][prop])))) ? 1 : 0;});
-            index++;
-        }
-      while (index < new_tiles.length && match != 1);
-        tile.level = new_tiles[index-1].level;
-    });
+    tiles.forEach(function(obj) { vq.utils.VisUtils.copyTile(obj,new_tiles);});
     return tiles;
+};
+
+vq.utils.VisUtils.copyTile = function(tile,tile_set) {
+            var match = null,
+            index= 0,
+            props = pv.keys(tile);
+            do {
+                 match = props.every(function(prop) { return ((tile[prop] == tile_set[index][prop]) ||
+                            (isNaN(tile[prop] && isNaN(tile_set[index][prop])))) ? 1 : 0;});
+                index++;
+            }
+          while (index < tile_set.length && match != 1);
+            tile.level = tile_set[index-1].level;
+        return tile;
 };
 
 vq.utils.VisUtils.layoutChrTicks = function(tiles,overlap,max_level) {
@@ -268,7 +272,13 @@ vq.utils.VisUtils.layoutTiles = function(tiles,overlap,max_level, treat_as_point
             (a.tile_length > b.tile_length) ? 1 : a.start < b.start ? -1 : 1 ;}).reverse();         //sort all tiles by tile length
     if (tiles.length) {tiles[0].level = 0;}
     tiles.forEach(function(tile,index,array) {
+            vq.utils.VisUtils.layoutTile(tile,index,array,overlap,max_level,treat_as_points);
+    });
+    return tiles;
+};
 
+vq.utils.VisUtils.layoutTile = function(tile,index,array,overlap,max_level, treat_as_points) {
+        var points = treat_as_points || Boolean(false);
         var levels = array.slice(0,index)
                 .map(
                 function(a){
@@ -288,9 +298,7 @@ vq.utils.VisUtils.layoutTiles = function(tiles,overlap,max_level, treat_as_point
         if (max_level === undefined) { tile.level = find;}
         else
         {tile.level  = find <= max_level ? find : Math.floor(Math.random() * (max_level + 1));}
-    });
-    return tiles;
-};
+    };
 
 vq.utils.VisUtils._isOverlapping = function(tile1,tile2,overlap, treat_as_points) {
     var point = treat_as_points || Boolean(false);

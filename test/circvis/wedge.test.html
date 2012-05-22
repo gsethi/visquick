@@ -3,27 +3,44 @@
 <head>
 <meta http-equiv="PRAGMA" content="NO-CACHE">
 <title>Wedge Demo</title>
+    <link href="../../assets/css/vq.css" type="text/css" rel="stylesheet" />
 <script type="text/javascript" src="../../lib/protovis/protovis.js"></script>
-    <script type="text/javascript" src="../../lib/d3/d3.js"></script>
+    <script type="text/javascript" src="../../lib/d3/d3.v2.js"></script>
     <script type="text/javascript" src="../../lib/d3/d3.layout.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
     <script type="text/javascript" src="../../lib/underscore/underscore.js"></script>
 <script type="text/javascript" src="../../vq.js"></script>
 <script type="text/javascript" src="../../vq.wedge.js"></script>
 
-<script type="text/javascript" src="../../data/GBM_cnv_track.json"></script>
-<script type="text/javascript" src="../../data/GBM_link_density_track.json"></script>
-<script type="text/javascript" src="../../data/GBM_tick_track.json"></script>
-<script type="text/javascript" src="../../data/GBM_network.json"></script>
+<script type="text/javascript" src="../../data/circvis_ticks.json"></script>
 <script type="text/javascript" src="../../data/chromInfo.json"></script>
 <script type="text/javascript" src="../../data/cytoband.hg18.json"></script>
 
 </head>
 <body>
 
+<button id="random_edge">Add Random Edge</button>
+
 <div id="wedge" style="font: 10px sans-serif;margin:10px"></div>
 
 <script type="text/javascript">
-    var circle;
+   $('#random_edge').on('click', function() {
+               var in1 = Math.round(Math.random()*(chrom_keys.length-1));
+               var in2 = Math.round(Math.random()*(chrom_keys.length-1));
+               var chr1 = chrom_keys[in1];
+               var chr2 = chrom_keys[in2];
+               var mut1 = Math.round(Math.random()*6);
+               var mut2 = Math.round(Math.random()*6);
+               circle.addEdges({node1:{chr:chr1,start:1,end:200000,value:'ZZZ',label:'ZZZ',source:'METH',
+               mutation_count:mut1},
+                   node2:{chr:chr2,start:1,end:200000,value:'YYY',label:'YYY',source:'GEXP',
+                       mutation_count:mut2}})
+           }
+   );
+
+
+   var circle;
+
 
 
 function wedge_plot(div) {
@@ -33,10 +50,10 @@ function wedge_plot(div) {
       var tick_keys = ['METH','CNV','hsa-miR','Other'],
         color_scale = d3.scale.category10().domain(tick_keys);
 
-    var tick_colors = function(data) {
+    var tick_colors = function(data,label_key) {
            var tick_key = 'Other';
            tick_keys.forEach(function(key){
-           if (data.label.indexOf(key) == 0)  //starts with key
+           if (data.source.indexOf(key) == 0)  //starts with key
            tick_key = key;
            });
        return color_scale(tick_key);
@@ -91,7 +108,8 @@ function wedge_plot(div) {
                    type : 'histogram'
             } ,
                 DATA:{
-                    data_array : cnv
+                    data_array : [],//cnv
+                    value_key:'cnv'
                 },
                 OPTIONS: {
                     base_value : 0,
@@ -99,7 +117,9 @@ function wedge_plot(div) {
                     line_width : .5,
                     legend_description : 'Mean Copy Number Variation',
                     listener : listener,
-                    outer_padding: 15
+                    outer_padding: 15,
+                    min_value : 0,
+                    max_value: 1
                 }
             },
             {
@@ -109,12 +129,12 @@ function wedge_plot(div) {
                     type : 'scatterplot'
                 },
                 DATA:{
-                    data_array : link_density,
-                    value_key : 'value'
+                    data_array : [],//link_density,
+                    value_key : 'mutation_count'
                 },
                 OPTIONS: {
-                    legend_label : 'Link Density',
-                    legend_description : 'Density of Inferred Links',
+                    legend_label : 'Mutation Count',
+                    legend_description : 'Mutation Count',
                     min_value : 0,
                     max_value : 6,
                     base_value : 0,
@@ -129,7 +149,7 @@ function wedge_plot(div) {
 
         TICKS : {
            DATA: {
-                data_array: ticks.map(function(tick) { return vq.utils.VisUtils.extend({label:tick.value},tick);})
+                data_array:_.first(ticks,35)// ticks.map(function(tick) { return vq.utils.VisUtils.extend({label:tick.value},tick);})
             },
             OPTIONS : {
                 height : 120,
@@ -146,7 +166,7 @@ function wedge_plot(div) {
 
         NETWORK:{
             DATA:{
-                data_array : network
+                data_array : []//
             },
             OPTIONS: {
                 outer_padding : 10,

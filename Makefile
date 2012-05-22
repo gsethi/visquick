@@ -58,7 +58,8 @@ vq.wedge.js: \
 	src/circvis/ticks.js \
 	src/circvis/network.js \
 	src/circvis/circvisdata.js \
-	src/circvis/wedgedata.js
+	src/circvis/wedgedata.js \
+	src/circvis/circvis_api.js
 
 vq.linear_browser.js: \
 	src/linear_browser/linear_browser.js 

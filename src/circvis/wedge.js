@@ -5,7 +5,6 @@ vq.CircVis.prototype._drawWedgeContents = function(wedge_obj, chr, wedge_index) 
     var dataObj = that.chromoData;
     var ideogram = dataObj._ideograms[chr];
     var wedge_params = dataObj._wedge[wedge_index];
-    var wedge = ideogram.wedge[wedge_index];
     switch (wedge_params._plot_type) {
         case('karyotype'):
         case('tile'):
@@ -19,10 +18,10 @@ vq.CircVis.prototype._drawWedgeContents = function(wedge_obj, chr, wedge_index) 
 };
 
 /**private **/
-vq.CircVis.prototype._add_wedge = function(ideogram_obj, chr) {
+vq.CircVis.prototype._add_wedge = function(chr) {
     var that = this;
     var dataObj = this.chromoData;
-    var ideogram = dataObj._ideograms[chr];
+    var ideogram_obj = d3.select('.ideogram[data-region="'+chr+'"]');
 
     function outerRadius(index) {
         return dataObj._wedge[index]._outerRadius -  dataObj._wedge[index]._outer_padding
@@ -33,11 +32,13 @@ vq.CircVis.prototype._add_wedge = function(ideogram_obj, chr) {
     }
 
     ideogram_obj.append("svg:g")
+        .attr('class','wedges')
         .selectAll("path")
         .data(pv.range(0,dataObj._wedge.length))
         .enter()
         .append("svg:g")
-        .attr('class',function(ring_index) { return 'wedge ring'+ ring_index;})
+        .attr("class",  "wedge")
+        .attr('data-ring',function(index) { return index;})
         .append("svg:path")
         .style("fill", "#ddd")
         .style("stroke", "#444")
@@ -75,12 +76,13 @@ vq.CircVis.prototype._add_wedge = function(ideogram_obj, chr) {
 };
 
 
-vq.CircVis.prototype._drawWedge_withoutRange = function(wedge_obj, chr, wedge_index) {
+vq.CircVis.prototype._drawWedge_withoutRange = function( wedge_obj, chr, wedge_index) {
        var that = this;
     var dataObj = that.chromoData;
     var ideogram = dataObj._ideograms[chr];
     var wedge_params = dataObj._wedge[wedge_index];
     var wedge = ideogram.wedge[wedge_index];
+  //  var wedge_obj = d3.select('.ideogram[data-ring="'+wedge_index+'"]');
 };
 
 vq.CircVis.prototype._drawWedge_withRange = function(wedge_obj, chr, wedge_index) {
@@ -89,6 +91,7 @@ vq.CircVis.prototype._drawWedge_withRange = function(wedge_obj, chr, wedge_index
     var ideogram = dataObj._ideograms[chr];
     var wedge_params = dataObj._wedge[wedge_index];
     var wedge = ideogram.wedge[wedge_index];
+    //var wedge_obj = d3.select('.ideogram[data-ring="'+wedge_index+'"]');
 
     if (wedge_params._draw_axes) {
         /* Circular grid lines. */
