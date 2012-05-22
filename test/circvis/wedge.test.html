@@ -5,7 +5,7 @@
 <title>Wedge Demo</title>
     <link href="../../assets/css/vq.css" type="text/css" rel="stylesheet" />
 <script type="text/javascript" src="../../lib/protovis/protovis.js"></script>
-    <script type="text/javascript" src="../../lib/d3/d3.js"></script>
+    <script type="text/javascript" src="../../lib/d3/d3.v2.js"></script>
     <script type="text/javascript" src="../../lib/d3/d3.layout.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
     <script type="text/javascript" src="../../lib/underscore/underscore.js"></script>
@@ -116,7 +116,9 @@ function wedge_plot(div) {
                     legend_label : 'Mean CNV',
                     legend_description : 'Mean Copy Number Variation',
                     listener : listener,
-                    outer_padding: 15
+                    outer_padding: 15,
+                    min_value : 0,
+                    max_value: 1
                 }
             },
             {

@@ -93,6 +93,17 @@ var ideograms = svg.selectAll('g.ideogram')
             .attr('opacity',1.0)
             .attr('transform',function(key) { return 'rotate(' + dataObj._chrom.groups[key].startAngle * 180 / Math.PI + ')';})
             .each(draw_ideogram_rings);
+
+                        ideograms.append('text')
+            .attr('transform',function(key) { return 'rotate(' + (dataObj._chrom.groups[key].endAngle - dataObj._chrom.groups[key].startAngle) * 180 / Math.PI / 2+ ')translate(0,-600)';})
+             .attr('class','region_label')
+                           .attr('stroke','black')
+                           .attr('text-anchor','middle')
+                            .attr('dy','.35em')
+            .text(function(f) { return f;})
+            .on('mouseover',function(){});
+           
+
     var f = fade(0.1);
     var unf=fade(1.0);
 

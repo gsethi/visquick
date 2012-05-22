@@ -76,22 +76,22 @@ vq.CircVis.prototype._add_wedge = function(chr) {
 };
 
 
-vq.CircVis.prototype._drawWedge_withoutRange = function( chr, wedge_index) {
+vq.CircVis.prototype._drawWedge_withoutRange = function( wedge_obj, chr, wedge_index) {
        var that = this;
     var dataObj = that.chromoData;
     var ideogram = dataObj._ideograms[chr];
     var wedge_params = dataObj._wedge[wedge_index];
     var wedge = ideogram.wedge[wedge_index];
-    var wedge_obj = d3.select('.ideogram[data-ring="'+wedge_index+'"]');
+  //  var wedge_obj = d3.select('.ideogram[data-ring="'+wedge_index+'"]');
 };
 
-vq.CircVis.prototype._drawWedge_withRange = function( chr, wedge_index) {
+vq.CircVis.prototype._drawWedge_withRange = function(wedge_obj, chr, wedge_index) {
            var that = this;
     var dataObj = that.chromoData;
     var ideogram = dataObj._ideograms[chr];
     var wedge_params = dataObj._wedge[wedge_index];
     var wedge = ideogram.wedge[wedge_index];
-    var wedge_obj = d3.select('.ideogram[data-ring="'+wedge_index+'"]');
+    //var wedge_obj = d3.select('.ideogram[data-ring="'+wedge_index+'"]');
 
     if (wedge_params._draw_axes) {
         /* Circular grid lines. */

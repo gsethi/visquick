@@ -13,3 +13,8 @@ path.link {
     stroke-opacity : 0.8;
 
 }
+.region_label {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 20px;
+    font-weight: normal;
+}
