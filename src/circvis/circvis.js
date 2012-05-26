@@ -65,8 +65,6 @@ vq.CircVis.prototype._render = function() {
     function dragstart(d,u) {}
     function dragend(d,u) {}
 
-
-l
     var drag = d3.behavior.drag()
         .on("dragstart", dragstart)
         .on("drag", dragmove)
@@ -89,15 +87,32 @@ var ideograms = svg.selectAll('g.ideogram')
             .attr('opacity',1.0)
             .attr('transform',function(key) { return 'rotate(' + dataObj._chrom.groups[key].startAngle * 180 / Math.PI + ')';})
             .each(draw_ideogram_rings);
+//calculate label placement as halfway along tick radial segment
+    var outerRadius  = (dataObj._plot.height / 2);
+    var outerTickRadius = outerRadius - dataObj.ticks.outer_padding;
+    var innerRadius = outerTickRadius - dataObj.ticks.height;
+    var label_height = (outerTickRadius + innerRadius) / 2;
 
            ideograms.append('text')
-            .attr('transform',function(key) { return 'rotate(' + (dataObj._chrom.groups[key].endAngle - dataObj._chrom.groups[key].startAngle) * 180 / Math.PI / 2+ ')translate(0,-600)';})
+            .attr('transform',function(key) { return 'rotate(' + (dataObj._chrom.groups[key].endAngle - dataObj._chrom.groups[key].startAngle)
+                   * 180 / Math.PI / 2 +
+                   ' )translate(0,-'+label_height+')';})
              .attr('class','region_label')
                            .attr('stroke','black')
                            .attr('text-anchor','middle')
                             .attr('dy','.35em')
+               .attr('cursor','pointer')
             .text(function(f) { return f;})
-            .on('mouseover',function(){});
+            .on('mouseover',function ideogram_label_click(obj){
+                   var half_arc_genome = {};
+                   var region_length = dataObj.normalizedLength[obj];
+                   var new_length = 1.0 - region_length;
+                   var num_regions = _.size(dataObj.normalizedLength);
+                   _.each(dataObj.normalizedLength,function(value,key,list){
+                        half_arc_genome[key] = value / new_length / 2;
+                   });
+                   half_arc_genome[obj] = 0.5;
+               });
 
     var f = fade(0.1);
     var unf=fade(1.0);
