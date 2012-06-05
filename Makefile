@@ -46,8 +46,7 @@ vq.js: \
 	src/core/models.js \
 	src/core/utils.js \
 	src/core/events.js \
-	src/core/hovercard.js \
-	src/core/pv.behavior.flextip.js
+	src/core/hovercard.js 	
 
 vq.circvis.js: \
 	src/circvis/circvis.old.js

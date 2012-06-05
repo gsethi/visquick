@@ -18,3 +18,53 @@ path.link {
     font-size: 20px;
     font-weight: normal;
 }
+
+.hovercard {
+	display : block;
+	visibility: hidden;
+	z-index: 100000;
+	position: absolute;
+	background:rgba(0,0,0,0.7);
+	border: 2px solid #222;
+	border-radius: 10px;
+	font: 9px sans-serif;
+	top: 0px;
+	left:0px;
+}
+
+.hovercard.pinned {
+	background:rgba(0,0,0,1.0);
+}
+
+.hovercard .frame {
+	height:1px;
+	background:rgba(0,0,0,1.0);
+	border:1px solid #333;
+}
+
+.hovercard .data table{
+font-size:10px;
+}
+
+.hovercard .links table{
+	
+}
+.hovercard .pin {
+	width:15px;
+	text-align:center;
+	cursor:pointer;
+	background:#FFF;
+}
+.hovercard .move {
+	width:30px;
+	height:15px;
+	background:black;
+	cursor:move;
+}
+.hovercard .footer {
+	text-align:right;
+	font-size:13px;
+	margin-right:5px;
+	color:rgb(240,10,10);
+	cursor:pointer;
+}

@@ -24,10 +24,10 @@
 
 vq.Hovercard = function(options) {
     this.id = 'hovercard_'+vq.utils.VisUtils.guid();
-    this.hovercard = vq.utils.VisUtils.createDiv(this.id);
-    this.hovercard.style.display = 'hidden';
-    this.hovercard.style.zIndex=100000;
-    this.hovercard.style.position='absolute';
+    this.hovercard = vq.utils.VisUtils.createDiv(this.id,'hovercard');
+    //this.hovercard.style.display = 'hidden';
+    // this.hovercard.style.zIndex=100000;
+    // this.hovercard.style.position='absolute';
     this.lock_display = false;
     if (options) {
         this.timeout = options.timeout || 800;
@@ -38,10 +38,10 @@ vq.Hovercard = function(options) {
         this.include_footer = options.include_footer != null ? options.include_footer : this.self_hover || false;
         this.include_header = options.include_header != null ? options.include_header :  this.self_hover || true;
         this.include_frame = options.include_frame != null ? options.include_frame :  false;
-        this.transform = options.transform || new pv.Transform();
+        // this.transform = options.transform || new pv.Transform();
     }
     var that = this;
-    vq.events.Dispatcher.addListener('zoom_select','tooltip',function() { that.togglePin();});
+    // vq.events.Dispatcher.addListener('zoom_select','tooltip',function() { that.togglePin();});
 };
 
 vq.Hovercard.prototype.show = function(anchorTarget,dataObject) {
@@ -57,12 +57,12 @@ vq.Hovercard.prototype.show = function(anchorTarget,dataObject) {
     }
     if (this.include_footer) this.hovercard.appendChild(this.renderFooter());
     this.hovercard.style.display = 'none';
-    this.hovercard.style.backgroundColor = 'white';
-    this.hovercard.style.borderWidth = '2px';
-    this.hovercard.style.borderColor = '#222';
-    this.hovercard.style.borderStyle = 'solid';
-    this.hovercard.style.font = "9px sans-serif";
-    this.hovercard.style.borderRadius = "10px";
+    // this.hovercard.style.backgroundColor = 'white';
+    // this.hovercard.style.borderWidth = '2px';
+    // this.hovercard.style.borderColor = '#222';
+    // this.hovercard.style.borderStyle = 'solid';
+    // this.hovercard.style.font = "9px sans-serif";
+    // this.hovercard.style.borderRadius = "10px";
 
     this.placeInDocument();
 
@@ -104,13 +104,11 @@ vq.Hovercard.prototype.togglePin = function() {
   this.lock_display = !this.lock_display || false;
     var that = this;
             if (this.getContainer().className=="") {
-                this.getContainer().addEventListener('mouseout',that.start,false);
-                this.getContainer().className ="temp";
+                $(this.getContainer()).on('mouseout',that.start).addClass("temp");
             } else {
-                this.target_mark.removeEventListener('mouseout',that.start,false);
-                this.getContainer().removeEventListener('mouseout',that.start,false);
+                $(this.target_mark).off('mouseout',that.start).off('mouseout',that.start);
                 this.cancelOutTimer();
-                this.getContainer().className ="";
+                $(this.getContainer()).removeClass("temp");
             }
     this.pin_div.innerHTML = this.lock_display ? vq.Hovercard.icon.pin_in : vq.Hovercard.icon.pin_out;
 };
@@ -118,21 +116,21 @@ vq.Hovercard.prototype.togglePin = function() {
 vq.Hovercard.prototype.placeInDocument = function(){
     var card = this.hovercard;
     var target = this.target;
-    var offset = vq.utils.VisUtils.cumulativeOffset(this.target);
-    offset.height = target.offsetHeight;
-    offset.width = target.offsetWidth;
+    var offset = $(target).offset();
+    offset.height = $(target).outerHeight();
+    offset.width = $(target).outerWidth();
     card.style.display='block';
-    card.style.visibility='hidden';
-    card.style.top = 0 +'px';
-    card.style.left = 0 + 'px';
+    // card.style.visibility='hidden';
+    // card.style.top = 0 +'px';
+    // card.style.left = 0 + 'px';
     document.body.appendChild(card);
      card.style.top = offset.top + offset.height + (20 * this.transform.invert().k ) + 'px';
      card.style.left = offset.left + offset.width + (20 * this.transform.invert().k  ) + 'px';
     card.style.visibility='visible';
 
     if (this.include_frame) {
-        var hr = document.createElement('div');
-        hr.setAttribute('style',"height:1px;background:#000;border:1px solid #333");
+        var hr = document.createElement('div','frame');
+        //hr.setAttribute('style',"height:1px;background:#000;border:1px solid #333");
          this.hovercard.insertBefore(hr,this.hovercard.childNodes.item(0));
         this.frame = this.hovercard.insertBefore(this.renderFrame(),this.hovercard.childNodes.item(0));
 
@@ -211,26 +209,28 @@ vq.Hovercard.prototype.attachMoveListener = function() {
 vq.Hovercard.prototype.renderFrame = function(pin_out) {
     var that = this;
     var frame = vq.utils.VisUtils.createDiv();
+    $(frame).addClass('data');
     frame.setAttribute('style','width:100%;cursor:arrow;background:#55eeff');
     var table = document.createElement('table');
     var tBody = document.createElement("tbody");
     table.appendChild(tBody);
     var trow = tBody.insertRow(-1);
     var tcell= trow.insertCell(-1);
-    this.move_div = vq.utils.VisUtils.createDiv('hovercard_move');
-    this.move_div.setAttribute('style','width:30px;height:15px;background:black;cursor:move;');
+    this.move_div = vq.utils.VisUtils.createDiv('hovercard_move','move');
+    // this.move_div.setAttribute('style','width:30px;height:15px;background:black;cursor:move;');
     this.move_div.setAttribute('title','Drag to move');
     vq.utils.VisUtils.disableSelect(this.move_div);
     tcell.appendChild(this.move_div);
     tcell=trow.insertCell(-1);
     this.pin_div = vq.utils.VisUtils.createDiv();
+    $(this.pin_div).addClass('pin');
     tcell.appendChild(this.pin_div);
     function pin_toggle() {
         that.togglePin();
         return false;
     }
     this.pin_div.addEventListener('click', pin_toggle, false);
-    this.pin_div.setAttribute('style', "width:15px;text-align:center;cursor:pointer;background:#FFF");
+    // this.pin_div.setAttribute('style', "width:15px;text-align:center;cursor:pointer;background:#FFF");
     vq.utils.VisUtils.disableSelect(this.pin_div);
     this.pin_div.innerHTML = vq.Hovercard.icon.pin_out;
     tcell=trow.insertCell(-1);
@@ -256,7 +256,7 @@ vq.Hovercard.prototype.renderFrame = function(pin_out) {
 vq.Hovercard.prototype.renderTools = function(dataObject) {
     var get = vq.utils.VisUtils.get;
     var table = document.createElement('table');
-    table.setAttribute('style',"font-size:10px");
+    // table.setAttribute('style',"font-size:10px");
     var tBody = document.createElement("tbody");
     table.appendChild(tBody);
 
@@ -284,8 +284,8 @@ vq.Hovercard.prototype.renderTools = function(dataObject) {
 };
 
 vq.Hovercard.icon = {};
-vq.Hovercard.icon.pin_in =  '<span style="font-size:15px;color:#000;" title="Click to unpin card from the window">O</span>';
-vq.Hovercard.icon.pin_out =  '<span style="font-size:15px;color:#000" title="Click to pin card to the window">T</span>';
+vq.Hovercard.icon.pin_in =  '<i class="icon-tag"></i>';//'<span style="font-size:15px;color:#000;" title="Click to unpin card from the window">O</span>';
+vq.Hovercard.icon.pin_out =  '<i class="icon-tag icon-white"></i>';//'<span style="font-size:15px;color:#000" title="Click to pin card to the window">T</span>';
 
 vq.Hovercard.prototype.renderData = function(dataObject) {
     var html = '';
@@ -323,7 +323,7 @@ vq.Hovercard.prototype.renderData = function(dataObject) {
 
             }
         } else {
-            pv.keys(dataObject).forEach(function(key) {
+            _.keys(dataObject).forEach(function(key) {
                 try {
                     var trow = tBody.insertRow(-1);
                     var tcell= trow.insertCell(-1);
@@ -349,15 +349,15 @@ vq.Hovercard.prototype.getContainer = function() {
 
 vq.Hovercard.prototype.renderFooter = function() {
     var that = this;
-    var footer = document.createElement('div');
-    footer.setAttribute('style',"text-align:right;font-size:13px;margin-right:5px;color:rgb(240,10,10);cursor:pointer;");
+    var footer = document.createElement('div','footer');
+    // footer.setAttribute('style',"text-align:right;font-size:13px;margin-right:5px;color:rgb(240,10,10);cursor:pointer;");
     var close = document.createElement('span');
         function hideHovercard() {
         that.destroy();
         return false;
     }
     close.addEventListener('click',hideHovercard,false);
-    close.innerHTML = 'CLOSE [X]';
+    close.innerHTML = 'CLOSE <i class="icon-remove></i>';
     footer.appendChild(close);
     return footer;
 };
@@ -394,107 +394,69 @@ vq.Hovercard.prototype.renderFooter = function() {
  * @param opts {JSON Object} - Configuration object defined above.
  */
 
-pv.Behavior.hovercard = function(opts) {
+vq.hovercard = function(opts) {
 
     var hovercard, anchor_div,target,relative_div;
     var hovercard_div_id =  'vq_hover';
-    var outtimer_id, clear, retry_tooltip;
+    // var outtimer_id, clear, retry_tooltip;
 
-    //list all hovercards that are visible, yet have not been persisted/pinned to the screen.
-    function recoverHovercard() {
-        var nodes =  document.body.childNodes;
-        var body_length = nodes.length;
-        var node_arr = [];
-        for (var i =0; i< body_length; i++) {
-            if (nodes.item(i).id && nodes.item(i).id.slice(0,'hovercard_'.length) == 'hovercard_' &&
-                nodes.item(i).className != "" ) {
-                node_arr.push(nodes.item(i));
-            }
-        }
-        return node_arr;
-    }
-
-    return function(d) {
-        var info = opts.param_data ? d : (this instanceof pv.Mark ? (this.data() ||  this.title()) : d);
-        var mouse_x, mouse_y;
-        var retry = opts.retry || false;
+     function createHovercard(d) {
+        var mark = d3.select(this);
+        var info = opts.param_data ? d : mark.datum();
+        var mouse_x = d3.event.x, mouse_y = d3.event.y;
         var that = this;
-        if (!retry) {
-            target = pv.event.target;
-            mouse_x = this.parent.mouse().x;
-            mouse_y = this.parent.mouse().y;
-        } else {
-            target =opts.target;
-            mouse_x = opts.event.x;
-            mouse_y = opts.event.y;
-        }
+      
         opts.self_hover = true;
         opts.include_frame = true;
         opts.include_footer = true;
-        opts.target = target;
-        var hovercard_arr = recoverHovercard();
-        outtimer_id = null;
-        clear = function(){
-            window.clearTimeout(outtimer_id);
-        };
-        retry_tooltip = function(){
-            pv.Behavior.hovercard(opts).call(that,info);
-        };
-        //set a timeout to retry after timeout milliseconds has passed
-        // quit if there is already a temporary hovercard on the window and timeout has passed
-        if (hovercard_arr.length > 0 && !retry) {
-             opts.retry = true;
-             opts.event = {x:this.parent.mouse().x,y:this.parent.mouse().y};
-             opts.param_data = true;
-             d=info;
-             target.addEventListener('mouseout',clear,false);
-             outtimer_id = window.setTimeout(retry_tooltip,opts.timeout || 100);
-             return;
-       	}// if there are still cards out and this is a retry, just give up
-        else if (hovercard_arr.length > 0 && retry) { opts.retry = false; target.removeEventListener('mouseout',clear,false); return;}
-        else if (retry) { clear(); target.removeEventListener('mouseout',clear,false);}
+        opts.target = target;      
+        // outtimer_id = null;
+        // clear = function(){
+        //     window.clearTimeout(outtimer_id);
+        // };
+        // retry_tooltip = function(){
+        //     pv.Behavior.hovercard(opts).call(that,info);
+        // };
+        // var t= pv.Transform.identity, p = this.parent;
+        // do {
+        //     t=t.translate(p.left(),p.top()).times(p.transform());
+        // } while( p=p.parent);
 
-        opts.retry = false;
-        var t= pv.Transform.identity, p = this.parent;
-        do {
-            t=t.translate(p.left(),p.top()).times(p.transform());
-        } while( p=p.parent);
+        // var c = this.root.canvas();
+        // if (!document.getElementById(c.id+'_rel')) {
+        //     relative_div = vq.utils.VisUtils.createDiv(c.id+'_rel');
+        //     c.insertBefore(relative_div,c.firstChild);
+        //     relative_div.style.position = "relative";
+        //     relative_div.style.top = "0px";
+        //     relative_div.style.zIndex=-1;
+        // }
+        // else {
+        //     relative_div = document.getElementById(c.id+'_rel');
+        // }
 
-        var c = this.root.canvas();
-        if (!document.getElementById(c.id+'_rel')) {
-            relative_div = vq.utils.VisUtils.createDiv(c.id+'_rel');
-            c.insertBefore(relative_div,c.firstChild);
-            relative_div.style.position = "relative";
-            relative_div.style.top = "0px";
-            relative_div.style.zIndex=-1;
-        }
-        else {
-            relative_div = document.getElementById(c.id+'_rel');
-        }
+        // if (!document.getElementById(hovercard_div_id)) {
+        //     anchor_div = vq.utils.VisUtils.createDiv(hovercard_div_id);
+        //     relative_div.appendChild(anchor_div);
+        //     anchor_div.style.position = "absolute";
+        //     anchor_div.style.zIndex = -1;
+        // }
+        // else {
+        //     anchor_div = document.getElementById(hovercard_div_id);
+        //     if (anchor_div.parentNode.id != relative_div.id) {
+        //         relative_div.appendChild(anchor_div);
+        //     }
+        // }
 
-        if (!document.getElementById(hovercard_div_id)) {
-            anchor_div = vq.utils.VisUtils.createDiv(hovercard_div_id);
-            relative_div.appendChild(anchor_div);
-            anchor_div.style.position = "absolute";
-            anchor_div.style.zIndex = -1;
-        }
-        else {
-            anchor_div = document.getElementById(hovercard_div_id);
-            if (anchor_div.parentNode.id != relative_div.id) {
-                relative_div.appendChild(anchor_div);
-            }
-        }
-
-        if(this.properties.width) {
-            anchor_div.style.width =  opts.on_mark ? Math.ceil(this.width() * t.k) + 1 : 1;
-            anchor_div.style.height =  opts.on_mark ? Math.ceil(this.height() * t.k) + 1 : 1;
-        }
-        else if (this.properties.radius) {
-            var r = this.radius();
-            t.x -= r;
-            t.y -= r;
-            anchor_div.style.height = anchor_div.style.width = Math.ceil(2 * r * t.k);
-        }
+        // if(this.properties.width) {
+        //     anchor_div.style.width =  opts.on_mark ? Math.ceil(this.width() * t.k) + 1 : 1;
+        //     anchor_div.style.height =  opts.on_mark ? Math.ceil(this.height() * t.k) + 1 : 1;
+        // }
+        // else if (this.properties.radius) {
+        //     var r = this.radius();
+        //     t.x -= r;
+        //     t.y -= r;
+        //     anchor_div.style.height = anchor_div.style.width = Math.ceil(2 * r * t.k);
+        // }
         anchor_div.style.left = opts.on_mark ? Math.floor(this.left() * t.k + t.x) + "px" : Math.floor(mouse_x  * t.k+ t.x)  + "px";
         anchor_div.style.top = opts.on_mark ? Math.floor(this.top() * t.k + t.y) + "px" : Math.floor(mouse_y * t.k + t.y) + "px";
         opts.transform = t;
@@ -502,6 +464,7 @@ pv.Behavior.hovercard = function(opts) {
         hovercard = new vq.Hovercard(opts);
         hovercard.show(anchor_div,info);
     };
+    return _.debounce(createHovercard,100);
 };
 
 

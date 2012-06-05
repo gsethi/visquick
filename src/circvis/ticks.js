@@ -83,6 +83,8 @@ vq.CircVis.prototype._add_ticks = function(chr,append) {
         return;
                     }
 
+               
+
 var arc = d3.svg.arc().startAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.start);})
                 .endAngle(function(point) {
                             return that.chromoData._ideograms[chr].theta(point.start) +
@@ -106,10 +108,12 @@ var arc = d3.svg.arc().startAngle(function(point) { return that.chromoData._ideo
                             tick_angle(point);})
                 ).on('mouseover',function(d){
                                     d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','visible');
+
                                 })
-                                .on('mouseout',function(d){
-                                    d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','hidden');
-                                });
+                .on('mouseout',function(d){
+                    d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','hidden');
+                })
+                .on('mouseover',hovercard);
 
     var labels = ticks
                 .selectAll('svg.text')
