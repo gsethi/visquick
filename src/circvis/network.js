@@ -213,14 +213,14 @@ vq.CircVis.prototype._add_network_links= function(svg_obj, append) {
         });
 
     var strokeWidthTween = function(begin,end){ return function(a) {
-                                                var i =d3.interpolate(begin,end);
+                                                var i =d3.interpolate(begin(a),end(a));
                                                 return function(t) {return i(t)+'px'};
                                                 };
                             };
 
     svg_obj.selectAll("path.link")
         .data(splines = bundle(dataObj._network.links_array))
-        .enter().append("svg:path")
+        .enter().insert("svg:path")
         .attr("class", function(d) { return "link t_" + d[0].chr + " p_"+ d[d.length-1].chr; })
         .attr('visibility','hidden')
          .attr('fill','none')
@@ -232,7 +232,7 @@ vq.CircVis.prototype._add_network_links= function(svg_obj, append) {
         .delay(100)
         .duration(800)
         .attr('visibility','visible')
-        .attrTween('stroke-width',strokeWidthTween(dataObj._network.link_line_width(a)*3,dataObj._network.link_line_width(a)))
+        .attrTween('stroke-width',strokeWidthTween(function(a) { return dataObj._network.link_line_width(a)*3;},function(a) { return dataObj._network.link_line_width(a);}))
         .attrTween('opacity',function(a) {
                                     var i =d3.interpolate(0.2,1);
                                     return function(t) {return i(t)};

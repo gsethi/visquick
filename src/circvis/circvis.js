@@ -134,7 +134,7 @@ function draw_ideogram_rings(d) {
 }
 
     that._draw_ticks();
-    that._add_network_links(svg.append('svg:g').attr('class','links'));
+    that._add_network_links(svg.insert('svg:g','.ideogram').attr('class','links'));
 
 var graph = svg.selectAll("svg.circvis")
 
