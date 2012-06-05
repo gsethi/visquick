@@ -16,9 +16,9 @@ svg {
     font-weight: normal;
 }
 circle.node {
-        fill:green;
-        stroke:none;
-        stroke-width: 1px;  /* 1/2 * stroke-width ~ radius) */
+        /*fill:green;*/
+        /*stroke:none;*/
+        /*stroke-width: 1px;  *//* 1/2 * stroke-width ~ radius) */
 }
 
 path.link {

@@ -127,8 +127,8 @@ vq.CircVis.prototype._add_network_nodes = function (chr,append) {
         .attr('cx',0)
         .attr('cy',0)
         .attr('r',dataObj._network.node_radius)
-        .attr('fill',dataObj._network.fillStyle)
-        .attr('stroke',dataObj._network.strokeStyle)
+        .attr('fill',dataObj._network.node_fillStyle)
+        .attr('stroke',dataObj._network.node_strokeStyle)
         .attr('transform', function(node) {
             return 'rotate('+ ((dataObj._ideograms[chr].theta(node.start) / Math.PI * 180) - 90) +')translate(' + network_radius + ')';
         })

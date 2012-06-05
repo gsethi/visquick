@@ -38,8 +38,6 @@
 
    var circle;
 
-
-
 function wedge_plot(div) {
     var width=1200, height=1200;
     var	cnv_ring_height = 60;
@@ -169,11 +167,12 @@ function wedge_plot(div) {
             OPTIONS: {
                 outer_padding : 10,
                 node_radius:6,
-                node_highlight_mode : 'isolate',
-                node_fill_style : 'steelblue',
+                node_fill_style : 'green',
                 link_stroke_style : 'red',
                 link_line_width:8,
                 link_alpha : 0.3,
+
+                node_highlight_mode : 'isolate',
                 node_key : function(node) { return vq.utils.VisUtils.options_map(node)['label'];},
                 node_tooltip_items :  {
                     Chr : 'chr',
