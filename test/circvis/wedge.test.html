@@ -149,6 +149,8 @@ function wedge_plot(div) {
                 data_array:[]
             },
             OPTIONS : {
+                wedge_height: 15,
+                wedge_width:0.7,
                 height : 120,
                 display_legend : true,
                 legend_corner : 'nw',
@@ -157,7 +159,6 @@ function wedge_plot(div) {
                             {key:{label:'CNV'} , label: 'Copy Number Variation'},
                             {key:{label:'hsa-miR'}, label:'uRNA'},
                             {key:{label:'Other'}, label: 'Gene Expression'}]
-
             }
         },
 
@@ -170,6 +171,7 @@ function wedge_plot(div) {
                 node_highlight_mode : 'isolate',
                 node_fill_style : 'steelblue',
                 link_stroke_style : 'red',
+                link_line_width:4px,
                 link_alpha : 0.3,
                 node_key : function(node) { return vq.utils.VisUtils.options_map(node)['label'];},
                 node_tooltip_items :  {

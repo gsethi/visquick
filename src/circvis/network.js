@@ -212,6 +212,12 @@ vq.CircVis.prototype._add_network_links= function(svg_obj, append) {
             dataObj._ideograms[d.chr]._feature_angle(d.start);
         });
 
+    var strokeWidthTween = function(begin,end){ return function(a) {
+                                                var i =d3.interpolate(begin,end);
+                                                return function(t) {return i(t)+'px'};
+                                                };
+                            };
+
     svg_obj.selectAll("path.link")
         .data(splines = bundle(dataObj._network.links_array))
         .enter().append("svg:path")
@@ -226,10 +232,7 @@ vq.CircVis.prototype._add_network_links= function(svg_obj, append) {
         .delay(100)
         .duration(800)
         .attr('visibility','visible')
-        .attrTween('stroke-width',function(a) {
-                                            var i =d3.interpolate(8,2.5);
-                                            return function(t) {return i(t)+'px'};
-                                            })
+        .attrTween('stroke-width',strokeWidthTween(dataObj._network.link_line_width(a)*3,dataObj._network.link_line_width(a)))
         .attrTween('opacity',function(a) {
                                     var i =d3.interpolate(0.2,1);
                                     return function(t) {return i(t)};
