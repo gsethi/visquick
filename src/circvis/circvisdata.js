@@ -67,8 +67,8 @@ vq.models.CircVisData.prototype.setDataModel = function() {
         {label : '_network.node_fillStyle', id: 'NETWORK.OPTIONS.node_fill_style', cast : vq.utils.VisUtils.wrapProperty, defaultValue : function() {
             return 'blue';
         } },
-        {label : '_network.node_strokeStyle', id: 'NETWORK.OPTIONS.node_stroke_style', cast : vq.utils.VisUtils.wrapProperty, defaultValue : function() {
-            return 'blue';
+        {label : '_network.node_radius', id: 'NETWORK.OPTIONS.node_radius', cast : vq.utils.VisUtils.wrapProperty, defaultValue : function() {
+            return 3;
         } },
         {label : '_network.node_key', id: 'NETWORK.OPTIONS.node_key', cast : Function, defaultValue : function(node) {
             return node['chr'];

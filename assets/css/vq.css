@@ -2,29 +2,36 @@ svg {
     cursor:default
 }
 
-.ticklabels {
+
+/* circvis css */
+
+
+.ticks .labels {
+    stroke: black;
+    text-anchor:middle;
+    visibility: hidden;
+    dy: .35em;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 13px;
     font-weight: normal;
 }
-
-.ticks .labels {
-stroke: black;
-text-anchor:middle;
-visibility: hidden;
-dy: .35em;
+circle.node {
+        fill:green;
+        stroke:none;
+        stroke-width: 1px;  /* 1/2 * stroke-width ~ radius) */
 }
 
 path.link {
-    stroke-width : 2.5px;
-    stroke-opacity : 0.8;
 
 }
+    /*chromosome label*/
 .region_label {
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 20px;
     font-weight: normal;
 }
+
+/*hovercard css */
 
 .hovercard {
 	display : block;

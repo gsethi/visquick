@@ -24,12 +24,16 @@ vq.CircVis.prototype._insertEdge = function(edge) {
         function same_feature(n1,n2) {
             return that.chromoData.ticks.tick_key(n1) == that.chromoData.ticks.tick_key(n2);
         }
+    function same_edge(link1,link2) {
+       return same_feature(link1.source,link2.source) &&
+                    same_feature(link1.target,link2.target);
+    }
         _.each(nodes,function(node,index) {
                 //previously loaded this node, pull it from the node_array
             if ( _.any(that.chromoData.ticks.data_map[node.chr],
                                         function(tick) { return same_feature(tick,node);})) {
                 var old_node = _.find(that.chromoData._network.nodes_array,
-                                    function(n) { return same_feature(n,node);})
+                                    function(n) { return same_feature(n,node);});
                 edge_arr.push(old_node);
             } else {
                 vq.utils.VisUtils.layoutTile(node,that.chromoData.ticks.data_map[node.chr].length,
@@ -53,10 +57,10 @@ vq.CircVis.prototype._insertEdge = function(edge) {
                             insert_edge[p] = edge[p];
                         }
                     }
-    if (_.indexOf(that.chromoData._network.links_array,insert_edge) < 0){     //new link
+    if (_.any(that.chromoData._network.links_array,function(link) { return same_edge(insert_edge,link);})){     //old link
+        console.log('already have it!');
+    }else {
         that.chromoData._network.links_array.push(insert_edge);  //add it
         that._add_network_links(d3.select('g.links'));
-    } else {
-        console('already have it!');
     }
 };
