@@ -74,16 +74,25 @@ vq.CircVis.prototype._add_ticks = function(chr,append) {
                            .attr("x",8)
                            .attr('data-label',function(d) { return d[label_key];})
                            .attr('class','labels')
-                           .attr("dy",".35em")
-                           .attr('stroke','black')
-                           .attr("text-anchor","middle")
-                           .attr('visibility','hidden')
+                           // .attr("dy",".35em")
+                           // .attr('stroke','black')
+                           // .attr("text-anchor","middle")
+                           // .attr('visibility','hidden')
                            .text(function(d) { return d[label_key];});
 
         return;
                     }
 
                
+               var hovercard  = vq.hovercard({
+                    include_header : false,
+                    include_footer : true,
+                    self_hover : true,
+                    timeout : dataObj._plot.tooltip_timeout,
+                    data_config : dataObj.ticks.tooltipItems,
+                    tool_config : dataObj.ticks.tooltipLinks
+                });
+
 
 var arc = d3.svg.arc().startAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.start);})
                 .endAngle(function(point) {
@@ -114,6 +123,8 @@ var arc = d3.svg.arc().startAngle(function(point) { return that.chromoData._ideo
                     d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','hidden');
                 })
                 .on('mouseover',hovercard);
+
+
 
     var labels = ticks
                 .selectAll('svg.text')
