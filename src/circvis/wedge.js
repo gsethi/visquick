@@ -1,9 +1,10 @@
 
 
-vq.CircVis.prototype._drawWedgeContents = function(wedge_obj, chr, wedge_index) {
+vq.CircVis.prototype._drawWedgeContents = function(chr, wedge_index) {
     var that = this;
     var dataObj = that.chromoData;
     var ideogram = dataObj._ideograms[chr];
+    var wedge_obj = d3.select('.ideogram[data-region="'+chr+'"] .wedge[data-ring="'+wedge_index+'"]');
     var wedge_params = dataObj._wedge[wedge_index];
     switch (wedge_params._plot_type) {
         case('karyotype'):
@@ -71,7 +72,7 @@ vq.CircVis.prototype._add_wedge = function(chr) {
             wedge_params._max_plotValue = wedge_params._max_plotValue + 1;
             console.warn('Invalid value range detected.  Range reset to [-1,1].');
         }
-        that._drawWedgeContents(wedge_obj, chr, wedge_index);
+        that._drawWedgeContents(chr, wedge_index);
     }
 };
 
