@@ -22,7 +22,7 @@ vq.CircVis.prototype._insertEdge = function(edge) {
         _.each(root_nodes, function(root,index){node_parent_map[root.chr]=index;});
 
         function same_feature(n1,n2) {
-            return that.chromoData.ticks.tick_key(n1) == that.chromoData.ticks.tick_key(n2);
+            return that.chromoData._network.node_key(n1) ==  that.chromoData._network.node_key(n2);
         }
     function same_edge(link1,link2) {
        return same_feature(link1.source,link2.source) &&
@@ -30,7 +30,7 @@ vq.CircVis.prototype._insertEdge = function(edge) {
     }
         _.each(nodes,function(node,index) {
                 //previously loaded this node, pull it from the node_array
-            if ( _.any(that.chromoData.ticks.data_map[node.chr],
+            if ( _.any(that.chromoData._network.nodes_array,
                                         function(tick) { return same_feature(tick,node);})) {
                 var old_node = _.find(that.chromoData._network.nodes_array,
                                     function(n) { return same_feature(n,node);});

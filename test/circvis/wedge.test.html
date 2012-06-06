@@ -28,9 +28,9 @@
                var chr2 = chrom_keys[in2];
                var mut1 = Math.round(Math.random()*6);
                var mut2 = Math.round(Math.random()*6);
-               circle.addEdges({node1:{chr:chr1,start:1,end:200000,value:'ZZZ',label:'ZZZ',source:'METH',
+               circle.addEdges({node1:{alias:'C:METH:ZZZ:'+chr1+':1:20000000::',chr:chr1,start:1,end:200000,value:'ZZZ',label:'ZZZ',source:'METH',
                mutation_count:mut1},
-                   node2:{chr:chr2,start:1,end:200000,value:'YYY',label:'YYY',source:'GEXP',
+                   node2:{alias:'C:GEXP:YYY:'+chr2+':1:20000000::',chr:chr2,start:1,end:200000,value:'YYY',label:'YYY',source:'GEXP',
                        mutation_count:mut2}})
            }
    );
@@ -173,7 +173,7 @@ function wedge_plot(div) {
                 link_alpha : 0.3,
 
                 node_highlight_mode : 'isolate',
-                node_key : function(node) { return vq.utils.VisUtils.options_map(node)['label'];},
+                node_key : function(node) { return node.alias;},
                 node_tooltip_items :  {
                     Chr : 'chr',
                     Start : 'start',

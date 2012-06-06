@@ -46,9 +46,9 @@ vq.CircVis.prototype._add_ticks = function(chr,append) {
             return _theta + _tick_angle + (multiplier * Math.PI /  360);});
     };
 
-    var tick_key = dataObj.ticks.tick_key = function(tick) { return tick.chr+':'+tick.start + ':' + tick.end + ':' + tick[label_key]};
+    var tick_key = dataObj._network.node_key; //.tick_key = function(tick) { return tick.chr+':'+tick.start + ':' + tick.end + ':' + tick[label_key]};
     if (append) {
-       var ticks = ideogram_obj.selectAll('.ticks path')
+       var ticks = ideogram_obj.select('g.ticks').selectAll('path')
                     .data(dataObj.ticks.data_map[chr],tick_key);
 
                     ticks.enter().append('path')
@@ -82,6 +82,8 @@ vq.CircVis.prototype._add_ticks = function(chr,append) {
                             var i=d3.interpolate(0.2,1.0);
                                 return function(t) {return  i(t);}
                         });
+
+                        ticks.exit().remove();
 
 //        ideogram_obj.selectAll('.ticks path')   //label
 //                        .selectAll('svg.text')
