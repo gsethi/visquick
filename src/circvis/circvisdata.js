@@ -297,13 +297,14 @@ vq.models.CircVisData.prototype._setupData = function() {
     var node_parent_map = {};
     var node_array = [{parent:null, chr:null, radius:0, angle:0,children:[]}];
     chrom_keys_array.forEach(function(key,index) {
-         var network_radius = that._wedge[that._ideograms[key].wedge.length-1]._innerRadius - that._network._outer_padding;
+        var network_radius = that._wedge[that._ideograms[key].wedge.length-1]._innerRadius - that._network._outer_padding;
         node_parent_map[key] = index + 1;
         var node = {chr:key,parent:node_array[0],children:[],radius: network_radius / 2,
-                angle : (that._chrom.groups[key].startAngle + (that._chrom.groups[key].angle /2))};
+                angle : (that._chrom.groups[key].startAngle + that._chrom.groups[key].endAngle)/2};
         node_array[0].children.push(node);
         node_array.push(node);
-});
+    });
+    
     var links_array = [];
     var length;
     var index1,index2;
