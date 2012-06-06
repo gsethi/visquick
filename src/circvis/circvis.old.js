@@ -1171,7 +1171,8 @@ vq.models.CircVisData.prototype._setupData =  function() {
         }); //foreach
     }
     //------------------- NETWORK DATA
-    var nodes = pv.dict(this._chrom.keys, function() { return {}; });
+    var nodes = {};
+    var valid_chr = pv.dict(this._chrom.keys, function() { return {}; });
     var node_array=[];
     var links_array = [];
     var length;
