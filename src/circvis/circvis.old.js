@@ -1175,43 +1175,31 @@ vq.models.CircVisData.prototype._setupData =  function() {
     var node_array=[];
     var links_array = [];
     var length;
-    var index1,index2;
+   var index1,index2;
+    var node_key = this._network.node_key;
     if (this._network != undefined && this._network.data != undefined) {
         this._network.data.forEach(function(d) {
-            index1 = null;
-            index2 = null;
-            if (nodes[d.node1.chr] != undefined){
-                if (nodes[d.node1.chr][d.node1.start] === undefined ){
-                    nodes[d.node1.chr][d.node1.start] = {};
-                    if (nodes[d.node1.chr][d.node1.start][d.node1.end] === undefined ) {
+            index1 = null, node1_key = node_key(d.node1),
+            index2 = null, node2_key = node_key(d.node2);
+            if (valid_chr[d.node1.chr] === undefined || valid_chr[d.node2.chr] === undefined) return;
+            if (nodes[node1_key] === undefined){
                         var temp_node = d.node1;
-                        temp_node.nodeName = d.node1.chr;
+                        temp_node.nodeName = node1_key;
                         length = node_array.push(temp_node);
                         index1 = length - 1;
-                        nodes[d.node1.chr][d.node1.start][d.node1.end] = index1;
+                        nodes[node1_key] = index1;
                     } else {
-                        index1 = nodes[d.node1.chr][d.node1.start][d.node1.end];
-                    }
-                } else {
-                    index1 = nodes[d.node1.chr][d.node1.start][d.node1.end];
-                }
-            }
-            if (nodes[d.node2.chr] != undefined) {
-                if (nodes[d.node2.chr][d.node2.start] === undefined ) {
-                    nodes[d.node2.chr][d.node2.start] = {};
-                    if (nodes[d.node2.chr][d.node2.start][d.node2.end] === undefined ) {
+                        index1 = nodes[node1_key];
+                    }            
+          if (nodes[node2_key] === undefined){
                         var temp_node = d.node2;
-                        temp_node.nodeName = d.node2.chr;
+                        temp_node.nodeName = node2_key;
                         length = node_array.push(temp_node);
                         index2 = length - 1;
-                        nodes[d.node2.chr][d.node2.start][d.node2.end] = index2;
+                        nodes[node2_key] = index2;
                     } else {
-                        index2 = nodes[d.node2.chr][d.node2.start][d.node2.end];
+                        index2 = nodes[node2_key];
                     }
-                } else {
-                    index2 = nodes[d.node2.chr][d.node2.start][d.node2.end];
-                }
-            }
 
             if (index1 != null && index2 !=null) {
                 //copy out useful properties
