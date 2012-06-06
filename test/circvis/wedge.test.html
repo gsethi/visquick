@@ -28,10 +28,13 @@
                var chr2 = chrom_keys[in2];
                var mut1 = Math.round(Math.random()*6);
                var mut2 = Math.round(Math.random()*6);
-               circle.addEdges({node1:{alias:'C:METH:ZZZ:'+chr1+':1:20000000::',chr:chr1,start:1,end:200000,value:'ZZZ',label:'ZZZ',source:'METH',
-               mutation_count:mut1},
-                   node2:{alias:'C:GEXP:YYY:'+chr2+':1:20000000::',chr:chr2,start:1,end:200000,value:'YYY',label:'YYY',source:'GEXP',
-                       mutation_count:mut2}})
+
+               var cnv1 = Math.round(Math.random()*500);
+               var cnv2 = Math.round(Math.random()*500);
+               circle.addEdges({node1:{alias:'C:METH:ZZZ:'+chr1+':1:20000000::',chr:chr1,start:1,end:20000000,value:'ZZZ',label:'ZZZ',source:'METH',
+               mutation_count:mut1,cnv:cnv1},
+                   node2:{alias:'C:GEXP:YYY:'+chr2+':1:20000000::',chr:chr2,start:20000000,end:40000000,value:'YYY',label:'YYY',source:'GEXP',
+                       mutation_count:mut2,cnv:cnv1}})
            }
    );
 
@@ -107,14 +110,16 @@ function wedge_plot(div) {
                     value_key:'cnv'
                 },
                 OPTIONS: {
+                    fill_style:'orange',
+                    stroke_style:'black',
                     base_value : 0,
                     legend_label : 'Mean CNV',
-                    line_width : .5,
+                    line_width : 0.5,
                     legend_description : 'Mean Copy Number Variation',
                     listener : listener,
                     outer_padding: 15,
                     min_value : 0,
-                    max_value: 1
+                    max_value: 500
                 }
             },
             {
@@ -133,7 +138,7 @@ function wedge_plot(div) {
                     min_value : 0,
                     max_value : 6,
                     base_value : 0,
-                    radius : 3,
+                    radius : 6,
                     shape : 'circle',
                     outer_padding: 15,
                     stroke_style : null,
@@ -149,6 +154,7 @@ function wedge_plot(div) {
             OPTIONS : {
                 wedge_height: 15,
                 wedge_width:0.7,
+                overlap_distance:100000,
                 height : 120,
                 display_legend : true,
                 legend_corner : 'nw',

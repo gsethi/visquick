@@ -46,6 +46,7 @@ vq.CircVis.prototype._insertEdge = function(edge) {
                 edge_arr.push(new_node);
                 that._add_ticks(node.chr,true);
                 that._add_network_nodes(node.chr,true);
+                that._add_wedge_data(node);
             }
         }
     );
