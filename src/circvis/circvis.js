@@ -31,20 +31,20 @@ vq.CircVis.prototype._render = function() {
     var dataObj = this.chromoData;
     var width = dataObj._plot.width, height = dataObj._plot.height;
 
-    $(dataObj._plot.container).resizable({
-        aspectRatio: width/height,
-        distance: 10,
-        ghost:true,
-         handles: "nw, ne, se, sw" ,
-        helper: "ui-resizable-helper"
-    });
-
-    $(dataObj._plot.container).bind('resizestop',function(event,ui){
-        var scale = ui.size.height/ui.originalSize.height;
-        var svg = d3.select('.circvis');
-        var current_transform = 'scale('+scale+')'+svg.attr('transform');
-        svg.attr('transform',d3.transform(current_transform).toString());
-    });
+//    $(dataObj._plot.container).resizable({
+//        aspectRatio: width/height,
+//        distance: 10,
+//        ghost:true,
+//         handles: "nw, ne, se, sw" ,
+//        helper: "ui-resizable-helper"
+//    });
+//
+//    $(dataObj._plot.container).bind('resizestop',function(event,ui){
+//        var scale = ui.size.height/ui.originalSize.height;
+//        var svg = d3.select('.circvis');
+//        var current_transform = 'scale('+scale+')'+svg.attr('transform');
+//        svg.attr('transform',d3.transform(current_transform).toString());
+//    });
 
     function fade(opacity) { return function(d,i) {
         d3.selectAll('g.ideogram')
@@ -146,15 +146,6 @@ var ideograms = svg.selectAll('g.ideogram')
                     );
    }
 
-//
-//    var f = fade(0.1);
-//    var unf=fade(1.0);
-
-//    ideograms.on("mouseover", f)
-//        .on("mouseout", unf);
-    // var g = grow(true);
-    // var ung = grow(false);
-
         function draw_ideogram_rings(d) {
             that._add_wedge( d);
             that._add_ticks( d);
@@ -164,8 +155,5 @@ var ideograms = svg.selectAll('g.ideogram')
     that._draw_ticks();
     that._add_network_links(svg.insert('svg:g','.ideogram').attr('class','links'));
     _(_.range(0,dataObj._wedge.length)).each(that._draw_axes_ticklabels,that);
-
-//var graph = svg.selectAll("svg.circvis")
-
 
 };

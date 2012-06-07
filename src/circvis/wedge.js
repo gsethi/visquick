@@ -381,7 +381,8 @@ vq.CircVis.prototype._add_wedge_data = function(data) {
     var that = this;
     var chr = data.chr;
     _.each(that.chromoData._ideograms[chr].wedge, function(wedge,index) {
-        wedge.push(data);
+        if(_.isUndefined(data[that.chromoData._wedge[index]._value_key]) || that.chromoData._wedge[index]._plot_type =='karyotype') { return;}
+            wedge.push(data);
         that._drawWedgeData(chr,index);
     });
 
