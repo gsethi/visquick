@@ -1,0 +1,96 @@
+svg {
+    cursor:default
+}
+
+
+/* circvis css */
+
+
+.ticks .labels {
+    stroke: black;
+    text-anchor:middle;
+    visibility: hidden;
+    dy: .35em;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    font-weight: normal;
+}
+circle.node {
+        /*fill:green;*/
+        /*stroke:none;*/
+        /*stroke-width: 1px;  *//* 1/2 * stroke-width ~ radius) */
+}
+
+path.link {
+
+}
+    /*chromosome label*/
+.region_label {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 30px;
+    font-weight: normal;
+}
+
+.axes .labels {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 9px;
+        font-weight: normal;
+}
+.ideogram .radial_lines {
+    stroke:#222;
+    stroke-width:1.5px;
+}
+
+/*hovercard css */
+
+.hovercard {
+	display : block;
+	visibility: hidden;
+	z-index: 100000;
+	position: absolute;
+	background:rgba(0,0,0,0.7);
+	border: 2px solid #222;
+	border-radius: 10px;
+	font: 9px sans-serif;
+	top: 0px;
+	left:0px;
+}
+
+.hovercard.pinned {
+	background:rgba(0,0,0,1.0);
+}
+
+.hovercard .frame {
+	height:1px;
+	background:rgba(0,0,0,1.0);
+	border:1px solid #333;
+}
+
+.hovercard .data table{
+font-size:10px;
+}
+
+.hovercard .links table{
+	
+}
+.hovercard .pin {
+	width:15px;
+	text-align:center;
+	cursor:pointer;
+	background:#FFF;
+}
+.hovercard .move {
+	width:30px;
+	height:15px;
+	background:black;
+	cursor:move;
+}
+.hovercard .footer {
+	text-align:right;
+	font-size:13px;
+	margin-right:5px;
+	color:rgb(240,10,10);
+	cursor:pointer;
+}
+
+.ui-resizable-helper { border: 2px dotted #00F; }
