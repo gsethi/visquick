@@ -9,7 +9,7 @@ vq.ScatterPlot = function() {
     this.selectedProbesetId('');
 };
 
-vq.ScatterPlot.prototype = pv.extend(vq.Vis);
+vq.ScatterPlot.prototype = vq.extend(vq.Vis);
 
 vq.ScatterPlot.prototype
         .property('selectedProbesetId');
@@ -357,7 +357,7 @@ vq.models.ScatterPlotData = function(data) {
     }
 };
 
-vq.models.ScatterPlotData.prototype = pv.extend(vq.models.VisData);
+vq.models.ScatterPlotData.prototype = vq.extend(vq.models.VisData);
 
 vq.models.ScatterPlotData.prototype.setDataModel = function () {
     this._dataModel = [

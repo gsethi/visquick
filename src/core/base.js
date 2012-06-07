@@ -23,7 +23,7 @@ vq.Base.prototype.extend =  function(proto) {
 /** @private **/
 vq.Base.prototype.property = function(name, cast) {
   if (!this.hasOwnProperty("properties")) {
-    this.properties = pv.extend(this.properties);
+    this.properties = vq.extend(this.properties);
   }
   this.properties[name] = true;
 
@@ -79,3 +79,8 @@ vq.Base.prototype.propertyMethod = function(name, cast) {
 };
 
 
+vq.extend = function(f) {
+  function g() {}
+  g.prototype = f.prototype || f;
+  return new g();
+};

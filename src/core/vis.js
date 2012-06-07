@@ -23,7 +23,7 @@ vq.Vis = function() {
  * @name container
  *
  */
-vq.Vis.prototype = pv.extend(vq.Base);
+vq.Vis.prototype = vq.extend(vq.Base);
 
 vq.Vis.prototype
     .property("vertical_padding",Number)

@@ -92,3 +92,5 @@ font-size:10px;
 	color:rgb(240,10,10);
 	cursor:pointer;
 }
+
+.ui-resizable-helper { border: 2px dotted #00F; }

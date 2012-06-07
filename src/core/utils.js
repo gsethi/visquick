@@ -153,6 +153,8 @@ vq.utils.VisUtils.set = function(obj,prop,value) {
         return target;
 };
 
+
+
     vq.utils.VisUtils.parse_pairs = function(column,assign_str,delimit_str) {
         var map = {}, pair_arr =[], pairs = [];
             pair_arr =[];
@@ -600,3 +602,12 @@ vq.utils.SyncDatasources = function(timeout,total_checks,success_callback,args,f
     };
 
 
+ vq.sum = function(list,func) { 
+    if (typeof func =='function')  {
+        return _.reduce(list,function(a,b,index){ return a+func.call({},b,index);},0);
+    } else if (typeof func == 'string') {
+        return _.reduce(list,function(a,b){ return a[func]+b[func];},0);
+    } else {
+        return _.reduce(list,function(a,b){ return a+b;},0);
+};
+    };

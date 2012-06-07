@@ -170,6 +170,7 @@ vq.CircVis.prototype._drawWedgeData_histogram = function(chr, wedge_index) {
         .enter().append('svg:path')
         .attr('fill',wedge_params._fillStyle)
         .attr('stroke',wedge_params._strokeStyle)
+        .attr('stroke-width',wedge_params._lineWidth)
         .attr('d',d3.svg.arc()
         .innerRadius(function(point) { return wedge_params._thresholded_innerRadius(point[value_key]);})
         .outerRadius(function(point) { return wedge_params._thresholded_outerRadius(point[value_key]);})
@@ -316,18 +317,41 @@ vq.CircVis.prototype._drawWedgeData_heatmap = function(chr, wedge_index) {
     var wedge_data = that.chromoData._ideograms[chr].wedge[wedge_index];
     var value_key = wedge_params._value_key;
     var wedge_obj = d3.select('.ideogram[data-region="'+chr+'"] .wedge[data-ring="'+wedge_index+'"]');
+
+    var generateArcTween = function (point) {
+        var _theta = that.chromoData._ideograms[chr].theta(point.start);
+        var _end = that.chromoData._ideograms[chr].theta(point.end);
+     return d3.svg.arc()
+        .innerRadius(function(multiplier) { return wedge_params._innerRadius - (multiplier *4);})
+        .outerRadius(function(multiplier) { return wedge_params._outerPlotRadius + (multiplier * 4);})
+        .startAngle(function(multiplier) { return _theta -  (multiplier * Math.PI / 360);})
+        .endAngle(function(multiplier) {  return _end + (multiplier * Math.PI /  360);});
+    };
+
   wedge_obj.select('g.data')
        .selectAll("path")
         .data(wedge_data,that.chromoData._network.node_key)
         .enter().append('svg:path')
         .attr('fill',wedge_params._fillStyle)
         .attr('stroke',wedge_params._strokeStyle)
+        .attr('stroke-width','1px')
+        .attr('visibility','hidden')
         .attr('d',d3.svg.arc()
         .innerRadius( wedge_params._innerRadius)
         .outerRadius( wedge_params._outerPlotRadius)
         .startAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.start);})
         .endAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.end);})
-    );
+        )
+        .transition()
+        .delay(100)
+        .duration(800)
+        .attr('visibility','visible')
+        .attrTween('d',function(a) {
+                        var i =d3.interpolate(4,0);
+                         var arc = generateArcTween(a);
+                        return function(t) {return arc(i(t));};
+        });
+    
 };
 
 vq.CircVis.prototype._draw_axes_ticklabels = function(wedge_index) {

@@ -4,7 +4,7 @@
 vq.CircVis = function() {
     vq.Vis.call(this);
 };
-vq.CircVis.prototype = pv.extend(vq.Vis);
+vq.CircVis.prototype = vq.extend(vq.Vis);
 
 /**
  *
@@ -31,6 +31,21 @@ vq.CircVis.prototype._render = function() {
     var dataObj = this.chromoData;
     var width = dataObj._plot.width, height = dataObj._plot.height;
 
+    $(dataObj._plot.container).resizable({
+        aspectRatio: width/height,
+        distance: 10,
+        ghost:true,
+         handles: "nw, ne, se, sw" ,
+        helper: "ui-resizable-helper"
+    });
+
+    $(dataObj._plot.container).bind('resizestop',function(event,ui){
+        var scale = ui.size.height/ui.originalSize.height;
+        var svg = d3.select('.circvis');
+        var current_transform = 'scale('+scale+')'+svg.attr('transform');
+        svg.attr('transform',d3.transform(current_transform).toString());
+    });
+
     function fade(opacity) { return function(d,i) {
         d3.selectAll('g.ideogram')
             .filter(function(g) { return g != d;})
@@ -50,14 +65,16 @@ vq.CircVis.prototype._render = function() {
     function dragmove(d,u) {
         var transform = d3.transform(d3.select(this).attr('transform'));
         var translate = transform.translate;
+        var scale = transform.scale;
         var rotation = transform.rotate;
-        var p = [d3.event.x - width /2, d3.event.y - height/2];
-        var q = [d3.event.x - d3.event.dx - width/2, d3.event.y - d3.event.dy - height/2];
+        var actual_width = (width /2*scale[0]), actual_height = (height /2*scale[1]);
+        var p = [d3.event.x - actual_width, d3.event.y -actual_height];
+        var q = [d3.event.x - d3.event.dx - actual_width, d3.event.y - d3.event.dy - actual_height];
         function cross(a, b) { return a[0] * b[1] - a[1] * b[0]; }
         function dot(a, b) { return a[0] * b[0] + a[1] * b[1]; }
         var angle = Math.atan2(cross(q,p),dot(q,p)) * 180 / Math.PI;
         rotation += angle;
-        d3.select(this).attr('transform','translate(' + translate[0]+','+translate[1]+')rotate('+rotation+')');
+        d3.select(this).attr('transform','translate(' + translate[0]+','+translate[1]+')scale('+scale+')rotate('+rotation+')');
     }
 
 
@@ -69,7 +86,7 @@ vq.CircVis.prototype._render = function() {
         .on("drag", dragmove)
         .on("dragend", dragend);
 
-    var svg = d3.select(dataObj._plot.container)
+    var svg = d3.select(dataObj._plot.container)        
         .append('svg:svg')
         .attr('width', width)
         .attr('height', height)

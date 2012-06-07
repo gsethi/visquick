@@ -16,7 +16,7 @@ vq.models.CircVisData.WedgeData = function(data) {
 
 };
 
-vq.models.CircVisData.WedgeData.prototype = pv.extend(vq.models.VisData);
+vq.models.CircVisData.WedgeData.prototype = vq.extend(vq.models.VisData);
 
 vq.models.CircVisData.WedgeData.prototype.setDataModel = function() {
     this._dataModel = [
@@ -35,6 +35,7 @@ vq.models.CircVisData.WedgeData.prototype.setDataModel = function() {
         {label : '_strokeStyle', id: 'OPTIONS.stroke_style', cast : vq.utils.VisUtils.wrapProperty, defaultValue : function(d) {
             return 'black';
         } },
+         {label : '_lineWidth', id: 'OPTIONS.line_width', cast : Number, defaultValue : 0.5 },
         {label : '_shape', id: 'OPTIONS.shape', cast : vq.utils.VisUtils.wrapProperty, defaultValue : function(d) {
             return 'circle';
         } },

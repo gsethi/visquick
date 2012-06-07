@@ -14,7 +14,7 @@ vq.models.CircVisData = function(data) {
 };
 
 
-vq.models.CircVisData.prototype = pv.extend(vq.models.VisData);
+vq.models.CircVisData.prototype = vq.extend(vq.models.VisData);
 
 vq.models.CircVisData.prototype.setDataModel = function() {
     this._dataModel = [
@@ -126,10 +126,10 @@ vq.models.CircVisData.prototype._build_data = function(data_struct) {
 
 
 vq.models.CircVisData.prototype._setupData = function() {
-    var chrom_keys_order,chrom_length_map,chrom_length_array = [],cnv_map, startAngle = {},
+    var chrom_keys_order={},chrom_length_map,chrom_length_array = [],cnv_map, startAngle = {},
         cnv_array, cnv_height = [], startAngle_map = {},normalizedLength = {},
         deviation = [],median = [], theta = {}, totalChromLength;
-    this.normalizedLength,this.theta = [],this.startAngle_map;
+    this.normalizedLength,this.theta = [],this.startAngle_map = {};
 
     var that = this;
 
@@ -139,8 +139,8 @@ vq.models.CircVisData.prototype._setupData = function() {
         return;
     }
 
-    var chrom_keys_array = this._chrom.keys;       //array in pre-sorted order
-    chrom_keys_order = pv.numerate(chrom_keys_array);
+    var chrom_keys_array = this._chrom.keys;       //array in pre-sorted order    
+    _.each(chrom_keys_array,function(val,index){chrom_keys_order[val]=index;});
 
     chrom_length_array = this._chrom.length.filter(function(d) {
         return chrom_keys_order[d['chr_name']] != null;
@@ -148,22 +148,15 @@ vq.models.CircVisData.prototype._setupData = function() {
     chrom_length_array.sort(function(c, d) {
         return chrom_keys_order[c['chr_name']] - chrom_keys_order[d['chr_name']] > 0;
     });  //sort by given order
-    totalChromLength = pv.sum(chrom_length_array, function(d) {
+    totalChromLength = vq.sum(chrom_length_array, function(d) {
         return d['chr_length'];
     });
 
-    chrom_length_map = pv.nest(chrom_length_array)
-        .key(function(d) {
-            return d['chr_name'].toUpperCase();
-        })
-        .sortKeys(function(c, d) {
-            return chrom_keys_order[c['chr_name']] - chrom_keys_order[d['chr_name']] > 0;
-        })//sort by given order
-        .map();
-
-    normalizedLength = pv.dict(chrom_keys_array, function(d) {
-        return chrom_length_map[d.toUpperCase()][0]['chr_length'] / totalChromLength;
-    });
+    chrom_length_map = {};
+        _.each(chrom_length_array,function(obj) {
+            chrom_length_map[obj['chr_name'].toUpperCase()] = obj['chr_length'];
+            normalizedLength[obj['chr_name'].toUpperCase()] =  obj['chr_length'] / totalChromLength;
+        });
 
     this.normalizedLength = normalizedLength;
 
@@ -173,13 +166,13 @@ vq.models.CircVisData.prototype._setupData = function() {
 
     //for each index of chrom_keys ( pre-sorted)
     // sum all lengths from 1st index to last index of chrom_length (sorted to chrom_length)
-    chrom_keys_array.forEach(function(d) {
-        startAngle[d] = pv.sum(chrom_keys_array.slice(0, (chrom_keys_order[d])),
-            function() {
-                return (normalizedLength[chrom_keys_array[this.index]] * 2 * Math.PI);
-            });
+    _.each(chrom_keys_array,function(d,index) {
+        startAngle[d] = _.reduce(chrom_keys_array.slice(0, (chrom_keys_order[d])),
+            function(a,b,index) {
+                return a+(normalizedLength[chrom_keys_array[index]] * 2 * Math.PI);
+            },0);
 
-        theta[d] = pv.Scale.linear(0, chrom_length_map[d.toUpperCase()][0]['chr_length'])
+        theta[d] = pv.Scale.linear(0, chrom_length_map[d.toUpperCase()])
             .range(0, 2 * Math.PI * normalizedLength[d]);
 
         if (that._chrom.reverse_list != undefined &&
@@ -187,11 +180,11 @@ vq.models.CircVisData.prototype._setupData = function() {
                 function(c) {
                     return c == d;
                 }).length > 0) {  //defined as reversed!
-            theta[d] = pv.Scale.linear(0, chrom_length_map[d.toUpperCase()][0]['chr_length'])
+            theta[d] = pv.Scale.linear(0, chrom_length_map[d.toUpperCase()])
                 .range(2 * Math.PI * normalizedLength[d], 0);
 
         } else {
-            theta[d] = pv.Scale.linear(0, chrom_length_map[d.toUpperCase()][0]['chr_length'])
+            theta[d] = pv.Scale.linear(0, chrom_length_map[d.toUpperCase()])
                 .range(0, 2 * Math.PI * normalizedLength[d]);
 
         }
@@ -199,17 +192,14 @@ vq.models.CircVisData.prototype._setupData = function() {
         angle: 2 * Math.PI * normalizedLength[d]};
     });
 
-
-    startAngle_map = pv.dict(chrom_keys_array, (function(d) {
-        return startAngle[d] + rotation;
-    } ));
+    this.theta = theta;
+    this._ideograms={};
+    _.each(that._chrom.keys, function(d) {
+            startAngle_map[d] =  startAngle[d] + rotation;
+                that._ideograms[d] = _.extend(chrom_groups[d],{wedge:[],_feature_angle : function(a) { return this.startAngle + this.theta(a); }});
+            });
     this.startAngle_map = startAngle_map;
     this._chrom.groups = chrom_groups;
-
-    this.theta = theta;
-    this._ideograms=pv.dict(that._chrom.keys, function(d) {
-                return _.extend(chrom_groups[d],{wedge:[],_feature_angle : function(a) { return this.startAngle + this.theta(a); }});
-            });
 
     if (this._wedge != undefined) {
         this._wedge.forEach(function(wedge, index) {
@@ -222,21 +212,21 @@ vq.models.CircVisData.prototype._setupData = function() {
                     vq.utils.VisUtils.layoutChrTicks(wedge._data, wedge._tile_overlap_distance, max_tile_level));
             }
 
-            cnv_map = pv.nest(wedge._data)
-                .key(function(d) {
-                    return d.chr;
-                })
-                .map();
+            cnv_map = {};
+             _.each(wedge._data, function(d) {
+                if (cnv_map[d.chr] === undefined) { cnv_map[d.chr] = [];}
+                    cnv_map[d.chr].push(d);
+                });
 
-            wedge._chr = [];
-            wedge._chr = pv.dict(that._chrom.keys, function(d) {
-                return cnv_map[d] === undefined ? [] : _.extend(cnv_map[d],chrom_groups[d]);
+            wedge._chr = {};
+            _.each(that._chrom.keys, function(d) {
+                wedge._chr[d] =  cnv_map[d] === undefined ? [] : _.extend(cnv_map[d],chrom_groups[d]);
             });
             wedge._outerRadius =
                 (that._plot.height / 2) -
-                    (pv.sum(that._wedge.slice(0, index), function(a) {
+                    (vq.sum(that._wedge.slice(0, index), function(a) {
                         return a._plot_height;
-                    }) + pv.sum(that._wedge.slice(0, index), function(a) {
+                    }) + vq.sum(that._wedge.slice(0, index), function(a) {
                         return a._outer_padding;
                     })) - (that.ticks.outer_padding + that.ticks.height);
 
@@ -246,7 +236,7 @@ vq.models.CircVisData.prototype._setupData = function() {
 
             that._chrom.keys.forEach(function(d) {
                         that._ideograms[d]._outerRadius = (that._plot.height / 2) - (that.ticks.outer_padding + that.ticks.height);
-                        that._ideograms[d].wedge[index] = wedge._chr[d];
+                        that._ideograms[d].wedge[index] = wedge._chr[d]; //?
             });
 
             var value_label = wedge._value_key;
@@ -291,8 +281,9 @@ vq.models.CircVisData.prototype._setupData = function() {
         }); //foreach
     }
     //------------------- NETWORK DATA
-    var nodes = pv.dict(this._chrom.keys, function() {
-        return {};
+    var nodes = {};
+    _.each(that._chrom.keys, function(d) {
+            nodes[d] = {};
     });
     var node_parent_map = {};
     var node_array = [{parent:null, chr:null, radius:0, angle:0,children:[]}];
@@ -379,14 +370,15 @@ vq.models.CircVisData.prototype._setupData = function() {
         var tick_array = that.ticks.tile_ticks ? vq.utils.VisUtils.layoutChrTicks(that.ticks._data_array, that.ticks.overlap_distance) :
             that.ticks._data_array;
 
-        var ticks_map = pv.nest(tick_array)
-            .key(function(d) {
-                return d.chr;
-            })
-            .map();
+        var ticks_map = {};
+        _.each(tick_array,function(d) {
+                ticks_map[d.chr] = d;
+            });
+            
 
-        this.ticks.data_map = pv.dict(that._chrom.keys, function(d) {
-            return ticks_map[d] === undefined ? [] : ticks_map[d];
+        this.ticks.data_map = {};
+        _.each(that._chrom.keys, function(d) {
+            that.ticks.data_map[d] =  ticks_map[d] === undefined ? [] : ticks_map[d];
         });
         this.ticks._data_array = [];
         delete tick_array;

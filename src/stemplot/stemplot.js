@@ -21,7 +21,7 @@ vq.StemPlot = function() {
         this.horizontal_padding(30);
 
     };
-    vq.StemPlot.prototype = pv.extend(vq.Vis);
+    vq.StemPlot.prototype = vq.extend(vq.Vis);
 
 vq.StemPlot.prototype._setOptionDefaults =  function(options) {
 
@@ -196,7 +196,7 @@ vq.models.StemPlotData = function(data) {
                 console.warn('Unrecognized JSON object.  Expected vq.models.StemPlotData object.');
             }
         };
-vq.models.StemPlotData.prototype = pv.extend(vq.models.VisData);
+vq.models.StemPlotData.prototype = vq.extend(vq.models.VisData);
 
 vq.models.StemPlotData.prototype._build_data = function(data) {
         this._processData(data);
