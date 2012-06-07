@@ -6,7 +6,9 @@ vq.CircVis.prototype._add_network_nodes = function (chr,append) {
     var     dataObj = this.chromoData;
 
     var ideogram_obj = d3.select('.ideogram[data-region="'+chr+'"]');
-    var network_radius = dataObj._wedge[dataObj._ideograms[chr].wedge.length-1]._innerRadius - dataObj._network._outer_padding;
+    var innerRadius = dataObj._ideograms[chr].wedge.length > 0 ? dataObj._wedge[dataObj._ideograms[chr].wedge.length-1]._innerRadius :
+                     (dataObj._plot.height / 2) - dataObj.ticks.outer_padding - dataObj.ticks.height;
+    var network_radius = dataObj._network.network_radius[chr];
 //    var node_behavior = function(d) {
 //       return (pv.Behavior.hovercard(
 //       {
@@ -205,7 +207,7 @@ vq.CircVis.prototype._add_network_links= function(svg_obj, append) {
         .tension(.65)
         .radius(function(d) { return d.radius !== undefined ?
             d.radius :
-            dataObj._wedge[dataObj._ideograms[d.chr].wedge.length-1]._innerRadius - dataObj._network._outer_padding;
+            dataObj._network.network_radius[d.chr]
         })
         .angle(function(d) { return d.angle !== undefined ?
             d.angle :
@@ -228,13 +230,15 @@ vq.CircVis.prototype._add_network_links= function(svg_obj, append) {
         .attr('stroke-width',8)
         .attr('opacity',0.2)
         .attr("d", line)
+        .on('mouseover',function(a){d3.select(this).attr('opacity',1.0);})
+        .on('mouseout',function(a){d3.select(this).attr('opacity',dataObj._network.link_alpha(a));})
         .transition()
         .delay(100)
         .duration(800)
         .attr('visibility','visible')
         .attrTween('stroke-width',strokeWidthTween(function(a) { return dataObj._network.link_line_width(a)*3;},function(a) { return dataObj._network.link_line_width(a);}))
         .attrTween('opacity',function(a) {
-                                    var i =d3.interpolate(0.2,1);
+                                    var i =d3.interpolate(0.2,dataObj._network.link_alpha(a));
                                     return function(t) {return i(t)};
                                     });
 

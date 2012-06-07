@@ -18,8 +18,8 @@ vq.CircVis.prototype._insertEdge = function(edge) {
     var node_parent_map = {};
      //root node + chrom keyes
 
-    var root_nodes = _.first(that.chromoData._network.nodes_array,that.chromoData._chrom.keys.length+1);
-        _.each(root_nodes, function(root,index){node_parent_map[root.chr]=index;});
+    _.chain(that.chromoData._network.nodes_array).first(that.chromoData._chrom.keys.length+1)
+        .each(function(root,index){node_parent_map[root.chr]=index;});
 
         function same_feature(n1,n2) {
             return that.chromoData._network.node_key(n1) ==  that.chromoData._network.node_key(n2);
@@ -50,17 +50,15 @@ vq.CircVis.prototype._insertEdge = function(edge) {
             }
         }
     );
-    var insert_edge = {source:edge_arr[0],target:edge_arr[1]};
+    //list of keys that aren't node1,node2
+    var keys = _.chain(edge).keys().reject(function(a){return a=='node1'|| a== 'node2';}).value();
+    //append the source,target nodes
+    var insert_edge = _.chain(edge).pick(keys).extend({source:edge_arr[0],target:edge_arr[1]}).value();
 
-
-    for (var p in edge) {
-                        if (p != 'node1' && p != 'node2') {
-                            insert_edge[p] = edge[p];
-                        }
-                    }
+    //search for edge in current data
     if (_.any(that.chromoData._network.links_array,function(link) { return same_edge(insert_edge,link);})){     //old link
-        console.log('already have it!');
-    }else {
+       // console.log('already have it!');
+    }else {  //insert new edge
         that.chromoData._network.links_array.push(insert_edge);  //add it
         that._add_network_links(d3.select('g.links'));
     }

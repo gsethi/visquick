@@ -31,6 +31,16 @@ path.link {
     font-weight: normal;
 }
 
+.axes .labels {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 9px;
+        font-weight: normal;
+}
+.ideogram .radial_lines {
+    stroke:#222;
+    stroke-width:1.5px;
+}
+
 /*hovercard css */
 
 .hovercard {

@@ -35,7 +35,7 @@ vq.CircVis.prototype._add_wedge = function(chr) {
     var wedge_obj = ideogram_obj.append("svg:g")
         .attr('class','wedges')
         .selectAll("path")
-        .data(pv.range(0,dataObj._wedge.length))
+        .data(_.range(0,dataObj._wedge.length))
         .enter()
         .append("svg:g")
         .attr("class",  "wedge")
@@ -105,10 +105,12 @@ vq.CircVis.prototype._drawWedge_withRange = function(chr, wedge_index,append) {
         var startAngle = p.startAngle;
         var endAngle = p.angle;
 
+        //interpolate position for radial line
         var angles = _.range(0,endAngle,0.01);
+        // generate ticks for y_axis
         var radii = wedge_params._y_linear.ticks(4);
-        var cross = _.map(radii, function(d) { return pv.cross(angles,[d]);});
-
+        //make a vector of pairs (theta,r)
+        var cross = _.map(radii, function(r) { return _.map(angles, function(theta) {return [theta,r];});});
 
         wedge_obj.append("svg:g")
                 .attr('class','axes')
@@ -328,6 +330,29 @@ vq.CircVis.prototype._drawWedgeData_heatmap = function(chr, wedge_index) {
     );
 };
 
+vq.CircVis.prototype._draw_axes_ticklabels = function(wedge_index) {
+    var that = this;
+    var dataObj = that.chromoData;
+    var wedge_params = dataObj._wedge[wedge_index];
+
+       if (wedge_params._draw_axes) {
+           /* Circular grid lines. */
+
+           // generate ticks for y_axis
+           var radii = wedge_params._y_linear.ticks(4);
+
+           d3.select('.ideogram .wedge[data-ring="'+wedge_index+'"] .axes')
+                   .append("svg:g")
+                    .attr('class','labels')
+                   .selectAll('g.text')
+                   .data(radii)
+                   .enter().append("svg:text")
+                    .attr('transform',function(r) {return 'translate(0,-'+wedge_params._y_linear(r) +')';})
+                    .text(function(a) { return a;});
+           }
+
+};
+
 vq.CircVis.prototype._add_wedge_data = function(data) {
     var that = this;
     var chr = data.chr;
@@ -336,4 +361,4 @@ vq.CircVis.prototype._add_wedge_data = function(data) {
         that._drawWedgeData(chr,index);
     });
 
-}
+};

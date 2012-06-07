@@ -56,7 +56,6 @@ vq.CircVis.prototype._render = function() {
         function cross(a, b) { return a[0] * b[1] - a[1] * b[0]; }
         function dot(a, b) { return a[0] * b[0] + a[1] * b[1]; }
         var angle = Math.atan2(cross(q,p),dot(q,p)) * 180 / Math.PI;
-        console.log('['+p[0] + ',' + p[1] + '] [' +d3.event.dx+','+d3.event.dy+'],' +angle+'');
         rotation += angle;
         d3.select(this).attr('transform','translate(' + translate[0]+','+translate[1]+')rotate('+rotation+')');
     }
@@ -113,30 +112,43 @@ var ideograms = svg.selectAll('g.ideogram')
                    });
                    half_arc_genome[obj] = 0.5;
                });
+    if(!_.isNull(dataObj._chrom.radial_grid_line_width)&&
+                dataObj._chrom.radial_grid_line_width > 0) {
 
-    var f = fade(0.1);
-    var unf=fade(1.0);
+        var network_radius = dataObj._network.network_radius;
+                ideograms.selectAll('path.radial_lines')
+                    .data(function(chr) {
+                        return [[{x:0,y:-1*outerTickRadius},{x:0,y:-1*network_radius[chr]}]];
+                    })
+                    .enter().insert('svg:path','.wedges')
+                    .attr('class','radial_lines')
+                    .attr('d',d3.svg.line()
+                    .x(function(point) {return point.x;})
+                    .y(function(point) {return point.y;})
+                    .interpolate('linear')
+                    );
+   }
+
+//
+//    var f = fade(0.1);
+//    var unf=fade(1.0);
 
 //    ideograms.on("mouseover", f)
 //        .on("mouseout", unf);
     // var g = grow(true);
     // var ung = grow(false);
 
-
-function draw_ideogram_rings(d) {
-
-    var ideogram = d3.select(this);
-
-               that._add_wedge( d);
-                that._add_ticks( d);
-                that._add_network_nodes( d);
-    
-}
+        function draw_ideogram_rings(d) {
+            that._add_wedge( d);
+            that._add_ticks( d);
+            that._add_network_nodes( d);
+        }
 
     that._draw_ticks();
     that._add_network_links(svg.insert('svg:g','.ideogram').attr('class','links'));
+    _(_.range(0,dataObj._wedge.length)).each(that._draw_axes_ticklabels,that);
 
-var graph = svg.selectAll("svg.circvis")
+//var graph = svg.selectAll("svg.circvis")
 
 
 };

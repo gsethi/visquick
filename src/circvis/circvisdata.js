@@ -276,14 +276,14 @@ vq.models.CircVisData.prototype._setupData = function() {
                 wedge._glyph_distance = function(c,d) { return (((d._tile.height + d._tile.padding) * c.level)
                     + innerRadius + (d._radius() * 2));};
                 wedge._checked_endAngle = function(feature,chr) {
-                    if (dataObj._chrom.keys.length == 1) {
-                        return Math.min(dataObj.startAngle_map[chr] + dataObj.theta[chr](feature.end||feature.start+1),dataObj.startAngle_map[dataObj._chrom.keys[0]] + (Math.PI * 2));
+                    if (that._chrom.keys.length == 1) {
+                        return Math.min(that.startAngle_map[chr] + that.theta[chr](feature.end||feature.start+1),dataObj.startAngle_map[dataObj._chrom.keys[0]] + (Math.PI * 2));
                     }
                     else if (this.parent.index+1 == dataObj._chrom.keys.length) {
-                        return Math.min(dataObj.startAngle_map[chr] + dataObj.theta[chr](feature.end||feature.start+1),dataObj.startAngle_map[dataObj._chrom.keys[0]] + (Math.PI * 2));
+                        return Math.min(that.startAngle_map[chr] + that.theta[chr](feature.end||feature.start+1),dataObj.startAngle_map[dataObj._chrom.keys[0]] + (Math.PI * 2));
                     }
-                    else {return Math.min(dataObj.startAngle_map[chr] + dataObj.theta[chr](feature.end||feature.start+1),
-                        dataObj.startAngle_map[dataObj._chrom.keys[(this.parent.index+1)%dataObj._chrom.keys.length]]);
+                    else {return Math.min(that.startAngle_map[chr] + that.theta[chr](feature.end||feature.start+1),
+                        that.startAngle_map[that._chrom.keys[(this.parent.index+1)%that._chrom.keys.length]]);
                     }
                 };
             }
@@ -296,8 +296,11 @@ vq.models.CircVisData.prototype._setupData = function() {
     });
     var node_parent_map = {};
     var node_array = [{parent:null, chr:null, radius:0, angle:0,children:[]}];
+    that._network.network_radius = {};
     chrom_keys_array.forEach(function(key,index) {
-        var network_radius = that._wedge[that._ideograms[key].wedge.length-1]._innerRadius - that._network._outer_padding;
+        var innerRadius = that._ideograms[key].wedge.length > 0 ? that._wedge[that._ideograms[key].wedge.length-1]._innerRadius :
+                    (that._plot.height / 2) - that.ticks.outer_padding - that.ticks.height;
+        var network_radius = that._network.network_radius[key] = innerRadius - that._network._outer_padding;
         node_parent_map[key] = index + 1;
         var node = {chr:key,parent:node_array[0],children:[],radius: network_radius / 2,
                 angle : (that._chrom.groups[key].startAngle + that._chrom.groups[key].endAngle)/2};
