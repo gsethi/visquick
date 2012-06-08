@@ -1,42 +1,21 @@
 vq.CircVis.prototype.addEdges = function(edge_array) {
-    var chr_list = {};
     if (_.isArray(edge_array)) {
-        chr_list = this._insertEdges(edge_array);
+        this._insertEdges(edge_array);
     }
     else {
-        chr_list = this._insertEdge(edge_array);
+        this._insertEdge(edge_array);
     }
-    this._renderAll(_.keys(chr_list));
 };
 
 vq.CircVis.prototype._insertEdges = function(edge_array) {
-    var that = this;
-    var chr_list = {};
-    function insertEdge(edge) {
-            var chrs = that._insertEdge(edge);
-            _.extend(chr_list,chrs);
-    }
-    _.each(edge_array, vq.CircVis.prototype._insertEdge, this);    
-    return chr_list;
+    _.each(edge_array, vq.CircVis.prototype._insertEdge, this);
 };
-
-vq.CircVis.prototype._renderAll = function(chr_array) {
-    var that = this;
-            _.each(chr_array,function(chr){
-                //render each chr once
-                that._add_ticks(chr,true);
-                that._add_network_nodes(chr,true);                
-                that.draw_wedges(chr,true);
-            });
-        };
-
 
 vq.CircVis.prototype._insertEdge = function(edge) {
     var nodes = [edge.node1,edge.node2];
     var that = this;
     var edge_arr=[];
     var node_parent_map = {};
-    var chr_list = {};
      //root node + chrom keyes
 
     _.chain(that.chromoData._network.nodes_array).first(that.chromoData._chrom.keys.length+1)
@@ -57,9 +36,6 @@ vq.CircVis.prototype._insertEdge = function(edge) {
                                     function(n) { return same_feature(n,node);});
                 edge_arr.push(old_node);
             } else {
-                //gather modified chr's for render list
-                chr_list[node.chr]=1;
-                //insert new data into arrays
                 vq.utils.VisUtils.layoutTile(node,that.chromoData.ticks.data_map[node.chr].length,
                     that.chromoData.ticks.data_map[node.chr],that.chromoData.ticks.overlap_distance);
                 that.chromoData.ticks.data_map[node.chr].push(node);
@@ -67,9 +43,11 @@ vq.CircVis.prototype._insertEdge = function(edge) {
                 var new_node = _.extend({parent:that.chromoData._network.nodes_array[node_parent_map[node.chr]]},node);
                 parent.children.push(new_node);
                 that.chromoData._network.nodes_array.push(new_node);
+                edge_arr.push(new_node);
+                that._add_ticks(node.chr,true);
+                that._add_network_nodes(node.chr,true);
                 that._add_wedge_data(node);
-                edge_arr.push(new_node);                
-            }            
+            }
         }
     );
     //list of keys that aren't node1,node2
@@ -84,5 +62,4 @@ vq.CircVis.prototype._insertEdge = function(edge) {
         that.chromoData._network.links_array.push(insert_edge);  //add it
         that._add_network_links(d3.select('g.links'));
     }
-    return chr_list;  //list of regions to update
 };

@@ -143,11 +143,6 @@ vq.CircVis.prototype._drawWedgeData = function(chr, wedge_index, append) {
 };
 
 
-vq.CircVis.prototype.draw_wedges = function(chr, append) {
-    var that = this;
-    var wedges = _.range(0,that.chromoData._wedge.length);
-    _.each(wedges, function(index) { that._drawWedgeData(chr,index,append);});
-};
 
 
 vq.CircVis.prototype._drawWedgeData_histogram = function(chr, wedge_index) {
@@ -158,7 +153,7 @@ vq.CircVis.prototype._drawWedgeData_histogram = function(chr, wedge_index) {
     var wedge_obj = d3.select('.ideogram[data-region="'+chr+'"] .wedge[data-ring="'+wedge_index+'"]');
 
     var histogramArcTween = function (point) {
-        var _inner = wedge_params._thresholded_innerRadius(point[value_key]);
+        var _inner = wedge_params._innerRadius;
         var _outer = wedge_params._thresholded_outerRadius(point[value_key]);
         var start = that.chromoData._ideograms[chr].theta(point.start);
         var end = that.chromoData._ideograms[chr].theta(point.end);
@@ -178,8 +173,8 @@ vq.CircVis.prototype._drawWedgeData_histogram = function(chr, wedge_index) {
         .attr('stroke-width',wedge_params._lineWidth)
         .attr('visibility','hidden')
         .attr('d',d3.svg.arc()
-        .innerRadius(function(point) { return wedge_params._thresholded_innerRadius(point[value_key]);})
-        .outerRadius(function(point) { return wedge_params._thresholded_outerRadius(point[value_key]);})
+        .innerRadius(wedge_params._innerRadius)
+        .outerRadius(wedge_params._innerRadius)
         .startAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.start);})
         .endAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.end);})
         )
@@ -389,7 +384,8 @@ vq.CircVis.prototype._add_wedge_data = function(data) {
     var chr = data.chr;
     _.each(that.chromoData._ideograms[chr].wedge, function(wedge,index) {
         if(_.isUndefined(data[that.chromoData._wedge[index]._value_key]) || that.chromoData._wedge[index]._plot_type =='karyotype') { return;}
-            wedge.push(data);        
+            wedge.push(data);
+        that._drawWedgeData(chr,index);
     });
 
 };
