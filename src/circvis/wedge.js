@@ -143,6 +143,11 @@ vq.CircVis.prototype._drawWedgeData = function(chr, wedge_index, append) {
 };
 
 
+vq.CircVis.prototype.draw_wedges = function(chr, append) {
+    var that = this;
+    var wedges = _.range(0,that.chromoData._wedge.length);
+    _.each(wedges, function(index) { that._drawWedgeData(chr,index,append);});
+};
 
 
 vq.CircVis.prototype._drawWedgeData_histogram = function(chr, wedge_index) {
@@ -384,8 +389,7 @@ vq.CircVis.prototype._add_wedge_data = function(data) {
     var chr = data.chr;
     _.each(that.chromoData._ideograms[chr].wedge, function(wedge,index) {
         if(_.isUndefined(data[that.chromoData._wedge[index]._value_key]) || that.chromoData._wedge[index]._plot_type =='karyotype') { return;}
-            wedge.push(data);
-        that._drawWedgeData(chr,index);
+            wedge.push(data);        
     });
 
 };
