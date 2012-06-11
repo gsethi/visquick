@@ -23,7 +23,7 @@
  */
 
 vq.Hovercard = function(options) {
-    this.id = 'hovercard_'+vq.utils.VisUtils.guid();
+    this.id = vq.utils.VisUtils.guid();
     this.hovercard = vq.utils.VisUtils.createDiv(this.id,'hovercard');
     //this.hovercard.style.display = 'hidden';
     // this.hovercard.style.zIndex=100000;
@@ -48,15 +48,13 @@ vq.Hovercard.prototype.show = function(anchorTarget,dataObject) {
     var that = this;
     if (!anchorTarget) { throw 'vq.Hovercard.show: target div not found.'; return;}
     this.target =  anchorTarget;
-        this.hovercard.appendChild(this.renderCard(dataObject));
+        $(this.hovercard).append(this.renderCard(dataObject));
     if (this.tool_config) {
-        var hr = document.createElement('div');
-        hr.setAttribute('style',"height:1px;background:#000;border:1px solid #333");
-        this.hovercard.appendChild(hr);
-        this.hovercard.appendChild(this.renderTools(dataObject));
+        $('<div></div>').css('height:1px;background:#000;border:1px solid #333').appendTo(that.hovercard);
+        $(this.hovercard).append(this.renderTools(dataObject)).hide();
     }
-    if (this.include_footer) this.hovercard.appendChild(this.renderFooter());
-    this.hovercard.style.display = 'none';
+    if (this.include_footer) $(this.hovercard).append(this.renderFooter());
+    
     // this.hovercard.style.backgroundColor = 'white';
     // this.hovercard.style.borderWidth = '2px';
     // this.hovercard.style.borderColor = '#222';
@@ -69,7 +67,7 @@ vq.Hovercard.prototype.show = function(anchorTarget,dataObject) {
     this.getContainer().className ="temp";
     this.start = function() {that.startOutTimer();};
     this.cancel = function() {
-        that.target_mark.removeEventListener('mouseout',that.start,false);
+        $(that.target_mark).off('mouseout',that.start,false);
         that.cancelOutTimer();
     };
     this.close = function() {that.destroy();};
@@ -425,6 +423,8 @@ vq.hovercard = function(opts) {
         // var c = this.root.canvas();
         // if (!document.getElementById(c.id+'_rel')) {
         //     relative_div = vq.utils.VisUtils.createDiv(c.id+'_rel');
+        relative_div = $('<div id='+ c.id+'_rel>').prepend($('#'+c.id).children());
+        $(relative_div).css('position:relative;top:0px;zIndex:-1');
         //     c.insertBefore(relative_div,c.firstChild);
         //     relative_div.style.position = "relative";
         //     relative_div.style.top = "0px";
@@ -434,13 +434,13 @@ vq.hovercard = function(opts) {
         //     relative_div = document.getElementById(c.id+'_rel');
         // }
 
-        // if (!document.getElementById(hovercard_div_id)) {
-        //     anchor_div = vq.utils.VisUtils.createDiv(hovercard_div_id);
-        //     relative_div.appendChild(anchor_div);
+        if ($('#'+hovercard_div_id)) {
+            anchor_div = $('<div id = '+ hovercard_div_id + '></div>').appendTo(relative_div);
+        $(anchor_div).css('position:absolute;zIndex:-1').append(relative_div);
         //     anchor_div.style.position = "absolute";
         //     anchor_div.style.zIndex = -1;
         // }
-        // else {
+         else {
         //     anchor_div = document.getElementById(hovercard_div_id);
         //     if (anchor_div.parentNode.id != relative_div.id) {
         //         relative_div.appendChild(anchor_div);
@@ -457,14 +457,13 @@ vq.hovercard = function(opts) {
         //     t.y -= r;
         //     anchor_div.style.height = anchor_div.style.width = Math.ceil(2 * r * t.k);
         // }
-        anchor_div.style.left = opts.on_mark ? Math.floor(this.left() * t.k + t.x) + "px" : Math.floor(mouse_x  * t.k+ t.x)  + "px";
-        anchor_div.style.top = opts.on_mark ? Math.floor(this.top() * t.k + t.y) + "px" : Math.floor(mouse_y * t.k + t.y) + "px";
-        opts.transform = t;
+        $(anchor_div).offset({'left': mouse_x  + "px", 'top': mouse_y  + "px"});
+        //opts.transform = t;
 
         hovercard = new vq.Hovercard(opts);
         hovercard.show(anchor_div,info);
     };
-    return _.debounce(createHovercard,100);
+    return createHovercard;
 };
 
 

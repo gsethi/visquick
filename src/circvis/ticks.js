@@ -51,6 +51,16 @@ vq.CircVis.prototype._add_ticks = function(chr,append) {
        var ticks = ideogram_obj.select('g.ticks').selectAll('path')
                     .data(dataObj.ticks.data_map[chr],tick_key);
 
+var hovercard  = vq.hovercard({
+                    include_header : false,
+                    include_footer : true,
+                    self_hover : true,
+                    timeout : dataObj._plot.tooltip_timeout,
+                    data_config : dataObj.ticks.tooltipItems,
+                    tool_config : dataObj.ticks.tooltipLinks
+                });
+
+
                     ticks.enter().append('path')
                     .attr('class',function(tick) { return tick[label_key];})
                             .attr('fill',tick_fill)
@@ -65,6 +75,7 @@ vq.CircVis.prototype._add_ticks = function(chr,append) {
                                         tick_angle(point);})
                             ).on('mouseover',function(d){
                                                 d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','visible');
+                                                hovercard(d);
                                             })
                                             .on('mouseout',function(d){
                                                 d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','hidden');
@@ -103,20 +114,7 @@ vq.CircVis.prototype._add_ticks = function(chr,append) {
         return;
                     }
 
-               
-               var hovercard  = vq.hovercard({
-                    include_header : false,
-                    include_footer : true,
-                    self_hover : true,
-                    timeout : dataObj._plot.tooltip_timeout,
-                    data_config : dataObj.ticks.tooltipItems,
-                    tool_config : dataObj.ticks.tooltipLinks
-                });
-
-
-
-
-    if (!append) {
+   if (!append) {
    var ticks =  ideogram_obj
                 .append('svg:g')
                 .attr('class','ticks');

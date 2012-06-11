@@ -198,6 +198,7 @@ function wedge_plot(div) {
                 display_legend : true,
                 legend_corner : 'nw',
                 fill_style : tick_colors,
+                tooltip_items: {Label:'alias',Chr:'chr',Start:'start'},
                 label_map : [{key:{label:'METH'}, label: 'Methylation'},
                     {key:{label:'CNV'} , label: 'Copy Number Variation'},
                     {key:{label:'hsa-miR'}, label:'uRNA'},
