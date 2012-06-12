@@ -44,7 +44,7 @@ vq.CircVis.prototype._insertEdge = function(edge) {
                 parent.children.push(new_node);
                 that.chromoData._network.nodes_array.push(new_node);
                 edge_arr.push(new_node);
-                that._add_ticks(node.chr,true);
+                that._add_ticks(node.chr);
                 that._add_network_nodes(node.chr,true);
                 that._add_wedge_data(node);
             }

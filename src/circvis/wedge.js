@@ -373,6 +373,7 @@ vq.CircVis.prototype._draw_axes_ticklabels = function(wedge_index) {
                    .selectAll('g.text')
                    .data(radii)
                    .enter().append("svg:text")
+                    .each(function() {$(this).disableSelection();})
                     .attr('transform',function(r) {return 'translate(0,-'+wedge_params._y_linear(r) +')';})
                     .text(function(a) { return a;});
            }

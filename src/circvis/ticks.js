@@ -1,8 +1,6 @@
 
 /** private **/
-vq.CircVis.prototype._add_ticks = function(chr,append) {
-    var append = append || Boolean(false);
-
+vq.CircVis.prototype._add_ticks = function(chr) {
     var that = this;
 
     var ideogram_obj = d3.select('.ideogram[data-region="'+chr+'"]');
@@ -47,19 +45,15 @@ vq.CircVis.prototype._add_ticks = function(chr,append) {
     };
 
     var tick_key = dataObj._network.node_key; //.tick_key = function(tick) { return tick.chr+':'+tick.start + ':' + tick.end + ':' + tick[label_key]};
-    if (append) {
+
+    if(ideogram_obj.select('g.ticks').empty()) {
+                ideogram_obj
+                    .append('svg:g')
+                    .attr('class','ticks');
+        }
+
        var ticks = ideogram_obj.select('g.ticks').selectAll('path')
                     .data(dataObj.ticks.data_map[chr],tick_key);
-
-var hovercard  = vq.hovercard({
-                    include_header : false,
-                    include_footer : true,
-                    self_hover : true,
-                    timeout : dataObj._plot.tooltip_timeout,
-                    data_config : dataObj.ticks.tooltipItems,
-                    tool_config : dataObj.ticks.tooltipLinks
-                });
-
 
                     ticks.enter().append('path')
                     .attr('class',function(tick) { return tick[label_key];})
@@ -75,7 +69,7 @@ var hovercard  = vq.hovercard({
                                         tick_angle(point);})
                             ).on('mouseover',function(d){
                                                 d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','visible');
-                                                hovercard(d);
+                                                dataObj.ticks.hovercard.call(this,d);
                                             })
                                             .on('mouseout',function(d){
                                                 d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','hidden');
@@ -111,57 +105,6 @@ var hovercard  = vq.hovercard({
 //                           // .attr('visibility','hidden')
 //                           .text(function(d) { return d[label_key];});
 //
-        return;
-                    }
-
-   if (!append) {
-   var ticks =  ideogram_obj
-                .append('svg:g')
-                .attr('class','ticks');
-    }
-
-          var tick_wedges= ideogram_obj.select('g.ticks').selectAll('path')
-               .data(dataObj.ticks.data_map[chr]);
-
-               tick_wedges.enter()
-                .append('path')
-                .attr('class',function(tick) { return tick[label_key];})
-                .attr('fill',tick_fill)
-                .attr('stroke',tick_stroke)
-                .attr('d',d3.svg.arc()
-                .innerRadius( inner)
-                .outerRadius( outer)
-                .startAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.start);})
-                .endAngle(function(point) {
-                            return that.chromoData._ideograms[chr].theta(point.start) +
-                            tick_angle(point);})
-                ).on('mouseover',function(d){
-                                    d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','visible');
-
-                                })
-                .on('mouseout',function(d){
-                    d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','hidden');
-                })
-                .on('mouseover',hovercard);
-
-            tick_wedges.exit().remove();
-
-
-    var labels = ticks
-                .selectAll('svg.text')
-                .data(dataObj.ticks.data_map[chr])
-                   .enter()
-                   .append('text')
-                   .attr('transform', function(tick)  { return tick_translate(tick);})
-                   .attr("x",8)
-                   .attr('data-label',function(d) { return d[label_key];})
-                   .attr('class','labels')
-                   .attr("dy",".35em")
-                   .attr('stroke','black')
-                   .attr("text-anchor","middle")
-                   .attr('visibility','hidden')
-                   .text(function(d) { return d[label_key];});
-
 };
 
 

@@ -132,6 +132,7 @@ vq.models.CircVisData.prototype._setupData = function() {
     this.normalizedLength,this.theta = [],this.startAngle_map = {};
 
     var that = this;
+    this._plot.id = vq.utils.VisUtils.guid();
 
     if (this._chrom.keys == [] || this._chrom.length == []) {
         console.warn('Chromosome/Ideogram information has not been detected.  Please verify that keys and length/key mappings have been ' +
@@ -278,6 +279,16 @@ vq.models.CircVisData.prototype._setupData = function() {
                 };
             }
             delete wedge._data;
+
+            wedge.hovercard = vq.hovercard({
+                                canvas_id : that._plot.id,
+                                include_header : false,
+                                include_footer : true,
+                                self_hover : true,
+                                timeout : that._plot.tooltip_timeout,
+                                data_config : wedge.tooltipItems,
+                                tool_config : wedge.tooltipLinks
+                            });
         }); //foreach
     }
     //------------------- NETWORK DATA
@@ -360,6 +371,24 @@ vq.models.CircVisData.prototype._setupData = function() {
         nodes = [];
         node_array = [];
         links_array = [];
+        this._network.link_hovercard  =  vq.hovercard({
+                            canvas_id : that._plot.id,
+                            include_header : false,
+                            include_footer : true,
+                            self_hover : true,
+                            timeout : that._plot.tooltip_timeout,
+                            data_config : that._network.link_tooltipItems,
+                            tool_config : that._network.link_tooltipLinks
+                        });
+        this._network.node_hovercard  =  vq.hovercard({
+                                  canvas_id : that._plot.id,
+                                  include_header : false,
+                                  include_footer : true,
+                                  self_hover : true,
+                                  timeout : that._plot.tooltip_timeout,
+                                  data_config : that._network.node_tooltipItems,
+                                  tool_config : that._network.node_tooltipLinks
+                              });
     }
 
     if (this.ticks != undefined && this.ticks._data_array != undefined && this.ticks._data_array != null) {
@@ -383,6 +412,17 @@ vq.models.CircVisData.prototype._setupData = function() {
         this.ticks._data_array = [];
         delete tick_array;
         ticks_map = [];
+
+        this.ticks.hovercard =  vq.hovercard({
+                    canvas_id : that._plot.id,
+                    include_header : false,
+                    include_footer : true,
+                    self_hover : true,
+                    timeout : that._plot.tooltip_timeout,
+                    data_config : that.ticks.tooltipItems,
+                    tool_config : that.ticks.tooltipLinks
+                });
+
     }
     this.setDataReady(true);
 };

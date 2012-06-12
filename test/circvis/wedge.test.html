@@ -3,17 +3,26 @@
 <head>
     <meta http-equiv="PRAGMA" content="NO-CACHE">
     <title>Wedge Demo</title>
+    <!-- Font Awesome - http://fortawesome.github.com/Font-Awesome -->
+    <link rel="stylesheet" href="../../assets/css/font-awesome.css">
+
     <link href="../../assets/css/vq.css" type="text/css" rel="stylesheet" />
-    <!--<link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.19/themes/base/jquery-ui.css" type="text/css" rel="stylesheet" />-->
+
     <script type="text/javascript" src="../../lib/protovis/protovis.js"></script>
     <script type="text/javascript" src="../../lib/d3/d3.v2.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
-    <!--<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.19/jquery-ui.min.js" type="text/javascript"></script>-->
     <script type="text/javascript" src="../../lib/underscore/underscore.js"></script>
     <script type="text/javascript" src="../../vq.js"></script>
     <script type="text/javascript" src="../../vq.wedge.js"></script>
     <script type="text/javascript" src="../../data/circvis_data.json"></script>
 
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!--[if IE 7]>
+      <link rel="stylesheet" href="../../assets/css/font-awesome-ie7.css">
+    <![endif]-->
 </head>
 <body>
 
@@ -36,6 +45,8 @@ function generateAssociation(sparse) {
     var chr2 = chrom_keys[in2];
     var mut1 = Math.round(Math.random()*6);
     var mut2 = Math.round(Math.random()*6);
+    var val1 = Math.random()*0.3;
+    var val2 = Math.random()*0.3;
     var cnv1 = Math.round(Math.random()*500);
     var cnv2 = Math.round(Math.random()*500);
     var start1 = Math.round(Math.random() *
@@ -45,20 +56,20 @@ function generateAssociation(sparse) {
     if (sparse) {
 
         circle.addEdges({node1:{label:'C:METH:ZZZ:'+chr1+':'+start1+':'+start1+50000+'::',chr:chr1,start:start1,end:start1
-                + 50000,value:'ZZZ',source:'METH'},
+                + 50000,source:'METH'},
 
             node2:{label:'C:GEXP:YYY:'+chr2+':'+start1+':'+start1+50000+'::',chr:chr2,start:start2,end:start2
-                    + 50000,value:'YYY',source:'GEXP'}});
+                    + 50000,assoc_value1:val2,source:'GEXP'},assoc_value1:val1});
         return;
     }
 
     circle.addEdges({node1:{label:'C:METH:ZZZ:'+chr1+':'+start1+':'+start1+50000+'::',chr:chr1,start:start1,end:start1
-            + 50000,value:'ZZZ',source:'METH',
+            + 50000,source:'METH',
         mutation_count:mut1,cnv:cnv1},
 
         node2:{label:'C:GEXP:YYY:'+chr2+':'+start1+':'+start1+50000+'::',chr:chr2,start:start2,end:start2
-                + 50000,value:'YYY',source:'GEXP',
-            mutation_count:mut2,cnv:cnv2}})
+                + 50000,source:'GEXP',
+            mutation_count:mut2,cnv:cnv2},assoc_value1:val1})
 }
 
 $('#50_random_edge').on('click',function() {
@@ -81,7 +92,7 @@ function wedge_plot(div) {
     var width=1200, height=1200;
     var	cnv_ring_height = 60;
 
-    var tick_keys = ['METH','CNV','hsa-miR','GEXP','Other'],
+    var tick_keys = ['METH','CNVR','hsa-miR','GEXP','Other'],
             color_scale = d3.scale.category10().domain(tick_keys);
 
     var tick_colors = function(data,label_key) {
@@ -93,6 +104,12 @@ function wedge_plot(div) {
         return color_scale(tick_key);
     };
 
+    var label_map = {'METH' : 'DNA Methylation',
+                        'CNVR': 'Copy Number Variation REGION',
+                        'hsa-miR' :'uRNA',
+                        'GEXP': 'Gene Expression',
+                        CLIN: 'Clinical',
+                        'SAMP': 'Tumor Sample'};
 
     var data = {
         PLOT: {
@@ -198,11 +215,8 @@ function wedge_plot(div) {
                 display_legend : true,
                 legend_corner : 'nw',
                 fill_style : tick_colors,
-                tooltip_items: {Label:'alias',Chr:'chr',Start:'start'},
-                label_map : [{key:{label:'METH'}, label: 'Methylation'},
-                    {key:{label:'CNV'} , label: 'Copy Number Variation'},
-                    {key:{label:'hsa-miR'}, label:'uRNA'},
-                    {key:{label:'Other'}, label: 'Gene Expression'}]
+                tooltip_items: {Feature:function(feature) { var label = feature.label.split(':'); return label_map[label[1]] + ' ' + label[2];},
+                    Location: function(feature) { return 'Chr ' + feature.chr + ' ' + feature.start + (feature.end ? '-' + feature.end : '');}}
             }
         },
 
@@ -221,16 +235,17 @@ function wedge_plot(div) {
                 node_highlight_mode : 'isolate',
                 node_key : function(node) { return node.label;},
                 node_tooltip_items :  {
-                    Chr : 'chr',
-                    Start : 'start',
-                    End : 'end',
-                    Label : function(c) { return c.label; }
+                        Feature:function(feature) { var label = feature.label.split(':'); return label_map[label[1]] + ' ' + label[2];},
+                        Location: function(feature) { return 'Chr ' + feature.chr + ' ' + feature.start + (feature.end ? '-' + feature.end : '');}
                 },
                 link_tooltip_items :  {
-                    'Node 1 Chr' : 'sourceNode.chr', 'Node 1 Start' : 'sourceNode.start', 'Node 1 End' : 'sourceNode.end',
-                    'Node 1 Label' : function(c) { return vq.utils.VisUtils.options_map(c.sourceNode)['label'];},
-                    'Node 2 Chr' : 'targetNode.chr', 'Node 2 Start' : 'targetNode.start', 'Node 2 End' : 'targetNode.end',
-                    'Node 2 Label' : function(c) { return vq.utils.VisUtils.options_map(c.targetNode)['label'];}
+                    'Target' : function(link) { var label = link.source.label.split(':'); return label_map[label[1]] + ' ' + label[2];},
+                    'Location' : function(link) { return 'Chr ' + link.source.chr + ' ' + link.source.start +
+                            (link.source.end ? '-' + link.source.end : '');},
+                    'Predictor' : function(link) { var label = link.target.label.split(':'); return label_map[label[1]] + ' ' + label[2];},
+                    'Location' : function(link) { return 'Chr ' + link.target.chr + ' ' + link.target.start +
+                                                (link.target.end ? '-' + link.target.end : '');},
+                    Importance:'assoc_value1'
                 }
             }
         }

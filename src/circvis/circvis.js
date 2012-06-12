@@ -86,8 +86,11 @@ vq.CircVis.prototype._render = function() {
         .on("drag", dragmove)
         .on("dragend", dragend);
 
+    var id = dataObj._plot.id;
+
     var svg = d3.select(dataObj._plot.container)        
         .append('svg:svg')
+        .attr('id', id)
         .attr('width', width)
         .attr('height', height)
         .append('svg:g')
@@ -119,6 +122,7 @@ var ideograms = svg.selectAll('g.ideogram')
                             .attr('dy','.35em')
                .attr('cursor','pointer')
             .text(function(f) { return f;})
+               .each(function() { $(this).disableSelection();})
             .on('mouseover',function ideogram_label_click(obj){
                    var half_arc_genome = {};
                    var region_length = dataObj.normalizedLength[obj];

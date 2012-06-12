@@ -17,17 +17,15 @@
  *
  *      self_hover : {Boolean} - If true, placing the mouse cursor over the hovercard cancels the timer which hides the hovercard
  *      include_header : {Boolean} - If true, the header of the data panel is displayed.
-*       include_footer : {Boolean} - If true, the footer containing the CLOSE [X} action is displayed at the bottom of the hovercard
-*       include_frame : {Boolean} - If true, the frame that contains the hovercard actions (move,pin, etc) is displayed.
+ *       include_footer : {Boolean} - If true, the footer containing the CLOSE [X} action is displayed at the bottom of the hovercard
+ *       include_frame : {Boolean} - If true, the frame that contains the hovercard actions (move,pin, etc) is displayed.
  *     </pre>
  */
 
 vq.Hovercard = function(options) {
     this.id = vq.utils.VisUtils.guid();
-    this.hovercard = vq.utils.VisUtils.createDiv(this.id,'hovercard');
-    //this.hovercard.style.display = 'hidden';
-    // this.hovercard.style.zIndex=100000;
-    // this.hovercard.style.position='absolute';
+    this.hovercard = document.createElement('div',this.id);
+    $(this.hovercard).addClass('hovercard');
     this.lock_display = false;
     if (options) {
         this.timeout = options.timeout || 800;
@@ -40,105 +38,87 @@ vq.Hovercard = function(options) {
         this.include_frame = options.include_frame != null ? options.include_frame :  false;
         // this.transform = options.transform || new pv.Transform();
     }
-    var that = this;
-    // vq.events.Dispatcher.addListener('zoom_select','tooltip',function() { that.togglePin();});
 };
 
 vq.Hovercard.prototype.show = function(anchorTarget,dataObject) {
     var that = this;
     if (!anchorTarget) { throw 'vq.Hovercard.show: target div not found.'; return;}
     this.target =  anchorTarget;
-        $(this.hovercard).append(this.renderCard(dataObject));
+    $('<div></div>').addClass('data').html(this.renderCard(dataObject)).appendTo(that.hovercard);
     if (this.tool_config) {
-        $('<div></div>').css('height:1px;background:#000;border:1px solid #333').appendTo(that.hovercard);
-        $(this.hovercard).append(this.renderTools(dataObject)).hide();
+        $('<div></div>').css({'height':'1px','background':'#000','border':'1px solid #333'}).html(this.renderTools(dataObject)).hide().appendTo(that.hovercard);
     }
     if (this.include_footer) $(this.hovercard).append(this.renderFooter());
-    
-    // this.hovercard.style.backgroundColor = 'white';
-    // this.hovercard.style.borderWidth = '2px';
-    // this.hovercard.style.borderColor = '#222';
-    // this.hovercard.style.borderStyle = 'solid';
-    // this.hovercard.style.font = "9px sans-serif";
-    // this.hovercard.style.borderRadius = "10px";
 
     this.placeInDocument();
-
-    this.getContainer().className ="temp";
     this.start = function() {that.startOutTimer();};
     this.cancel = function() {
         $(that.target_mark).off('mouseout',that.start,false);
         that.cancelOutTimer();
     };
     this.close = function() {that.destroy();};
-    this.target_mark.addEventListener('mouseout',that.start, false);
-    this.getContainer().addEventListener('mouseover',that.cancel, false);
-    this.getContainer().addEventListener('mouseout',that.start,false);
+    $(this.target_mark).on('mouseout',that.start);
+    $(this.getContainer()).on('mouseover',that.cancel);
+    $(this.getContainer()).on('mouseout',that.start);
 
 };
 
-  vq.Hovercard.prototype.startOutTimer =   function() {
-      var that = this;
-        if (!this.outtimer_id){ this.outtimer_id = window.setTimeout(function(){that.trigger();},that.timeout); }
- };
+vq.Hovercard.prototype.startOutTimer =   function() {
+    var that = this;
+    if (!this.outtimer_id){ this.outtimer_id = window.setTimeout(function(){that.trigger();},that.timeout); }
+};
 
- vq.Hovercard.prototype.cancelOutTimer =  function() {
-        if (this.outtimer_id){
-            window.clearTimeout(this.outtimer_id);
-            this.outtimer_id = null;
-        }
- };
+vq.Hovercard.prototype.cancelOutTimer =  function() {
+    if (this.outtimer_id){
+        window.clearTimeout(this.outtimer_id);
+        this.outtimer_id = null;
+    }
+};
 
- vq.Hovercard.prototype.trigger = function (){
-        if(this.outtimer_id) {
-            window.clearTimeout(this.outtimer_id);
-            this.outtimer_id = null;
-            this.destroy();
-        }
-        return false;
+vq.Hovercard.prototype.trigger = function (){
+    if(this.outtimer_id) {
+        window.clearTimeout(this.outtimer_id);
+        this.outtimer_id = null;
+        this.destroy();
+    }
+    return false;
 };
 
 vq.Hovercard.prototype.togglePin = function() {
-  this.lock_display = !this.lock_display || false;
+    this.lock_display = !this.lock_display || false;
     var that = this;
-            if (this.getContainer().className=="") {
-                $(this.getContainer()).on('mouseout',that.start).addClass("temp");
-            } else {
-                $(this.target_mark).off('mouseout',that.start).off('mouseout',that.start);
-                this.cancelOutTimer();
-                $(this.getContainer()).removeClass("temp");
-            }
-    this.pin_div.innerHTML = this.lock_display ? vq.Hovercard.icon.pin_in : vq.Hovercard.icon.pin_out;
+    if ($(this.getContainer()).hasClass('pinned')) {
+        $(this.getContainer()).on('mouseout',that.start).removeClass("pinned");
+    } else {
+        $(this.target_mark).off('mouseout',that.start);
+        $(this.getContainer()).off('mouseout',that.start);
+        this.cancelOutTimer();
+        $(this.getContainer()).addClass("pinned");
+    }
 };
 
 vq.Hovercard.prototype.placeInDocument = function(){
     var card = this.hovercard;
     var target = this.target;
     var offset = $(target).offset();
-    offset.height = $(target).outerHeight();
-    offset.width = $(target).outerWidth();
     card.style.display='block';
-    // card.style.visibility='hidden';
-    // card.style.top = 0 +'px';
-    // card.style.left = 0 + 'px';
-    document.body.appendChild(card);
-     card.style.top = offset.top + offset.height + (20 * this.transform.invert().k ) + 'px';
-     card.style.left = offset.left + offset.width + (20 * this.transform.invert().k  ) + 'px';
-    card.style.visibility='visible';
+    $('body').append(card);
+    $(card).offset({top: offset.top, // + offset.height,//+ (20 * this.transform.invert().k ) + 'px';
+        left:  offset.left + $(card).outerWidth() > $('body').outerWidth() ? offset.left - $(card).outerWidth() : offset.left}); // + offset.width});// + (20 * this.transform.invert().k  ) + 'px';
 
     if (this.include_frame) {
-        var hr = document.createElement('div','frame');
-        //hr.setAttribute('style',"height:1px;background:#000;border:1px solid #333");
-         this.hovercard.insertBefore(hr,this.hovercard.childNodes.item(0));
-        this.frame = this.hovercard.insertBefore(this.renderFrame(),this.hovercard.childNodes.item(0));
-
+        //$(card).prepend(hr);
+        this.frame = this.renderFrame();
+        $(card).prepend(this.frame);
         this.attachMoveListener();}
+    $(card).show();
+
 };
 
 vq.Hovercard.prototype.hide = function() {
     if(!this.self_hover || !this.over_self) {
-    this.hovercard.style.display = 'none';
-    this.hovercard.style.visibility='hidden';
+        this.hovercard.style.display = 'none';
+        this.hovercard.style.visibility='hidden';
     }
 };
 
@@ -157,7 +137,7 @@ vq.Hovercard.prototype.isHidden = function() {
 };
 
 vq.Hovercard.prototype.renderCard = function(dataObject) {
-          return  this.renderData(dataObject);
+    return  this.renderData(dataObject);
 };
 
 vq.Hovercard.prototype.attachMoveListener = function() {
@@ -165,27 +145,27 @@ vq.Hovercard.prototype.attachMoveListener = function() {
     var pos= {}, offset = {};
 
     function activateDrag(evt) {
-         var ev = !evt?window.event:evt;
+        var ev = !evt?window.event:evt;
         //don't listen for mouseout if its a temp card
-        if (that.getContainer().className=="temp") {
-                that.getContainer().removeEventListener('mouseout',that.start,false);
+        if ($(that.getContainer()).hasClass("temp")) {
+            $(that.getContainer()).off('mouseout',that.start);
         }
         //begin tracking mouse movement!
-        window.addEventListener('mousemove',trackMouse,false);
+        $(window).on('mousemove',trackMouse);
         offset = vq.utils.VisUtils.cumulativeOffset(that.hovercard);
         pos.top = ev.clientY ? ev.clientY : ev.pageY;
         pos.left = ev.clientX ? ev.clientX : ev.pageX;
         //don't allow text selection during drag
-        window.addEventListener('selectstart',vq.utils.VisUtils.disabler,false);
+        $(window).on('selectstart',vq.utils.VisUtils.disabler);
     }
     function disableDrag() {
         //stop tracking mouse movement!
-        window.removeEventListener('mousemove',trackMouse,false);
+        $(window).off('mousemove',trackMouse);
         //enable text selection after drag
-        window.removeEventListener('selectstart',vq.utils.VisUtils.disabler,false);
-        //start listening again for mouseout if its a temp card
-        if (that.getContainer().className=="temp") {
-            that.getContainer().addEventListener('mouseout',that.start,false);
+        $(window).off('selectstart',vq.utils.VisUtils.disabler);
+        //start listening again for mouseout if its not pinned
+        if (!$(that.getContainer()).hasClass("pinned")) {
+            $(that.getContainer()).on('mouseout',that.start);
         }
         pos = {};
     }
@@ -193,61 +173,58 @@ vq.Hovercard.prototype.attachMoveListener = function() {
         var ev = !evt?window.event:evt;
         var x = ev.clientX ? ev.clientX : ev.pageX;
         var y = ev.clientY ? ev.clientY : ev.pageY;
-        that.hovercard.style.left = offset.left + (x - pos.left) + 'px';
-        that.hovercard.style.top = offset.top +  (y - pos.top) + 'px';
+        $(that.hovercard).offset({left: offset.left + (x - pos.left),
+            top : offset.top +  (y - pos.top)});
     }
     //track mouse button for begin/end of drag
-    this.move_div.addEventListener('mousedown',activateDrag,false);
-    this.move_div.addEventListener('mouseup' , disableDrag,false);
+    $(this.move_div).on('mousedown',activateDrag);
+    $(this.move_div).on('mouseup' , disableDrag);
     //track mouse button in window, too.
-    window.addEventListener('mouseup' , disableDrag,false);
+    $(window).on('mouseup' , disableDrag);
 };
 
 
-vq.Hovercard.prototype.renderFrame = function(pin_out) {
+vq.Hovercard.prototype.renderFrame = function() {
     var that = this;
-    var frame = vq.utils.VisUtils.createDiv();
-    $(frame).addClass('data');
-    frame.setAttribute('style','width:100%;cursor:arrow;background:#55eeff');
-    var table = document.createElement('table');
-    var tBody = document.createElement("tbody");
-    table.appendChild(tBody);
-    var trow = tBody.insertRow(-1);
-    var tcell= trow.insertCell(-1);
-    this.move_div = vq.utils.VisUtils.createDiv('hovercard_move','move');
-    // this.move_div.setAttribute('style','width:30px;height:15px;background:black;cursor:move;');
-    this.move_div.setAttribute('title','Drag to move');
-    vq.utils.VisUtils.disableSelect(this.move_div);
-    tcell.appendChild(this.move_div);
-    tcell=trow.insertCell(-1);
-    this.pin_div = vq.utils.VisUtils.createDiv();
-    $(this.pin_div).addClass('pin');
-    tcell.appendChild(this.pin_div);
+    var frame = document.createElement('div');
+    $(frame).addClass('tools');
+    //frame.setAttribute('style','width:100%;cursor:arrow;background:#55eeff');
+//    var table = document.createElement('table');
+//    var tBody = document.createElement("tbody");
+//    table.appendChild(tBody);
+//    var trow = tBody.insertRow(-1);
+//    var tcell= trow.insertCell(-1);
+    this.move_div = document.createElement('span');
+    $(this.move_div).addClass('move').attr('title','Drag to move').html('<i class="icon-move"></i>').appendTo(frame);
+
+
+//    tcell=trow.insertCell(-1);
+    this.pin_div = document.createElement('span');
+    $(this.pin_div).addClass('pin').attr('title','Click to pin').html('<i class="icon-pushpin"></i>')
+        .on('click', pin_toggle)
+        .appendTo(frame);
     function pin_toggle() {
         that.togglePin();
         return false;
     }
-    this.pin_div.addEventListener('click', pin_toggle, false);
-    // this.pin_div.setAttribute('style', "width:15px;text-align:center;cursor:pointer;background:#FFF");
-    vq.utils.VisUtils.disableSelect(this.pin_div);
-    this.pin_div.innerHTML = vq.Hovercard.icon.pin_out;
-    tcell=trow.insertCell(-1);
-    var zoom_div = vq.utils.VisUtils.createDiv('hovercard_zoom');
-    tcell.appendChild(zoom_div);
-    function zoom() {
-        vq.events.Dispatcher.dispatch(new vq.events.Event('zoom','tooltip',{hovercard:that}));
-        return false;
-    }
-    zoom_div.addEventListener('click', zoom, false);
-    tcell=trow.insertCell(-1);
-    var select_div = vq.utils.VisUtils.createDiv('hovercard_select');
-    tcell.appendChild(select_div);
-    function select() {
-        vq.events.Dispatcher.dispatch(new vq.events.Event('select','tooltip',{hovercard:that}));
-        return false;
-    }
-    select_div.addEventListener('click', select, false);
-    frame.appendChild(table);
+//    tcell=trow.insertCell(-1);
+//    var zoom_div = document.createElement('div');
+//    $(zoom_div).addClass('hovercard_zoom').appendTo($(tcell));
+//    function zoom() {
+//        vq.events.Dispatcher.dispatch(new vq.events.Event('zoom','tooltip',{hovercard:that}));
+//        return false;
+//    }
+//    $(zoom_div).on('click', zoom);
+//    tcell=trow.insertCell(-1);
+//    var select_div = document.createElement('div');
+//    $(select_div).addClass('hovercard_select');
+//    $(tcell).append(select_div);
+//    function select() {
+//        vq.events.Dispatcher.dispatch(new vq.events.Event('select','tooltip',{hovercard:that}));
+//        return false;
+//    }
+//    $(select_div).on('click', select);
+//    $(frame).append(table);
     return frame;
 };
 
@@ -347,16 +324,17 @@ vq.Hovercard.prototype.getContainer = function() {
 
 vq.Hovercard.prototype.renderFooter = function() {
     var that = this;
-    var footer = document.createElement('div','footer');
+    var footer = document.createElement('div');
+    $(footer).addClass('footer');
     // footer.setAttribute('style',"text-align:right;font-size:13px;margin-right:5px;color:rgb(240,10,10);cursor:pointer;");
     var close = document.createElement('span');
-        function hideHovercard() {
+    function hideHovercard() {
         that.destroy();
         return false;
     }
-    close.addEventListener('click',hideHovercard,false);
-    close.innerHTML = 'CLOSE <i class="icon-remove></i>';
-    footer.appendChild(close);
+    $(close).on('click',hideHovercard);
+    $('<i></i>').addClass('icon-remove').html('CLOSE').appendTo(close);
+    $(footer).append(close);
     return footer;
 };
 
@@ -398,16 +376,16 @@ vq.hovercard = function(opts) {
     var hovercard_div_id =  'vq_hover';
     // var outtimer_id, clear, retry_tooltip;
 
-     function createHovercard(d) {
-        var mark = d3.select(this);
-        var info = opts.param_data ? d : mark.datum();
-        var mouse_x = d3.event.x, mouse_y = d3.event.y;
-        var that = this;
-      
+    function createHovercard(d) {
+        var mark = this;
+        var obj = d3.select(this);
+        var info = opts.param_data ? d : obj.datum();
+        var mouse_x = d3.event.pageX, mouse_y = d3.event.pageY;
+        opts.canvas_id = opts.canvas_id || $('div svg').get(0);
         opts.self_hover = true;
         opts.include_frame = true;
         opts.include_footer = true;
-        opts.target = target;      
+        opts.target = mark;
         // outtimer_id = null;
         // clear = function(){
         //     window.clearTimeout(outtimer_id);
@@ -415,49 +393,23 @@ vq.hovercard = function(opts) {
         // retry_tooltip = function(){
         //     pv.Behavior.hovercard(opts).call(that,info);
         // };
-        // var t= pv.Transform.identity, p = this.parent;
-        // do {
-        //     t=t.translate(p.left(),p.top()).times(p.transform());
-        // } while( p=p.parent);
 
-        // var c = this.root.canvas();
-        // if (!document.getElementById(c.id+'_rel')) {
-        //     relative_div = vq.utils.VisUtils.createDiv(c.id+'_rel');
-        relative_div = $('<div id='+ c.id+'_rel>').prepend($('#'+c.id).children());
-        $(relative_div).css('position:relative;top:0px;zIndex:-1');
-        //     c.insertBefore(relative_div,c.firstChild);
-        //     relative_div.style.position = "relative";
-        //     relative_div.style.top = "0px";
-        //     relative_div.style.zIndex=-1;
-        // }
-        // else {
-        //     relative_div = document.getElementById(c.id+'_rel');
-        // }
+        var c_id = $('#'+opts.canvas_id).first().parent().attr('id'); //this.root.canvas();
+        if (!$('#' + c_id+'_rel').length) {
+            $('#'+c_id).prepend('<div id='+ c_id+'_rel></div>');
+            var relative_div = $('#'+c_id+'_rel');
+            relative_div.css({'position':'relative','top':'0px','zIndex':'-1'});
+        }
+        else {
+            relative_div = $('#' + c_id+'_rel');
+        }
 
-        if ($('#'+hovercard_div_id)) {
-            anchor_div = $('<div id = '+ hovercard_div_id + '></div>').appendTo(relative_div);
-        $(anchor_div).css('position:absolute;zIndex:-1').append(relative_div);
-        //     anchor_div.style.position = "absolute";
-        //     anchor_div.style.zIndex = -1;
-        // }
-         else {
-        //     anchor_div = document.getElementById(hovercard_div_id);
-        //     if (anchor_div.parentNode.id != relative_div.id) {
-        //         relative_div.appendChild(anchor_div);
-        //     }
-        // }
+        if (!$('#'+hovercard_div_id).length) {
+            $('<div id='+ hovercard_div_id + '></div>').appendTo(relative_div).css({'position':'absolute','zIndex':'-1'});
+        }
 
-        // if(this.properties.width) {
-        //     anchor_div.style.width =  opts.on_mark ? Math.ceil(this.width() * t.k) + 1 : 1;
-        //     anchor_div.style.height =  opts.on_mark ? Math.ceil(this.height() * t.k) + 1 : 1;
-        // }
-        // else if (this.properties.radius) {
-        //     var r = this.radius();
-        //     t.x -= r;
-        //     t.y -= r;
-        //     anchor_div.style.height = anchor_div.style.width = Math.ceil(2 * r * t.k);
-        // }
-        $(anchor_div).offset({'left': mouse_x  + "px", 'top': mouse_y  + "px"});
+        anchor_div = $('#' +hovercard_div_id).get(0);
+        $(anchor_div).offset({'left': mouse_x, 'top': mouse_y});
         //opts.transform = t;
 
         hovercard = new vq.Hovercard(opts);

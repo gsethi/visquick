@@ -134,6 +134,7 @@ vq.CircVis.prototype._add_network_nodes = function (chr,append) {
         .attr('transform', function(node) {
             return 'rotate('+ ((dataObj._ideograms[chr].theta(node.start) / Math.PI * 180) - 90) +')translate(' + network_radius + ')';
         })
+        .on('mouseover',function(d){d3.select(this).attr('opacity',1.0); dataObj._network.node_hovercard.call(this,d);})
         .transition()
         .delay(100)
         .duration(800)
@@ -200,7 +201,7 @@ vq.CircVis.prototype._add_network_links= function(svg_obj, append) {
     var dataObj = this.chromoData;
 
     var bundle = d3.layout.bundle();
-    var splines;
+
 
     var line = d3.svg.line.radial()
         .interpolate("bundle")
@@ -221,17 +222,21 @@ vq.CircVis.prototype._add_network_links= function(svg_obj, append) {
                             };
 
     svg_obj.selectAll("path.link")
-        .data(splines = bundle(dataObj._network.links_array))
+        .data(bundle(dataObj._network.links_array).map(function(b, index) { return _.extend(dataObj._network.links_array[index],{spline:b});}))
         .enter().insert("svg:path")
-        .attr("class", function(d) { return "link t_" + d[0].chr + " p_"+ d[d.length-1].chr; })
+        .attr("class", function(d) {
+            return "link t_" + d.source.chr + " p_"+ d.target.chr;
+        })
         .attr('visibility','hidden')
          .attr('fill','none')
          .attr('stroke','steelblue')
         .attr('stroke-width',8)
         .attr('opacity',0.2)
-        .attr("d", line)
-        .on('mouseover',function(a){d3.select(this).attr('opacity',1.0);})
-        .on('mouseout',function(a){d3.select(this).attr('opacity',dataObj._network.link_alpha(a));})
+        .attr("d", function(link) { return line(link.spline);})
+        .on('mouseover',function(d){
+            d3.select(this).attr('opacity',1.0); dataObj._network.link_hovercard.call(this,d);
+        })
+        .on('mouseout',function(d){d3.select(this).attr('opacity',dataObj._network.link_alpha(d));})
         .transition()
         .delay(100)
         .duration(800)

@@ -392,13 +392,22 @@ vq.utils.VisUtils.disabler = function(e) {
     return false;
 };
 
-vq.utils.VisUtils.disableSelect= function(el) {
-       if(el.attachEvent){
-        el.attachEvent("onselectstart",vq.utils.VisUtils.disabler);
-    } else {
-        el.addEventListener("selectstart",vq.utils.VisUtils.disabler,false);
-    }
+$.fn.disableSelection = function() {
+    return this.each(function() {
+        $(this).attr('unselectable', 'on')
+               .css({'-moz-user-select':'none',
+                    '-o-user-select':'none',
+                    '-khtml-user-select':'none',
+                    '-webkit-user-select':'none',
+                    '-ms-user-select':'none',
+                    'user-select':'none'})
+               .each(function() {
+                    $(this).attr('unselectable','on')
+                    .bind('selectstart',function(){ return false; });
+               });
+    });
 };
+
 
 vq.utils.VisUtils.enableSelect = function(el){
     if(el.attachEvent){
