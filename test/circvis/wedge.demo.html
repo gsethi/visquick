@@ -30,7 +30,6 @@
 
 <button id="1_random_edge">Add 1 Random Edges</button><br />
 <button id="50_random_edge">Add 50 Random Edges</button><br />
-<button id="50_random_nodes">Add 50 Random Nodes</button><br />
 
 Drag the circvis (on the rings) to rotate the entire display.<br/>
 
@@ -55,7 +54,9 @@ function generateClinicalNode() {
     var source = ['CLIN','SAMP'][(Math.random()*2) >>> 0];
     var label_arr = node.label.split(':');
     label_arr[1] = source;
+    label_arr[3] = label_arr[4] = label_arr[5] = "";
     node.label = label_arr.join(':');
+    node.chr = node.start = node.end = node.source = node.mutation_count = "";
     return node;
 }
 
@@ -68,23 +69,41 @@ function generateFeature() {
 
     function generateAssociation() {
         var val1 = (Math.random()*0.3).toFixed(4);
-        return {node1:generateNode(), node2:generateNode(), assoc_value1:val1};
+        var nodeType = [0,1].map(function() { return [generateClinicalNode,generateNode][+(Math.random() > 0.2)];});
+        return {node1:nodeType[0](), node2:nodeType[1](), assoc_value1:val1};
     }
 
     $('#50_random_edge').on('click',function() {
                 var edges = _(_.range(0,50)).map(generateAssociation);
-                circle.addEdges(edges);
+                addRFAssociation(edges);
+
             }
     );
     $('#1_random_edge').on('click',function() {
-                circle.addEdges(generateAssociation());
+                addRFAssociation(generateAssociation());
             }
     );
-    $('#50_random_nodes').on('click',function() {
-                var nodes = _(_.range(0,50)).map(generateFeature);
-                circle.addNodes(nodes);
-            }
-    );
+  
+
+    function addRFAssociation(array) {
+        var edges = [],
+        nodes =[];
+        array = _.isArray(array) ? array : [array];
+            _.each(array, function(assoc){
+                if (_.isEmpty(assoc.node1.chr)) {
+                    nodes.push(_.extend(assoc.node2,{clin_alias:assoc.node1.label}));
+                    return;
+                } else if (_.isEmpty(assoc.node2.chr)) {
+                       nodes.push(_.extend(assoc.node1,{clin_alias:assoc.node2.label}));
+                       return;
+                }
+                else {
+                    edges.push(assoc);
+                }        
+            });
+            circle.addEdges(edges);
+            circle.addNodes(nodes);
+    }
 
 
     var circle;

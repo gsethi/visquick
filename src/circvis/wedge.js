@@ -25,11 +25,11 @@ vq.CircVis.prototype._add_wedge = function(chr) {
     var ideogram_obj = d3.select('.ideogram[data-region="'+chr+'"]');
 
     function outerRadius(index) {
-        return dataObj._wedge[index]._outerRadius -  dataObj._wedge[index]._outer_padding
+        return dataObj._wedge[index]._outerPlotRadius;
     }
 
     function innerRadius(index) {
-        return outerRadius(index) - dataObj._wedge[index]._plot_height;
+        return dataObj._wedge[index]._innerRadius;
     }
 
     var wedge_obj = ideogram_obj.append("svg:g")
