@@ -17,7 +17,7 @@
             //pink
             'RPPA': '#e377c2',
             //brown
-            'CLIN': '#7f7f7f',
+            'CLIN': '#aa4444',
             'SAMP': '#bcbd22',
             'other' : '#17becf'
         };
@@ -197,7 +197,7 @@
                     base_value : 0,
                     radius : 6,
                     outer_padding: 10,
-                    stroke_style : '#c55',
+                    stroke_style : 'orange',
                     line_width:6,
                     tooltip_items: hovercard_items_config,
                     tooltip_links: hovercard_links_config,

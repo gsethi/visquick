@@ -58,7 +58,7 @@ svg .wedge[data-ring="1"] .background {
 }
 
 svg .wedge[data-ring="2"] .background {
-	fill:rgba(0,200,30,0.4);
+	fill:rgba(200,200,200,0.4);
 	stroke-width:0;
 }
 
