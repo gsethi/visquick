@@ -126,7 +126,7 @@
                 radial_grid_line_width : 2,
                 label_layout_style:'clock',
                 label_font_style:'16px helvetica',
-                gap_degrees : 3
+                gap_degrees : 2
             }
         },
 
@@ -163,15 +163,15 @@
                 },
                 OPTIONS: {
                     tile_height:10,
-                    tile_padding:0,
-                    tile_overlap_distance:100000000,
+                    tile_padding:6,
+                    tile_overlap_distance:10000000,
                     tile_show_all_tiles : true,
                     fill_style:function(feature) { return type_color(clin_type(feature));},
                     stroke_style:null,
                     line_width:3,
                     legend_label : 'Clinical Associations',
                     shape:clinical_shape,
-                    radius:7,
+                    radius:12,
                     legend_description : 'Clinical Associations',
                     listener : function() {return null;},
                     outer_padding: 30,
@@ -182,8 +182,8 @@
             {
                 PLOT : {
 
-                    height : 60,
-                    type : 'scatterplot'
+                    height : 50,
+                    type : 'histogram'
                 },
                 DATA:{
                     data_array : [],//link_density,
@@ -196,12 +196,12 @@
                     max_value : 6,
                     base_value : 0,
                     radius : 6,
-                    shape : 'circle',
                     outer_padding: 10,
-                    stroke_style : null,
+                    stroke_style : '#c55',
+                    line_width:6,
                     tooltip_items: hovercard_items_config,
                     tooltip_links: hovercard_links_config,
-                    fill_style: tick_colors,
+                    fill_style: 'orange',
                     listener : function() {return null;}
                 }
             }

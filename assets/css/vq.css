@@ -33,11 +33,12 @@ path.link {
 
 .axes .labels {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 9px;
+    font-size: 12px;
     font-weight: normal;
 }
 svg .ideogram .radial_lines {
     stroke:null;
+    /*stroke:#444;*/
     stroke-width:1.5px;
 }
 svg .wedge .background {
@@ -53,7 +54,7 @@ svg .wedge[data-ring="1"] .background {
 svg .wedge[data-ring="1"] .background {
 	fill:none;
 	stroke:none;
-	stroke-width:0;
+	stroke-width:0px;
 }
 
 svg .wedge[data-ring="2"] .background {
