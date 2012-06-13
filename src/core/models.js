@@ -115,7 +115,7 @@ vq.models.VisData.prototype._processData = function(data) {
     var get = vq.utils.VisUtils.get;
 
     if(!this.hasOwnProperty('_dataModel')) {
-        this._dataModel = pv.extend(this._dataModel);
+        this._dataModel = vq.extend(this._dataModel);
     }
     data = Object(data);
     this['_dataModel'].forEach(function(o) {

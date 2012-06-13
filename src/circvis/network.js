@@ -221,6 +221,7 @@ vq.CircVis.prototype._add_network_links= function(svg_obj, append) {
                                                 };
                             };
 
+
     svg_obj.selectAll("path.link")
         .data(bundle(dataObj._network.links_array).map(function(b, index) { return _.extend(dataObj._network.links_array[index],{spline:b});}))
         .enter().insert("svg:path")

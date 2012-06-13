@@ -110,6 +110,8 @@ vq.utils.VisUtils.set = function(obj,prop,value) {
 
 //sorting functions, etc
 
+vq.utils.VisUtils.natural_order = function(a,b){return a-b};
+
     vq.utils.VisUtils.alphanumeric = function(comp_a,comp_b) {	//sort order -> numbers -> letters
         if (isNaN(comp_a || comp_b))  { // a is definitely a non-integer
             if (isNaN( comp_b || comp_a)) {   // both are non-integers
@@ -122,7 +124,7 @@ vq.utils.VisUtils.set = function(obj,prop,value) {
         } else {                                    // both are integers
             return Number(comp_a) - Number(comp_b);
         }
-    },
+    };
 
 
 //function network_node_id(node) { return node.nodeName + node.start.toFixed(4) + node.end.toFixed(4);};
@@ -183,62 +185,14 @@ vq.utils.VisUtils.set = function(obj,prop,value) {
             return function() {return property;}
         }
     };
-vq.utils.VisUtils.pivotArray = function(array,pivot_on,group_by,value_id,aggregate_object,
-                                        include_other_properties,filter_incomplete){
-
-    var dims =  pv.uniq(array.map(function(c) { return c[pivot_on];})).sort();
-
-    var nested_data = pv.nest(array)
-            .key(function(d) { return d[group_by];})
-            .map();
-
-    var data = pv.values(nested_data).map(function(pivot_array){
-        var new_object = {};
-        if (include_other_properties) {
-            new_object = vq.utils.VisUtils.clone(pivot_array[0]);
-            delete new_object[value_id];
-            delete new_object[pivot_on];}
-        else {
-            new_object[group_by] = pivot_array[0][group_by];
-        }
-        pivot_array.forEach(  function(pivot_object) {
-            new_object[pivot_object[pivot_on]] = pivot_object[value_id];
-        });
-
-        if (aggregate_object) {
-            switch(aggregate_object.operation) {
-                case 'collect' :
-                    new_object[aggregate_object.column] = pv.map(pivot_array, function(data) { return data[aggregate_object.column];});
-                    break;
-                case 'mean':
-                    new_object[aggregate_object.column] = pv.mean(pivot_array, function(data) { return data[aggregate_object.column];});
-                    break;
-                case 'min':
-                    new_object[aggregate_object.column] = pv.min(pivot_array, function(data) { return data[aggregate_object.column];});
-                    break;
-                case 'max':
-                    new_object[aggregate_object.column] = pv.max(pivot_array, function(data) { return data[aggregate_object.column];});
-                    break;
-                case 'sum':
-                default:
-                    new_object[aggregate_object.column] = pv.sum(pivot_array, function(data) { return data[aggregate_object.column];});
-            }
-        }
-        return new_object;
-        //filter out any data points which are missing a year or more
-    });
-    if(filter_incomplete) data = data.filter(function(d) { return dims.every(function(dim) { return d[dim];} );});
-    return data;
-
-};
 
 
 vq.utils.VisUtils.layoutChrTiles = function(tiles,overlap, max_level, treat_as_points) {
     var points = treat_as_points || Boolean(false);
     var new_tiles = [], chr_arr = [];
-    chr_arr = pv.uniq(tiles, function(tile) { return tile.chr;});
+    chr_arr = _.uniq(tiles, function(tile) { return tile.chr;});
     chr_arr.forEach(function(chr) {
-        new_tiles = pv.blend([new_tiles,
+        new_tiles = _.union([new_tiles,
                 vq.utils.VisUtils.layoutTiles(tiles.filter(function(tile) { return tile.chr == chr;}),overlap,max_level,points)]);
     });
     tiles.forEach(function(obj) { vq.utils.VisUtils.copyTile(obj,new_tiles);});
@@ -248,7 +202,7 @@ vq.utils.VisUtils.layoutChrTiles = function(tiles,overlap, max_level, treat_as_p
 vq.utils.VisUtils.copyTile = function(tile,tile_set) {
             var match = null,
             index= 0,
-            props = pv.keys(tile);
+            props = _.keys(tile);
             do {
                  match = props.every(function(prop) { return ((tile[prop] == tile_set[index][prop]) ||
                             (isNaN(tile[prop] && isNaN(tile_set[index][prop])))) ? 1 : 0;});
@@ -291,7 +245,7 @@ vq.utils.VisUtils.layoutTile = function(tile,index,array,overlap,max_level, trea
                     return vq.utils.VisUtils._isOverlapping(t1,t2,overlap || 0, points) ? a.level : null;
                 }
                 );
-        levels = levels.filter(function(a) { return a != null;}).sort(pv.naturalOrder);
+        levels = levels.filter(function(a) { return _.isFinite(a);}).sort(vq.utils.VisUtils.natural_order);
         var find = 0, l_index =0;
         while (find >= levels[l_index]) {
             if (find == levels[l_index]) { find++;}
@@ -620,3 +574,78 @@ vq.utils.SyncDatasources = function(timeout,total_checks,success_callback,args,f
         return _.reduce(list,function(a,b){ return a+b;},0);
 };
     };
+
+//import from science.js
+
+(function(exports){
+science = {version: "1.9.1"}; // semver
+science.stats = {};
+science.stats.mean = function(x) {
+  var n = x.length;
+  if (n === 0) return NaN;
+  var m = 0,
+      i = -1;
+  while (++i < n) m += (x[i] - m) / (i + 1);
+  return m;
+};
+
+science.stats.variance = function(x) {
+  var n = x.length;
+  if (n < 1) return NaN;
+  if (n === 1) return 0;
+  var mean = science.stats.mean(x),
+      i = -1,
+      s = 0;
+  while (++i < n) {
+    var v = x[i] - mean;
+    s += v * v;
+  }
+  return s / (n - 1);
+};
+
+science.stats.median = function(x) {
+  return science.stats.quantiles(x, [.5])[0];
+};
+science.stats.mode = function(x) {
+  x = x.slice().sort(science.ascending);
+  var mode,
+      n = x.length,
+      i = -1,
+      l = i,
+      last = null,
+      max = 0,
+      tmp,
+      v;
+  while (++i < n) {
+    if ((v = x[i]) !== last) {
+      if ((tmp = i - l) > max) {
+        max = tmp;
+        mode = last;
+      }
+      last = v;
+      l = i;
+    }
+  }
+  return mode;
+};
+// Uses R's quantile algorithm type=7.
+science.stats.quantiles = function(d, quantiles) {
+  d = d.slice().sort(science.ascending);
+  var n_1 = d.length - 1;
+  return quantiles.map(function(q) {
+    if (q === 0) return d[0];
+    else if (q === 1) return d[n_1];
+
+    var index = 1 + q * n_1,
+        lo = Math.floor(index),
+        h = index - lo,
+        a = d[lo - 1];
+
+    return h === 0 ? a : a + h * (d[lo] - a);
+  });
+};
+
+science.ascending = function(a, b) {
+  return a - b;
+};
+})(this);

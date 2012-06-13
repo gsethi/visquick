@@ -9,7 +9,7 @@
     <link href="../../assets/css/vq.css" type="text/css" rel="stylesheet" />
 
     <script type="text/javascript" src="../../lib/protovis/protovis.js"></script>
-    <script type="text/javascript" src="../../lib/d3/d3.v2.js"></script>
+    <script type="text/javascript" src="../../lib/d3/d3.v2.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
     <script type="text/javascript" src="../../lib/underscore/underscore.js"></script>
     <script type="text/javascript" src="../../vq.js"></script>
@@ -45,8 +45,8 @@ function generateAssociation(sparse) {
     var chr2 = chrom_keys[in2];
     var mut1 = Math.round(Math.random()*6);
     var mut2 = Math.round(Math.random()*6);
-    var val1 = Math.random()*0.3;
-    var val2 = Math.random()*0.3;
+    var val1 = (Math.random()*0.3).toFixed(4);
+    var val2 = (Math.random()*0.3).toFixed(4);
     var cnv1 = Math.round(Math.random()*500);
     var cnv2 = Math.round(Math.random()*500);
     var start1 = Math.round(Math.random() *
@@ -59,17 +59,15 @@ function generateAssociation(sparse) {
                 + 50000,source:'METH'},
 
             node2:{label:'C:GEXP:YYY:'+chr2+':'+start1+':'+start1+50000+'::',chr:chr2,start:start2,end:start2
-                    + 50000,assoc_value1:val2,source:'GEXP'},assoc_value1:val1});
+                    + 50000,source:'GEXP'},assoc_value1:val1});
         return;
     }
 
     circle.addEdges({node1:{label:'C:METH:ZZZ:'+chr1+':'+start1+':'+start1+50000+'::',chr:chr1,start:start1,end:start1
-            + 50000,source:'METH',
-        mutation_count:mut1,cnv:cnv1},
+            + 50000,source:'METH', mutation_count:mut1,cnv:cnv1},
 
         node2:{label:'C:GEXP:YYY:'+chr2+':'+start1+':'+start1+50000+'::',chr:chr2,start:start2,end:start2
-                + 50000,source:'GEXP',
-            mutation_count:mut2,cnv:cnv2},assoc_value1:val1})
+                + 50000,source:'GEXP', mutation_count:mut2,cnv:cnv2},assoc_value1:val1})
 }
 
 $('#50_random_edge').on('click',function() {
@@ -88,20 +86,35 @@ $('#50_random_edge_wo_node_attr').on('click',function() {
 
 var circle;
 
+
+
 function wedge_plot(div) {
     var width=1200, height=1200;
     var	cnv_ring_height = 60;
 
-    var tick_keys = ['METH','CNVR','hsa-miR','GEXP','Other'],
-            color_scale = d3.scale.category10().domain(tick_keys);
+    var tick_keys = ['METH','CNVR','hsa-miR','GEXP','GNAB'],
+            color_scale =    { 'GEXP': '#1f77b4',
+                    //blue
+                    'METH': '#2ca02c',
+                    //green
+                    'CNVR': '#ff7f0e',
+                    //orange
+                    'MIRN': '#9467bd',
+                    //purple
+                    'GNAB': '#d62728',
+                    //red
+                    'PRDM': '#8c564b',
+                    //pink
+                    'RPPA': '#e377c2',
+                    //brown
+                    'CLIN': '#7f7f7f',
+                    'SAMP': '#bcbd22',
+                    'other' : '#17becf'
+                };
 
-    var tick_colors = function(data,label_key) {
-        var tick_key = 'Other';
-        tick_keys.forEach(function(key){
-            if (data.source.indexOf(key) == 0)  //starts with key
-                tick_key = key;
-        });
-        return color_scale(tick_key);
+    var tick_colors = function(data) {
+        var tick_key = data.source;
+        return color_scale[tick_key] || color_scale['other'];
     };
 
     var label_map = {'METH' : 'DNA Methylation',
@@ -110,6 +123,11 @@ function wedge_plot(div) {
                         'GEXP': 'Gene Expression',
                         CLIN: 'Clinical',
                         'SAMP': 'Tumor Sample'};
+
+    var hovercard_config = {Feature:function(feature) { var label = feature.label.split(':'); return '<span style="color:'+tick_colors(feature)+'">' +
+            label_map[label[1]] + '</span> ' + label[2];},
+                        Location: function(feature) { return 'Chr ' + feature.chr + ' ' + feature.start + (feature.end ? '-' + feature.end : '');},
+                        'Copy Num Variation' : 'cnv','Somatic Mutations': 'mutation_count'};
 
     var data = {
         PLOT: {
@@ -153,7 +171,10 @@ function wedge_plot(div) {
                     listener : function() {return null;},
                     outer_padding: 15,
                     stroke_style:'#777',
-                    line_width:'0.5px'
+                    line_width:'0.5px',
+                    tooltip_items:{'Cytogenic Band':'label',
+                            "Location": function(feature) { return 'Chr ' + feature.chr + ' ' + feature.start + (feature.end ? '-' + feature.end : '');}
+                    }
                 }
             },
             {   PLOT : {
@@ -173,6 +194,7 @@ function wedge_plot(div) {
                     legend_description : 'Mean Copy Number Variation',
                     listener : listener,
                     outer_padding: 15,
+                    tooltip_items: hovercard_config,
                     min_value : 0,
                     max_value: 500
                 }
@@ -197,6 +219,7 @@ function wedge_plot(div) {
                     shape : 'circle',
                     outer_padding: 15,
                     stroke_style : null,
+                    tooltip_items: hovercard_config,
                     fill_style: tick_colors,
                     listener : listener
                 }
@@ -215,8 +238,7 @@ function wedge_plot(div) {
                 display_legend : true,
                 legend_corner : 'nw',
                 fill_style : tick_colors,
-                tooltip_items: {Feature:function(feature) { var label = feature.label.split(':'); return label_map[label[1]] + ' ' + label[2];},
-                    Location: function(feature) { return 'Chr ' + feature.chr + ' ' + feature.start + (feature.end ? '-' + feature.end : '');}}
+                tooltip_items: hovercard_config
             }
         },
 
@@ -227,23 +249,21 @@ function wedge_plot(div) {
             OPTIONS: {
                 outer_padding : 10,
                 node_radius:6,
-                node_fill_style : 'green',
+                node_fill_style : tick_colors,
                 link_stroke_style : 'red',
                 link_line_width:8,
                 link_alpha : 0.6,
-
                 node_highlight_mode : 'isolate',
                 node_key : function(node) { return node.label;},
-                node_tooltip_items :  {
-                        Feature:function(feature) { var label = feature.label.split(':'); return label_map[label[1]] + ' ' + label[2];},
-                        Location: function(feature) { return 'Chr ' + feature.chr + ' ' + feature.start + (feature.end ? '-' + feature.end : '');}
-                },
+                node_tooltip_items :  hovercard_config,
                 link_tooltip_items :  {
-                    'Target' : function(link) { var label = link.source.label.split(':'); return label_map[label[1]] + ' ' + label[2];},
-                    'Location' : function(link) { return 'Chr ' + link.source.chr + ' ' + link.source.start +
+                    'Target' : function(link) { var label = link.source.label.split(':'); return '<span style="color:'+tick_colors(link.source)+'">' +
+                                label_map[label[1]] + '</span> ' + label[2];},
+                    'Target Location' : function(link) { return 'Chr ' + link.source.chr + ' ' + link.source.start +
                             (link.source.end ? '-' + link.source.end : '');},
-                    'Predictor' : function(link) { var label = link.target.label.split(':'); return label_map[label[1]] + ' ' + label[2];},
-                    'Location' : function(link) { return 'Chr ' + link.target.chr + ' ' + link.target.start +
+                    'Predictor' : function(link) { var label = link.target.label.split(':'); return '<span style="color:'+tick_colors(link.target)+'">' +
+                                label_map[label[1]] + '</span> ' + label[2];},
+                    'Predictor Location' : function(link) { return 'Chr ' + link.target.chr + ' ' + link.target.start +
                                                 (link.target.end ? '-' + link.target.end : '');},
                     Importance:'assoc_value1'
                 }

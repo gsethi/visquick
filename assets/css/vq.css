@@ -16,25 +16,25 @@ svg {
     font-weight: normal;
 }
 circle.node {
-        /*fill:green;*/
-        /*stroke:none;*/
-        /*stroke-width: 1px;  *//* 1/2 * stroke-width ~ radius) */
+    /*fill:green;*/
+    /*stroke:none;*/
+    /*stroke-width: 1px;  *//* 1/2 * stroke-width ~ radius) */
 }
 
 path.link {
 
 }
-    /*chromosome label*/
+/*chromosome label*/
 .region_label {
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 30px;
     font-weight: normal;
 }
 
 .axes .labels {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-size: 9px;
-        font-weight: normal;
+    font-size: 9px;
+    font-weight: normal;
 }
 .ideogram .radial_lines {
     stroke:#222;
@@ -46,14 +46,14 @@ path.link {
 .hovercard {
     position: absolute;
     /*display : block;*/
-	/*visibility: hidden;*/
-	z-index: 100000;
+    /*visibility: hidden;*/
+    z-index: 100000;
     font-family: Sans-serif !important;
     font-size:16px !important;
     color:#666 !important;
     line-height:1.5em;
-	background:rgba(255,255,255,0.9);
-	border: 2px solid #ddd;
+    background:rgba(255,255,255,0.9);
+    border: 2px solid #ddd;
     -moz-border-radius:3px;
     -webkit-border-radius:3px;
     border-radius:3px;
@@ -61,13 +61,13 @@ path.link {
 }
 
 .hovercard.pinned .pin {
-	color:rgba(255,0,0,1.0);
+    color:rgba(255,0,0,1.0);
 }
 
 .hovercard .tools {
     background-color:transparent;
     background:#ddd;
-	border:1px solid #333;
+    border:1px solid #333;
     top:1px;
     left:1px;
     color:#000;
@@ -85,25 +85,54 @@ path.link {
 
 }
 
-.hovercard .links table{
-	
+.hovercard .links tr {
+    vertical-align: middle;
 }
-.hovercard .pin {
-	text-align:center;
-    color : black;
-	cursor:pointer;
+.hovercard .links a{
+    color:blue;
+    font-size:14px;
+    vertical-align: middle;
+    text-decoration: none;
 }
-.hovercard .move {
-	cursor:move;
+.hovercard .links a:visited{
+    color:blue;
+    text-decoration: none;
 }
-.hovercard .move:active{
-	cursor:move;
-}
-.hovercard .footer {
-	text-align:right;
-	margin-right:5px;
-	color:rgb(240,10,10);
-	cursor:pointer;
+.hovercard .links a:hover{
+    color:blue;
+    text-decoration: none;
 }
 
-.ui-resizable-helper { border: 2px dotted #00F; }
+.hovercard .pin {
+    text-align:center;
+    color : black;
+    cursor:pointer;
+}
+.hovercard .move {
+    cursor:move;
+}
+.hovercard .move:active{
+    cursor:move;
+}
+.hovercard .footer {
+    text-align:right;
+    margin-right:5px;
+    color:rgb(240,10,10);
+    cursor:pointer;
+}
+
+i.icon-ucsc {
+    content: url('http://genome.ucsc.edu/favicon.ico');
+}
+
+i.icon-cosmic {
+    content: url('http://www.sanger.ac.uk/favicon.ico');
+}
+
+i.icon-ensembl {
+    content: url('http://ensembl.org/favicon.ico');
+}
+
+i.icon-mirBase {
+    content: url('http://www.mirbase.org/favicon.ico');
+}

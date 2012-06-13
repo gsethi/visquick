@@ -62,10 +62,10 @@ vq.models.CircVisData.prototype.setDataModel = function() {
             return 0.7;
         } },
         {label : '_network.link_strokeStyle', id: 'NETWORK.OPTIONS.link_stroke_style', cast : vq.utils.VisUtils.wrapProperty, defaultValue : function() {
-            return 'red';
+            return 'steelblue';
         } },
         {label : '_network.node_fillStyle', id: 'NETWORK.OPTIONS.node_fill_style', cast : vq.utils.VisUtils.wrapProperty, defaultValue : function() {
-            return 'blue';
+            return 'green';
         } },
         {label : '_network.node_radius', id: 'NETWORK.OPTIONS.node_radius', cast : vq.utils.VisUtils.wrapProperty, defaultValue : function() {
             return 3;
@@ -134,6 +134,8 @@ vq.models.CircVisData.prototype._setupData = function() {
     var that = this;
     this._plot.id = vq.utils.VisUtils.guid();
 
+//  Ideogram Data
+
     if (this._chrom.keys == [] || this._chrom.length == []) {
         console.warn('Chromosome/Ideogram information has not been detected.  Please verify that keys and length/key mappings have been ' +
             'passed into the GENOME.DATA object.');
@@ -173,20 +175,20 @@ vq.models.CircVisData.prototype._setupData = function() {
                 return a+(normalizedLength[chrom_keys_array[index]] * 2 * Math.PI);
             },0);
 
-        theta[d] = pv.Scale.linear(0, chrom_length_map[d.toUpperCase()])
-            .range(0, 2 * Math.PI * normalizedLength[d]);
+        theta[d] = d3.scale.linear().domain([0, chrom_length_map[d.toUpperCase()]])
+            .range([0, 2 * Math.PI * normalizedLength[d]]);
 
         if (that._chrom.reverse_list != undefined &&
             that._chrom.reverse_list.filter(
                 function(c) {
                     return c == d;
                 }).length > 0) {  //defined as reversed!
-            theta[d] = pv.Scale.linear(0, chrom_length_map[d.toUpperCase()])
-                .range(2 * Math.PI * normalizedLength[d], 0);
+            theta[d] = d3.scale.linear().domain([0, chrom_length_map[d.toUpperCase()]])
+                .range([2 * Math.PI * normalizedLength[d], 0]);
 
         } else {
-            theta[d] = pv.Scale.linear(0, chrom_length_map[d.toUpperCase()])
-                .range(0, 2 * Math.PI * normalizedLength[d]);
+            theta[d] = d3.scale.linear().domain([0, chrom_length_map[d.toUpperCase()]])
+                .range([0, 2 * Math.PI * normalizedLength[d]]);
 
         }
         chrom_groups[d]={key:d, startAngle: startAngle[d], endAngle: startAngle[d] + 2 * Math.PI * normalizedLength[d], theta:theta[d],
@@ -202,8 +204,10 @@ vq.models.CircVisData.prototype._setupData = function() {
     this.startAngle_map = startAngle_map;
     this._chrom.groups = chrom_groups;
 
+//    Ring Data
+
     if (this._wedge != undefined) {
-        this._wedge.forEach(function(wedge, index) {
+        _.each(this._wedge,function(wedge, index) {
 
             if (wedge._plot_type == 'tile' || wedge._plot_type == 'glyph') {
                 var max_tile_level = wedge._tile_show_all_tiles ?
@@ -240,13 +244,21 @@ vq.models.CircVisData.prototype._setupData = function() {
                         that._ideograms[d].wedge[index] = wedge._chr[d]; //?
             });
 
+            wedge.hovercard = vq.hovercard({
+                                            canvas_id : that._plot.id,
+                                            include_header : false,
+                                            include_footer : true,
+                                            self_hover : true,
+                                            timeout : that._plot.tooltip_timeout,
+                                            data_config : wedge._tooltipItems,
+                                            tool_config : wedge._tooltipLinks
+                                        });
+
+            if(wedge._plot_type =='karyotype') { return;}
+
             var value_label = wedge._value_key;
-            deviation = pv.deviation(wedge._data, function(d) {
-                return d[value_label];
-            });
-            median = pv.median(wedge._data, function(d) {
-                return d[value_label];
-            });
+            deviation = Math.sqrt(science.stats.variance(_.pluck(wedge._data,value_label)));
+            median = science.stats.median(_.pluck(wedge._data,value_label));
 
             wedge._min_plotValue = (wedge._min_plotValue === undefined) ? parseFloat(((-1 * deviation) + median).toFixed(2)) : wedge._min_plotValue;
             wedge._max_plotValue = (wedge._max_plotValue === undefined) ? parseFloat((deviation + median).toFixed(2)) : wedge._max_plotValue;
@@ -255,7 +267,7 @@ vq.models.CircVisData.prototype._setupData = function() {
         .domain([wedge._min_plotValue, wedge._max_plotValue])
         .range([wedge._innerRadius,wedge._outerRadius - wedge._outer_padding]).nice();
 
-    wedge._y_axis = pv.Scale.linear(wedge._min_plotValue, wedge._max_plotValue).range(wedge._innerRadius,wedge._outerPlotRadius);
+    wedge._y_axis = d3.scale.linear().domain([wedge._min_plotValue, wedge._max_plotValue]).range([wedge._innerRadius,wedge._outerPlotRadius]);
     wedge._thresholded_innerRadius = function(d) { return Math.max(wedge._y_axis(Math.min(d,wedge._range_mean)),wedge._innerRadius); };
     wedge._thresholded_outerRadius = function(d) { return Math.min(wedge._y_axis(Math.max(d,wedge._range_mean)),wedge._outerPlotRadius); };
     wedge._thresholded_value_to_radius = function(d) { return Math.min(Math.max(wedge._y_axis(d),wedge._innerRadius),wedge._outerPlotRadius); };
@@ -280,15 +292,7 @@ vq.models.CircVisData.prototype._setupData = function() {
             }
             delete wedge._data;
 
-            wedge.hovercard = vq.hovercard({
-                                canvas_id : that._plot.id,
-                                include_header : false,
-                                include_footer : true,
-                                self_hover : true,
-                                timeout : that._plot.tooltip_timeout,
-                                data_config : wedge.tooltipItems,
-                                tool_config : wedge.tooltipLinks
-                            });
+
         }); //foreach
     }
     //------------------- NETWORK DATA
@@ -310,62 +314,48 @@ vq.models.CircVisData.prototype._setupData = function() {
         node_array.push(node);
     });
     
+    var valid_chr = {};
+    _.each(this._chrom.keys, function(a) { valid_chr[a] = {}; });
     var links_array = [];
     var length;
-    var index1,index2;
+   var index1,index2;
+    var node_key = this._network.node_key;
     if (this._network != undefined && this._network.data != undefined) {
         this._network.data.forEach(function(d) {
-            index1 = null;
-            index2 = null;
-            if (nodes[d.node1.chr] != undefined) {
-                if (nodes[d.node1.chr][d.node1.start] === undefined) {
-                    nodes[d.node1.chr][d.node1.start] = {};
-                    if (nodes[d.node1.chr][d.node1.start][d.node1.end] === undefined) {
+            index1 = null, node1_key = node_key(d.node1),
+            index2 = null, node2_key = node_key(d.node2);
+            if (valid_chr[d.node1.chr] === undefined || valid_chr[d.node2.chr] === undefined) return;
+            if (nodes[node1_key] === undefined){
                         var temp_node = d.node1;
-                        temp_node.nodeName =  temp_node.parent = d.node1.chr;
-                        temp_node.parent = node_array[node_parent_map[d.node1.chr]];
-                        node_array[node_parent_map[d.node1.chr]].children.push(temp_node);
+                        temp_node.nodeName = node1_key;
                         length = node_array.push(temp_node);
                         index1 = length - 1;
-                        nodes[d.node1.chr][d.node1.start][d.node1.end] = index1;
+                        nodes[node1_key] = index1;
                     } else {
-                        index1 = nodes[d.node1.chr][d.node1.start][d.node1.end];
+                        index1 = nodes[node1_key];
                     }
-                } else {
-                    index1 = nodes[d.node1.chr][d.node1.start][d.node1.end];
-                }
-            }
-            if (nodes[d.node2.chr] != undefined) {
-                if (nodes[d.node2.chr][d.node2.start] === undefined) {
-                    nodes[d.node2.chr][d.node2.start] = {};
-                    if (nodes[d.node2.chr][d.node2.start][d.node2.end] === undefined) {
+          if (nodes[node2_key] === undefined){
                         var temp_node = d.node2;
-                        temp_node.nodeName = d.node2.chr;
-                        temp_node.parent = node_array[node_parent_map[d.node2.chr]];
-                        node_array[node_parent_map[d.node2.chr]].children.push(temp_node);
+                        temp_node.nodeName = node2_key;
                         length = node_array.push(temp_node);
                         index2 = length - 1;
-                        nodes[d.node2.chr][d.node2.start][d.node2.end] = index2;
+                        nodes[node2_key] = index2;
                     } else {
-                        index2 = nodes[d.node2.chr][d.node2.start][d.node2.end];
+                        index2 = nodes[node2_key];
                     }
-                } else {
-                    index2 = nodes[d.node2.chr][d.node2.start][d.node2.end];
-                }
-            }
 
-            if (index1 != null && index2 != null) {
+            if (index1 != null && index2 !=null) {
                 //copy out useful properties
-                var node = {source : node_array[index1], target : node_array[index2]};
+                var node = {source : index1, target : index2} ;
                 for (var p in d) {
-                    if (p != 'node1' && p != 'node2') {
+                    if (p != 'node1' && p!= 'node2') {
                         node[p] = d[p];
                     }
                 }
                 links_array.push(node);
             }
         });
-        this._network.nodes_array = this._network.tile_nodes ? vq.utils.VisUtils.layoutChrTiles(node_array, that._network.node_overlap_distance) : node_array;
+        this._network.nodes_array = this._network.tile_nodes ?  vq.utils.VisUtils.layoutChrTiles(node_array,that._network.node_overlap_distance) : node_array;
         this._network.links_array = links_array;
         this._network.data = 'loaded';
         nodes = [];
@@ -390,6 +380,8 @@ vq.models.CircVisData.prototype._setupData = function() {
                                   tool_config : that._network.node_tooltipLinks
                               });
     }
+
+//    Tick Data
 
     if (this.ticks != undefined && this.ticks._data_array != undefined && this.ticks._data_array != null) {
         if (that.ticks.overlap_distance === undefined) {
