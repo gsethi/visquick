@@ -54,7 +54,9 @@
         Location: function(feature) { return 'Chr ' + feature.chr + ' ' + feature.start + (feature.end ? '-' + feature.end : '');},
         'Somatic Mutations': 'mutation_count'};
 
-    var clinical_hovercard_items_config  = _.extend(hovercard_items_config,
+    var clinical_hovercard_items_config  = _.extend({},hovercard_items_config);
+
+     _.extend(clinical_hovercard_items_config,
         {
             'Clinical Coorelate' : function(feature) { var label = feature.clin_alias.split(':'); 
                     return label[2] + ' (<span style="color:'+type_color(clin_type(feature)) +'">' + label_map[clin_type(feature)] + '</span>)';}
