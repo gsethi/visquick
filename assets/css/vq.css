@@ -36,9 +36,29 @@ path.link {
     font-size: 9px;
     font-weight: normal;
 }
-.ideogram .radial_lines {
-    stroke:#222;
+svg .ideogram .radial_lines {
+    stroke:null;
     stroke-width:1.5px;
+}
+svg .wedge .background {
+	fill:#ddd;
+	stroke:#444;
+	opacity:0.6;
+}
+svg .wedge[data-ring="1"] .background {
+	fill:rgba(255,255,255,0.7);
+	stroke:none;
+	stroke-width:0;
+}
+svg .wedge[data-ring="1"] .background {
+	fill:none;
+	stroke:none;
+	stroke-width:0;
+}
+
+svg .wedge[data-ring="2"] .background {
+	fill:rgba(0,200,30,0.4);
+	stroke-width:0;
 }
 
 /*hovercard css */
@@ -122,17 +142,17 @@ path.link {
 }
 
 i.icon-ucsc {
-    content: url('http://genome.ucsc.edu/favicon.ico');
+    content: url('../icons/ucsc.png');
 }
 
 i.icon-cosmic {
-    content: url('http://www.sanger.ac.uk/favicon.ico');
+    content: url('../icons/cosmic.png');
 }
 
 i.icon-ensembl {
-    content: url('http://ensembl.org/favicon.ico');
+    content: url('../icons/ensembl.png');
 }
 
 i.icon-mirBase {
-    content: url('http://www.mirbase.org/favicon.ico');
+    content: url('../icons/mirbase.png');
 }

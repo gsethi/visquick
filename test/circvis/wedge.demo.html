@@ -47,8 +47,24 @@ Drag the circvis (on the rings) to rotate the entire display.<br/>
         var cnv1 = Math.random()*500 >>> 0;
         var start1 = Math.random() * (chrom_attr[chr1].length - 50000) >>> 0;
         return {label:'C:'+ source +':'+label+':'+chr1+':'+start1+':'+start1+50000+'::',chr:chr1,start:start1,end:start1
-                + 50000,source:source,clin_assoc:cnv1, mutation_count:mut1};
+                + 50000,source:'+', mutation_count:mut1};
     }
+
+function generateClinicalNode() {
+    var node = generateNode();
+    var source = ['CLIN','SAMP'][(Math.random()*2) >>> 0];
+    var label_arr = node.label.split(':');
+    label_arr[1] = source;
+    node.label = label_arr.join(':');
+    return node;
+}
+
+function generateFeature() {
+    var node1 = generateNode(),
+    node2 = generateClinicalNode();
+    node1.clin_alias = node2.label;
+    return node1;
+}
 
     function generateAssociation() {
         var val1 = (Math.random()*0.3).toFixed(4);
@@ -65,7 +81,7 @@ Drag the circvis (on the rings) to rotate the entire display.<br/>
             }
     );
     $('#50_random_nodes').on('click',function() {
-                var nodes = _(_.range(0,50)).map(generateNode);
+                var nodes = _(_.range(0,50)).map(generateFeature);
                 circle.addNodes(nodes);
             }
     );

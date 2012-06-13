@@ -1,6 +1,6 @@
 
 
-vq.CircVis.prototype._drawWedgeContents = function(chr, wedge_index,append) {
+vq.CircVis.prototype._drawWedgeContents = function(chr, wedge_index) {
     var that = this;
     var dataObj = that.chromoData;
     var ideogram = dataObj._ideograms[chr];
@@ -11,10 +11,10 @@ vq.CircVis.prototype._drawWedgeContents = function(chr, wedge_index,append) {
         case('tile'):
         case('band'):
         case('glyph'):
-            this._drawWedgeData(chr, wedge_index,append);
+            this._drawWedgeData(chr, wedge_index);
             break;
         default:
-            this._drawWedge_withRange(chr, wedge_index,append);
+            this._drawWedge_withRange(chr, wedge_index);
     }
 };
 
@@ -43,15 +43,17 @@ vq.CircVis.prototype._add_wedge = function(chr) {
 
     wedge_obj
         .append("svg:path")
-        .style("fill", "#ddd")
-        .style("stroke", "#444")
-        .style("opacity",0.6)
+        .attr('class', 'background')
         .attr("d",d3.svg.arc()
         .innerRadius(  function(ring_index) { return innerRadius(ring_index); })
         .outerRadius( function(ring_index) { return outerRadius(ring_index);} )
         .startAngle(0)
         .endAngle( dataObj._chrom.groups[chr].angle)
     );
+
+
+        // var clip_obj = ideogram_obj.append('defs').append('svg:clipPath')
+        // .attr('')
 
     wedge_obj.append("svg:g")
         .attr('class','data');
@@ -81,7 +83,7 @@ vq.CircVis.prototype._add_wedge = function(chr) {
 };
 
 
-vq.CircVis.prototype._drawWedge_withoutRange = function( chr, wedge_index,append) {
+vq.CircVis.prototype._drawWedge_withoutRange = function( chr, wedge_index) {
     var that = this;
     var dataObj = that.chromoData;
     var ideogram = dataObj._ideograms[chr];
@@ -89,7 +91,7 @@ vq.CircVis.prototype._drawWedge_withoutRange = function( chr, wedge_index,append
     var wedge = ideogram.wedge[wedge_index];
 };
 
-vq.CircVis.prototype._drawWedge_withRange = function(chr, wedge_index,append) {
+vq.CircVis.prototype._drawWedge_withRange = function(chr, wedge_index) {
     var that = this;
     var dataObj = that.chromoData;
     var ideogram = dataObj._ideograms[chr];
@@ -127,17 +129,17 @@ vq.CircVis.prototype._drawWedge_withRange = function(chr, wedge_index,append) {
 
     }
 
-    that._drawWedgeData(chr, wedge_index,append);
+    that._drawWedgeData(chr, wedge_index);
 
 };
 
-vq.CircVis.prototype._drawWedgeData = function(chr, wedge_index, append) {
+vq.CircVis.prototype._drawWedgeData = function(chr, wedge_index) {
     var that = this;
     var wedge_params = that.chromoData._wedge[wedge_index];
 
     var funcName = '_drawWedgeData_'+ wedge_params._plot_type;
     if (that[funcName] !==undefined) {
-        that[funcName](chr,wedge_index,append);
+        that[funcName](chr,wedge_index);
     }
     //get all the data points in this wedge
     var data = d3.selectAll('.ideogram[data-region="'+chr+'"] .wedge[data-ring="'+wedge_index+'"] .data > *');
@@ -258,21 +260,24 @@ vq.CircVis.prototype._drawWedgeData_glyph = function(chr, wedge_index) {
 
     wedge_obj.select('g.data')
         .selectAll("path")
-        .data(wedge_data,that.chromoData._network.node_key)
+        .data(wedge_data,wedge_params._hash)
         .enter().append('svg:path')
         .attr('fill',wedge_params._fillStyle)
         .attr('stroke',wedge_params._strokeStyle)
-        .attr("transform",function(point) {
-            return "translate(" +
-                wedge_params._glyph_distance(point,wedge_params) *
-                    Math.cos(that.chromoData._ideograms[chr].theta(point.start) ) +
-                "," +
-                wedge_params._glyph_distance(point,wedge_params) *
-                    Math.sin(that.chromoData._ideograms[chr].theta(point.start)) +
-                ")";} )
+        .attr('opacity',0.2)
+        .attr("transform",function(point) { 
+            return "rotate(" + ((that.chromoData._ideograms[chr].theta(point.start) * 180 / Math.PI) - 90)+ ")translate(" +
+                wedge_params._glyph_distance(point) + ")";} )
         .attr('d',d3.svg.symbol()
         .type(wedge_params._shape)
-        .size(Math.pow(wedge_params._radius(),2)) );
+        .size(Math.pow(wedge_params._radius(),2)) )
+          .transition()
+        .delay(100)
+        .duration(800)
+        .attrTween('opacity',function(a) {
+            var i =d3.interpolate(0.2,1.0);
+            return function(t) { return i(t);}
+        });
 };
 
 vq.CircVis.prototype._drawWedgeData_tile = function(chr, wedge_index) {

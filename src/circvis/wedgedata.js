@@ -25,6 +25,7 @@ vq.models.CircVisData.WedgeData.prototype.setDataModel = function() {
                 "value": -0.058664}
         ]},
         {label : '_value_key', id: 'DATA.value_key', defaultValue : 'value',cast: String },
+        {label : '_hash', id: 'DATA.hash', defaultValue : 'label',cast: String },
         {label : 'listener', id: 'OPTIONS.listener', defaultValue :  function(a, b) {
         } },
         {label : '_plot_type', id: 'PLOT.type', defaultValue : 'histogram' },

@@ -22,9 +22,21 @@
             'other' : '#17becf'
         };
 
-    var tick_colors = function(data) {
-        var tick_key = data.source;
-        return color_scale[tick_key] || color_scale['other'];
+        function feature_type(feature) { return feature && feature.label && !!~feature.label.indexOf(':') ? 
+                    feature.label.split(':')[1] : 'other';}
+        function clin_type(feature) { return feature && feature.clin_alias && !!~feature.clin_alias.indexOf(':')?
+        feature.clin_alias.split(':')[1] : 'other';}
+        
+        var shape_map ={'CLIN':'square','SAMP':'cross','other':'diamond'};
+        function shape(type) { return shape_map[type];}
+        function clinical_shape(feature) { return shape(clin_type(feature));}
+
+    var tick_colors = function(data) {       
+        return type_color(feature_type(data));
+    };
+
+    var type_color = function(type) {
+        return color_scale[type] || color_scale['other'];
     };
 
     var label_map = {'METH' : 'DNA Methylation',
@@ -32,13 +44,23 @@
         'MIRN' :'mircoRNA',
         'GNAB' : 'Gene Abberation',
         'GEXP': 'Gene Expression',
-        CLIN: 'Clinical Data',
-        'SAMP': 'Tumor Sample'};
+        'CLIN': 'Clinical Data',
+        'SAMP': 'Tumor Sample'
+    };
 
-    var hovercard_items_config = {Feature:function(feature) { var label = feature.label.split(':'); return label[2] + ' (<span style="color:'+tick_colors(feature)+'">' +
-        label_map[label[1]] + '</span>)';},
+    var hovercard_items_config = {Feature:function(feature) { var label = feature.label.split(':'); return label[2] + 
+    ' (<span style="color:'+type_color(feature_type(feature))+'">' +
+        label_map[feature_type(feature)] + '</span>)';},
         Location: function(feature) { return 'Chr ' + feature.chr + ' ' + feature.start + (feature.end ? '-' + feature.end : '');},
         'Somatic Mutations': 'mutation_count'};
+
+    var clinical_hovercard_items_config  = _.extend(hovercard_items_config,
+        {
+            'Clinical Coorelate' : function(feature) { var label = feature.clin_alias.split(':'); 
+                    return label[2] + ' (<span style="color:'+type_color(clin_type(feature)) +'">' + label_map[clin_type(feature)] + '</span>)';}
+    }
+        );
+
     var links = [
         {
             label: 'UCSC Genome Browser',
@@ -103,7 +125,8 @@
             OPTIONS: {
                 radial_grid_line_width : 2,
                 label_layout_style:'clock',
-                label_font_style:'16px helvetica'
+                label_font_style:'16px helvetica',
+                gap_degrees : 3
             }
         },
 
@@ -122,7 +145,7 @@
                     legend_description : 'Cytogenic Bands',
                     listener : function() {return null;},
                     outer_padding: 15,
-                    stroke_style:'#777',
+                    stroke_style:'rgba(200,200,200,0.5)',
                     line_width:'0.5px',
                     tooltip_items:{'Cytogenic Band':'label',
                         "Location": function(feature) { return 'Chr ' + feature.chr + ' ' + feature.start + (feature.end ? '-' + feature.end : '');}
@@ -130,24 +153,29 @@
                 }
             },
             {   PLOT : {
-                height : cnv_ring_height,
+                height : 20,
                 type : 'glyph'
             } ,
                 DATA:{
                     data_array : [],//cnv
-                    value_key:'clin_alias'
+                    value_key:'clin_alias',
+                    hash:function(point) { return point.label + '_' + point.clin_alias;}
                 },
                 OPTIONS: {
-                    fill_style:'orange',
-                    stroke_style:'white',
-                    line_width:1,
+                    tile_height:10,
+                    tile_padding:0,
+                    tile_overlap_distance:100000000,
+                    tile_show_all_tiles : true,
+                    fill_style:function(feature) { return type_color(clin_type(feature));},
+                    stroke_style:null,
+                    line_width:3,
                     legend_label : 'Clinical Associations',
-                    shape:'dot',
-                    radius:4,
+                    shape:clinical_shape,
+                    radius:7,
                     legend_description : 'Clinical Associations',
                     listener : function() {return null;},
-                    outer_padding: 15,
-                    tooltip_items: hovercard_items_config,
+                    outer_padding: 30,
+                    tooltip_items: clinical_hovercard_items_config,
                     tooltip_links: hovercard_links_config
                 }
             },
@@ -169,7 +197,7 @@
                     base_value : 0,
                     radius : 6,
                     shape : 'circle',
-                    outer_padding: 15,
+                    outer_padding: 10,
                     stroke_style : null,
                     tooltip_items: hovercard_items_config,
                     tooltip_links: hovercard_links_config,

@@ -31,37 +31,6 @@ vq.CircVis.prototype._render = function() {
     var dataObj = this.chromoData;
     var width = dataObj._plot.width, height = dataObj._plot.height;
 
-//    $(dataObj._plot.container).resizable({
-//        aspectRatio: width/height,
-//        distance: 10,
-//        ghost:true,
-//         handles: "nw, ne, se, sw" ,
-//        helper: "ui-resizable-helper"
-//    });
-//
-//    $(dataObj._plot.container).bind('resizestop',function(event,ui){
-//        var scale = ui.size.height/ui.originalSize.height;
-//        var svg = d3.select('.circvis');
-//        var current_transform = 'scale('+scale+')'+svg.attr('transform');
-//        svg.attr('transform',d3.transform(current_transform).toString());
-//    });
-
-    function fade(opacity) { return function(d,i) {
-        d3.selectAll('g.ideogram')
-            .filter(function(g) { return g != d;})
-            .transition()
-            .delay(20)
-            .duration(20)
-            .attr('opacity',opacity);
-
-        d3.selectAll('path.link').filter(function(g) { return g[0].chr != d && g[g.length-1].chr != d; })
-            .transition()
-            .delay(20)
-            .duration(20)
-            .attr('opacity',opacity);
-    };
-    }
-
     function dragmove(d,u) {
         var transform = d3.transform(d3.select(this).attr('transform'));
         var translate = transform.translate;
@@ -155,8 +124,6 @@ var ideograms = svg.selectAll('g.ideogram')
             that._add_ticks( d);
             that._add_network_nodes( d);
         }
-
-    that._draw_ticks();
     that._add_network_links(svg.insert('svg:g','.ideogram').attr('class','links'));
     _(_.range(0,dataObj._wedge.length)).each(that._draw_axes_ticklabels,that);
 

@@ -27,12 +27,14 @@ vq.models.CircVisData.prototype.setDataModel = function() {
             "11","12","13","14","15","16","17","18","19","20","21","22","X","Y"] },
         {label : '_chrom.length', id: 'GENOME.DATA.key_length', defaultValue : [] },
         {label : '_chrom.reverse_list', id: 'GENOME.OPTIONS.key_reverse_list', optional : true },
+        {label : '_chrom.gap_degrees', id: 'GENOME.OPTIONS.gap_degrees', cast : Number, defaultValue : 0 },
         {label : '_chrom.label_layout_style', id: 'GENOME.OPTIONS.label_layout_style', defaultValue : 'default' },
         {label : '_chrom.label_font_style', id: 'GENOME.OPTIONS.label_font_style', cast: String, defaultValue : "16px helvetica, monospaced" },
         {label : '_chrom.radial_grid_line_width', id: 'GENOME.OPTIONS.radial_grid_line_width', cast : Number, defaultValue : null },
         {label : '_chrom.listener', id: 'GENOME.OPTIONS.listener', cast: Function, defaultValue : function() {
             return null;
         }},
+
         {label : '_plot.enable_pan', id: 'PLOT.enable_pan', cast: Boolean, defaultValue : false },
         {label : '_plot.enable_zoom', id: 'PLOT.enable_zoom', cast: Boolean, defaultValue : false },
         {label : '_plot.show_legend', id: 'PLOT.show_legend', cast: Boolean, defaultValue : false },
@@ -155,10 +157,13 @@ vq.models.CircVisData.prototype._setupData = function() {
         return d['chr_length'];
     });
 
+
+    var shorten = totalChromLength / 360 * this._chrom.gap_degrees;
+
     chrom_length_map = {};
         _.each(chrom_length_array,function(obj) {
             chrom_length_map[obj['chr_name'].toUpperCase()] = obj['chr_length'];
-            normalizedLength[obj['chr_name'].toUpperCase()] =  obj['chr_length'] / totalChromLength;
+            normalizedLength[obj['chr_name'].toUpperCase()] =  (obj['chr_length'] -shorten) / totalChromLength;
         });
 
     this.normalizedLength = normalizedLength;
@@ -167,12 +172,14 @@ vq.models.CircVisData.prototype._setupData = function() {
 
     var rotation = (this._plot.rotate_degrees) * Math.PI / 180;
 
+    var renormalize_factor =  this._chrom.gap_degrees * Math.PI / 180; //radians
+
     //for each index of chrom_keys ( pre-sorted)
     // sum all lengths from 1st index to last index of chrom_length (sorted to chrom_length)
     _.each(chrom_keys_array,function(d,index) {
         startAngle[d] = _.reduce(chrom_keys_array.slice(0, (chrom_keys_order[d])),
             function(a,b,index) {
-                return a+(normalizedLength[chrom_keys_array[index]] * 2 * Math.PI);
+                return a+(normalizedLength[chrom_keys_array[index]] * 2 * Math.PI)+renormalize_factor;
             },0);
 
         theta[d] = d3.scale.linear().domain([0, chrom_length_map[d.toUpperCase()]])
@@ -210,11 +217,11 @@ vq.models.CircVisData.prototype._setupData = function() {
         _.each(this._wedge,function(wedge, index) {
 
             if (wedge._plot_type == 'tile' || wedge._plot_type == 'glyph') {
-                var max_tile_level = wedge._tile_show_all_tiles ?
-                    Math.floor((wedge._plot_height - (wedge._radius() * 4)) / (wedge._tile_height + wedge._tile_padding)) :
+                var max_tile_level = wedge._tile.show_all_tiles ?
+                    Math.floor((wedge._plot_height - (wedge._radius() * 4)) / (wedge._tile.height + wedge._tile.padding)) :
                     undefined;
-                wedge._data = (wedge._plot_type == 'tile' ? vq.utils.VisUtils.layoutChrTiles(wedge._data, wedge._tile_overlap_distance, max_tile_level) :
-                    vq.utils.VisUtils.layoutChrTicks(wedge._data, wedge._tile_overlap_distance, max_tile_level));
+                wedge._data = (wedge._plot_type == 'tile' ? vq.utils.VisUtils.layoutChrTiles(wedge._data, wedge._tile.overlap_distance, max_tile_level) :
+                    vq.utils.VisUtils.layoutChrTicks(wedge._data, wedge._tile.overlap_distance, max_tile_level));
             }
 
             cnv_map = {};
@@ -276,8 +283,8 @@ vq.models.CircVisData.prototype._setupData = function() {
     wedge._thresholded_tile_innerRadius = function(c,d) { return wedge._innerRadius + (d._tile.height + d._tile.padding) * c.level;};
     wedge._thresholded_tile_outerRadius = function(c,d) { return wedge._innerRadius + ((d._tile.height + d._tile.padding) * c.level) + d._tile.height;};
             if (wedge._plot_type == 'glyph') {
-                wedge._glyph_distance = function(c,d) { return (((d._tile.height + d._tile.padding) * c.level)
-                    + innerRadius + (d._radius() * 2));};
+                wedge._glyph_distance = function(c) { return (((wedge._tile.height + wedge._tile.padding) * c.level)
+                    + wedge._innerRadius );};
                 wedge._checked_endAngle = function(feature,chr) {
                     if (that._chrom.keys.length == 1) {
                         return Math.min(that.startAngle_map[chr] + that.theta[chr](feature.end||feature.start+1),dataObj.startAngle_map[dataObj._chrom.keys[0]] + (Math.PI * 2));

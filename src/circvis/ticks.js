@@ -25,12 +25,6 @@ vq.CircVis.prototype._add_ticks = function(chr) {
     var tick_width = Math.PI / 180 * dataObj.ticks.wedge_width;
     var tick_length = tick_width * innerRadius;
 
-    function tick_translate(tick) {
-        var radius = (outer(tick) + inner(tick)) / 2;
-        var angle =  ((that.chromoData._ideograms[chr].theta(tick.start) * 180 / Math.PI) - 90);
-        var tick_rotation = (that.chromoData._ideograms[chr].startAngle + that.chromoData._ideograms[chr].theta(tick.start) >= Math.PI ? 180 : 0);
-        return "rotate(" + angle + ")translate(" +  radius + ")rotate("+tick_rotation+")";}
-
     var generateArcTween = function (point) {
         var _inner = inner(point);
         var _outer = outer(point);
@@ -89,30 +83,5 @@ vq.CircVis.prototype._add_ticks = function(chr) {
                         });
 
                         ticks.exit().remove();
-
-//        ideogram_obj.selectAll('.ticks path')   //label
-//                        .selectAll('svg.text')
-//                        .data(dataObj.ticks.data_map[chr],tick_key)
-//                           .enter()
-//                           .append('text')
-//                           .attr('transform', function(tick)  { return tick_translate(tick);})
-//                           .attr("x",8)
-//                           .attr('data-label',function(d) { return d[label_key];})
-//                           .attr('class','labels')
-//                           // .attr("dy",".35em")
-//                           // .attr('stroke','black')
-//                           // .attr("text-anchor","middle")
-//                           // .attr('visibility','hidden')
-//                           .text(function(d) { return d[label_key];});
-//
-};
-
-
-vq.CircVis.prototype._draw_ticks = function() {
-
-//    d3.selectAll('.ticks')
-//       .transition()
-//       .duration(1200)
-//       .attr('opacity',1.0)
 
 };
