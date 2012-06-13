@@ -14,7 +14,6 @@ all: \
 full: \
 	vq.js \
 	vq.circvis.js \
-	vq.wedge.js \
 	vq.linear_browser.js \
 	vq.brush_link.js \
 	vq.chromavis.js \
@@ -49,9 +48,6 @@ vq.js: \
 	src/core/hovercard.js 	
 
 vq.circvis.js: \
-	src/circvis/circvis.old.js
-
-vq.wedge.js: \
 	src/circvis/circvis.js \
 	src/circvis/wedge.js \
 	src/circvis/ticks.js \
