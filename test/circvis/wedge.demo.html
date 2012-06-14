@@ -30,6 +30,8 @@
 
 <button id="1_random_edge">Add 1 Random Edges</button><br />
 <button id="50_random_edge">Add 50 Random Edges</button><br />
+<button id="50_remove">Remove 50 Random Edges</button><br />
+<button id="all_remove">Remove all Random Edges</button><br />
 
 Drag the circvis (on the rings) to rotate the entire display.<br/>
 
@@ -78,13 +80,19 @@ function generateFeature() {
     $('#50_random_edge').on('click',function() {
                 var edges = _(_.range(0,50)).map(generateAssociation);
                 addRFAssociation(edges);
-
             }
     );
     $('#1_random_edge').on('click',function() {
                 addRFAssociation(generateAssociation());
             }
     );
+
+    $('#50_remove').on('click', function() {
+            circle.removeEdges(50);
+    });
+    $('#all_remove').on('click', function() {
+            circle.removeEdges('all');
+    });
   
 
     function addRFAssociation(array) {
