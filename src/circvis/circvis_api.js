@@ -1,3 +1,61 @@
+vq.CircVis.prototype.removeEdges = function(edge_array) {
+    if (_.isArray(edge_array)) {
+       _.each(edge_aray,function(edge) {this._removeEdge(edge);});
+    }
+    else if (_.isNumber(edge_array) || _.isObject(edge_array)){
+        this._removeEdge(edge_array);
+    }
+    else if (edge_array === 'all') {
+        this._removeAllEdges();
+    }
+};
+
+vq.CircVis.prototype._removeEdge = function(edge) {
+    var edges = [];
+    if (_.isNumber(edge)) { 
+        edges = this.chromoData._network.links_array.splice(0,edge);  //remove  
+  //      this.removeNodes(this._edgeListToNodeList(edges));      
+    }
+    else if (_.isObject(edge)) {
+        this.chromoData._network.links_array = _.reject(this.chromoData._network.links_array,edge);
+    }
+    this._add_network_links(d3.select('g.links'));
+};
+
+vq.CircVis.prototype._removeAllEdges = function(edge) {
+    var removed = this.chromoData._network.links_array.splice(0,this.chromoData._network.links_array.length);
+    var nodes = this._edgeListToNodeList(removed);
+    this.removeNodes(nodes);
+    this._add_network_links(d3.select('g.links'));
+
+};
+
+
+vq.CircVis.prototype.removeNodes = function(node_array) {
+    var that = this;
+     if (_.isArray(node_array)) {
+       _.each(node_array,function(node) {that._removeNode(node);});
+    }
+    else if (_.isNumber(node_array) || _.isObject(node_array)){
+        that._removeNode(node_array);
+    }
+    else if (node_array === 'all') {
+        that._removeAllNodes();
+    }
+};
+
+vq.CircVis.prototype._edgeListToNodeList = function(edges) {
+    return _.uniq(_.flatten(_.chain(edges).map(function(edge){return [edge.node1,edge.node2];}).values()));
+};
+
+vq.CircVis.prototype._removeNode = function(node) {
+    if (!_.isObject(node)) { return; }
+        this.chromoData.ticks.data_map[node.chr] = _.reject(this.chromoData.ticks.data_map[node.chr],node);
+      this._add_ticks(node.chr);
+                this._add_network_nodes(node.chr,true);
+                //that._add_wedge_data(node);
+};
+
 vq.CircVis.prototype.addEdges = function(edge_array) {
     if (_.isArray(edge_array)) {
         this._insertEdges(edge_array);
@@ -85,3 +143,4 @@ vq.CircVis.prototype._insertNode = function(node) {
                 return new_node;
             }
  };
+
