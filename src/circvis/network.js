@@ -1,31 +1,20 @@
 
 
 /** private **/
-vq.CircVis.prototype._add_network_nodes = function (chr,append) {
-    var append = append || Boolean(false);
+vq.CircVis.prototype._add_network_nodes = function (chr) {
     var     dataObj = this.chromoData;
 
-    var ideogram_obj = d3.select('.ideogram[data-region="'+chr+'"]');
-    var innerRadius = dataObj._ideograms[chr].wedge.length > 0 ? dataObj._wedge[dataObj._ideograms[chr].wedge.length-1]._innerRadius :
-                     (dataObj._plot.height / 2) - dataObj.ticks.outer_padding - dataObj.ticks.height;
     var network_radius = dataObj._network.network_radius[chr];
+    var ideogram_obj = d3.select('.ideogram[data-region="'+chr+'"]');
 
-    var feature_angle = dataObj._ideograms[chr]._feature_angle;
-
-    var network_node_y = dataObj._network.tile_nodes ?
-        function(d) { return ( (network_radius - (d.level * 10)) * Math.sin(dataObj._ideograms[chr]._feature_angle(d.start) )); }  :
-        function(d) { return  ( (network_radius) * Math.sin(dataObj._ideograms[chr]._feature_angle(d.start) )) };
-    var network_node_x = dataObj._network.tile_nodes ?
-        function(d) { return ((network_radius - (d.level * 10)) * Math.cos(dataObj._ideograms[chr]._feature_angle(d.start) )); } :
-        function(d) { return ((network_radius) * Math.cos(dataObj._ideograms[chr]._feature_angle(d.start) )); };
-    if (!append) {
+    if(ideogram_obj.select('g.nodes').empty()) {
         ideogram_obj.append('svg:g').attr('class','nodes');
     }
 
     var node = ideogram_obj
         .select('g.nodes')
         .selectAll('circle.node')
-        .data(dataObj._network.nodes_array.filter(function(node) { return !node.children && node.chr == chr;}));
+        .data(dataObj._network.nodes_array.filter(function(node) { return !node.children && node.chr == chr;}),dataObj._network.node_key);
 
     node.enter().append('svg:circle')
         .attr('class','node')
@@ -49,12 +38,11 @@ vq.CircVis.prototype._add_network_nodes = function (chr,append) {
                                     var i =d3.interpolate(0.2,1);
                                     return function(t) {return i(t)};
                                     });
-
     node.exit().remove();
 };
 
-vq.CircVis.prototype._add_network_links= function(svg_obj, append) {
-    var append = append || Boolean(false);
+vq.CircVis.prototype._add_network_links= function(svg_obj) {
+
     var dataObj = this.chromoData;
 
     var bundle = d3.layout.bundle();

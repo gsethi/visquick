@@ -1,6 +1,6 @@
 vq.CircVis.prototype.removeEdges = function(edge_array) {
     if (_.isArray(edge_array)) {
-       _.each(edge_aray,function(edge) {this._removeEdge(edge);});
+        _.each(edge_aray,function(edge) {this._removeEdge(edge);});
     }
     else if (_.isNumber(edge_array) || _.isObject(edge_array)){
         this._removeEdge(edge_array);
@@ -12,9 +12,9 @@ vq.CircVis.prototype.removeEdges = function(edge_array) {
 
 vq.CircVis.prototype._removeEdge = function(edge) {
     var edges = [];
-    if (_.isNumber(edge)) { 
+    if (_.isNumber(edge)) {
         edges = this.chromoData._network.links_array.splice(0,edge);  //remove  
-  //      this.removeNodes(this._edgeListToNodeList(edges));      
+        //      this.removeNodes(this._edgeListToNodeList(edges));
     }
     else if (_.isObject(edge)) {
         this.chromoData._network.links_array = _.reject(this.chromoData._network.links_array,edge);
@@ -24,36 +24,52 @@ vq.CircVis.prototype._removeEdge = function(edge) {
 
 vq.CircVis.prototype._removeAllEdges = function(edge) {
     var removed = this.chromoData._network.links_array.splice(0,this.chromoData._network.links_array.length);
-    var nodes = this._edgeListToNodeList(removed);
-    this.removeNodes(nodes);
     this._add_network_links(d3.select('g.links'));
+    var removable = this._edgeListToNodeList(removed);
+    var remaining_nodes = this._edgeListToNodeList(this.chromoData._network.links_array);
+    if (!remaining_nodes.length) { this.removeNodes('all'); return;}
+    var nodes_to_remove = _.difference(removable,remaining_nodes);
+    this.removeNodes(nodes_to_remove);
 
 };
 
 
 vq.CircVis.prototype.removeNodes = function(node_array) {
     var that = this;
-     if (_.isArray(node_array)) {
-       _.each(node_array,function(node) {that._removeNode(node);});
+    if (_.isArray(node_array)) {
+        _.each(node_array, function(node) {
+            that._removeNode(node);
+        });
     }
     else if (_.isNumber(node_array) || _.isObject(node_array)){
         that._removeNode(node_array);
     }
     else if (node_array === 'all') {
-        that._removeAllNodes();
+        _.each(_.keys(that.chromoData.ticks.data_map), function(chr) {
+            that.chromoData.ticks.data_map[chr] = [];
+            that.chromoData._network.nodes_array = [];
+            that._add_ticks(chr);
+            that._add_network_nodes(chr);
+            that.chromoData._ideograms[chr].wedge = _.map(that.chromoData._ideograms[chr].wedge,function() { return [];});
+            that._drawWedgeData(chr);
+        });
+        return;
     }
 };
 
 vq.CircVis.prototype._edgeListToNodeList = function(edges) {
-    return _.uniq(_.flatten(_.chain(edges).map(function(edge){return [edge.node1,edge.node2];}).values()));
+    return _.uniq(_.flatten(_.chain(edges).map(function(edge){return [edge.source,edge.target];}).value()));
 };
 
 vq.CircVis.prototype._removeNode = function(node) {
     if (!_.isObject(node)) { return; }
-        this.chromoData.ticks.data_map[node.chr] = _.reject(this.chromoData.ticks.data_map[node.chr],node);
-      this._add_ticks(node.chr);
-                this._add_network_nodes(node.chr,true);
-                //that._add_wedge_data(node);
+    this.chromoData.ticks.data_map[node.chr] = _.reject(this.chromoData.ticks.data_map[node.chr],
+        function(obj) { return obj === node;});
+    this.chromoData._network.nodes_array = _.reject(this.chromoData._network.nodes_array,
+            function(obj) { return obj === node;});
+    this._remove_wedge_data(node);
+    this._add_ticks(node.chr);
+    this._add_network_nodes(node.chr);
 };
 
 vq.CircVis.prototype.addEdges = function(edge_array) {
@@ -96,11 +112,11 @@ vq.CircVis.prototype._insertEdge = function(edge) {
     var that = this;
     var edge_arr=[];
 
-        //quit if either node has an unmappable locationß
+    //quit if either node has an unmappable locationß
     _.each(nodes,function(node) {
         if (!_.include(_.keys(that.chromoData._chrom.groups),node.chr)) {return null;}
     });
-            //insert/recover both nodes
+    //insert/recover both nodes
     _.each(nodes,function(node) {
             edge_arr.push(that._insertNode(node));
         }
