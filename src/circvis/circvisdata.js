@@ -322,7 +322,7 @@ vq.models.CircVisData.prototype._setupData = function() {
     });
     
     var valid_chr = {};
-    _.each(this._chrom.keys, function(a) { valid_chr[a] = {}; });
+    _.each(this._chrom.keys, function(a) { valid_chr[a] = 1; });
     var links_array = [];
     var length;
    var index1,index2;
@@ -331,10 +331,12 @@ vq.models.CircVisData.prototype._setupData = function() {
         this._network.data.forEach(function(d) {
             index1 = null, node1_key = node_key(d.node1),
             index2 = null, node2_key = node_key(d.node2);
-            if (valid_chr[d.node1.chr] === undefined || valid_chr[d.node2.chr] === undefined) return;
+            if (valid_chr[d.node1.chr] || valid_chr[d.node2.chr] ) return;
             if (nodes[node1_key] === undefined){
                         var temp_node = d.node1;
-                        temp_node.nodeName = node1_key;
+                        temp_node.nodeName = node1_key;                        
+                        temp_node.parent = node_array[node_parent_map[d.node1.chr]];
+                        node_array[node_parent_map[d.node1.chr]].children.push(temp_node);
                         length = node_array.push(temp_node);
                         index1 = length - 1;
                         nodes[node1_key] = index1;
@@ -343,7 +345,9 @@ vq.models.CircVisData.prototype._setupData = function() {
                     }
           if (nodes[node2_key] === undefined){
                         var temp_node = d.node2;
-                        temp_node.nodeName = node2_key;
+                        temp_node.nodeName = node2_key;                        
+                        temp_node.parent = node_array[node_parent_map[d.node2.chr]];
+                        node_array[node_parent_map[d.node2.chr]].children.push(temp_node);
                         length = node_array.push(temp_node);
                         index2 = length - 1;
                         nodes[node2_key] = index2;

@@ -13,8 +13,7 @@ vq.CircVis.prototype.removeEdges = function(edge_array) {
 vq.CircVis.prototype._removeEdge = function(edge) {
     var edges = [];
     if (_.isNumber(edge)) {
-        edges = this.chromoData._network.links_array.splice(0,edge);  //remove  
-        //      this.removeNodes(this._edgeListToNodeList(edges));
+        this._removeAllEdges(edge);
     }
     else if (_.isObject(edge)) {
         this.chromoData._network.links_array = _.reject(this.chromoData._network.links_array,edge);
@@ -22,20 +21,29 @@ vq.CircVis.prototype._removeEdge = function(edge) {
     this._add_network_links(d3.select('g.links'));
 };
 
-vq.CircVis.prototype._removeAllEdges = function(edge) {
-    var removed = this.chromoData._network.links_array.splice(0,this.chromoData._network.links_array.length);
+
+vq.CircVis.prototype._removeAllEdges = function(num_edges) {
+    var num = _.isNumber(num_edges) ? num_edges : this.chromoData._network.links_array.length    
+    var removed = this.chromoData._network.links_array.splice(0,num);
     this._add_network_links(d3.select('g.links'));
     var removable = this._edgeListToNodeList(removed);
     var remaining_nodes = this._edgeListToNodeList(this.chromoData._network.links_array);
-    if (!remaining_nodes.length) { this.removeNodes('all'); return;}
     var nodes_to_remove = _.difference(removable,remaining_nodes);
     this.removeNodes(nodes_to_remove);
 
 };
 
 
+vq.CircVis.prototype._removeAllNetworkNodes = function() {
+    this.chromoData._network.nodes_array = _.filter(this.chromoData._network.nodes_array,function(node){ return !!node.children;});
+};
+
+
 vq.CircVis.prototype.removeNodes = function(node_array) {
     var that = this;
+    if (_.isFunction(node_array)) {
+        node_array = _.filter(this.chromoData._network.nodes_array, node_array);
+    }
     if (_.isArray(node_array)) {
         _.each(node_array, function(node) {
             that._removeNode(node);
@@ -44,17 +52,7 @@ vq.CircVis.prototype.removeNodes = function(node_array) {
     else if (_.isNumber(node_array) || _.isObject(node_array)){
         that._removeNode(node_array);
     }
-    else if (node_array === 'all') {
-        _.each(_.keys(that.chromoData.ticks.data_map), function(chr) {
-            that.chromoData.ticks.data_map[chr] = [];
-            that.chromoData._network.nodes_array = [];
-            that._add_ticks(chr);
-            that._add_network_nodes(chr);
-            that.chromoData._ideograms[chr].wedge = _.map(that.chromoData._ideograms[chr].wedge,function() { return [];});
-            that._drawWedgeData(chr);
-        });
-        return;
-    }
+  
 };
 
 vq.CircVis.prototype._edgeListToNodeList = function(edges) {
@@ -62,11 +60,12 @@ vq.CircVis.prototype._edgeListToNodeList = function(edges) {
 };
 
 vq.CircVis.prototype._removeNode = function(node) {
+    var that = this;
     if (!_.isObject(node)) { return; }
     this.chromoData.ticks.data_map[node.chr] = _.reject(this.chromoData.ticks.data_map[node.chr],
-        function(obj) { return obj === node;});
+        function(obj) { return that.same_feature(obj,node);});
     this.chromoData._network.nodes_array = _.reject(this.chromoData._network.nodes_array,
-            function(obj) { return obj === node;});
+            function(obj) { return that.same_feature(obj,node);});
     this._remove_wedge_data(node);
     this._add_ticks(node.chr);
     this._add_network_nodes(node.chr);
@@ -167,3 +166,5 @@ vq.CircVis.prototype._insertNode = function(node) {
         return new_node;
     }
 };
+
+

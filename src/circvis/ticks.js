@@ -52,26 +52,25 @@ vq.CircVis.prototype._add_ticks = function(chr) {
                     ticks.enter().append('path')
                     .attr('class',function(tick) { return tick[label_key];})
                             .attr('fill',tick_fill)
-                            .attr('stroke',tick_stroke)
-                            .attr('visibility','hidden')
-                            .attr('d',d3.svg.arc()
-                            .innerRadius( inner)
-                            .outerRadius( outer)
-                            .startAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.start);})
-                            .endAngle(function(point) {
-                                        return that.chromoData._ideograms[chr].theta(point.start) +
-                                        tick_angle(point);})
-                            ).on('mouseover',function(d){
+                            .attr('stroke',tick_stroke)                            
+                            .on('mouseover',function(d){
                                                 d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','visible');
                                                 dataObj.ticks.hovercard.call(this,d);
                                             })
                                             .on('mouseout',function(d){
                                                 d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','hidden');
                                             })
-                    .transition()
-                    .attr('visibility','visible')
+                    .transition()                    
                     .delay(100)
                     .duration(800)
+                    .attr('d',d3.svg.arc()
+                            .innerRadius( inner)
+                            .outerRadius( outer)
+                            .startAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.start);})
+                            .endAngle(function(point) {
+                                        return that.chromoData._ideograms[chr].theta(point.start) +
+                                        tick_angle(point);})
+                            )
                     .attrTween('d',function(a) {
                         var i =d3.interpolate(4,0);
                          var arc = generateArcTween(a);
@@ -82,6 +81,19 @@ vq.CircVis.prototype._add_ticks = function(chr) {
                                 return function(t) {return  i(t);}
                         });
 
-                        ticks.exit().remove();
+                        ticks.exit()
+                        .transition()
+                        .delay(100)
+                    .duration(800)
+                    .attrTween('d',function(a) {
+                        var i =d3.interpolate(0,4);
+                         var arc = generateArcTween(a);
+                        return function(t) {return arc(i(t));};
+                        })
+                        .attrTween('opacity', function(a) {
+                            var i=d3.interpolate(1.0,0);
+                                return function(t) {return  i(t);}
+                        })
+                        .remove();
 
 };

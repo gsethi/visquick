@@ -20,7 +20,7 @@ vq.CircVis.prototype._add_network_nodes = function (chr) {
         .attr('class','node')
         .attr('cx',0)
         .attr('cy',0)
-        .attr('r',dataObj._network.node_radius)
+        .attr('r',0)
         .attr('fill',dataObj._network.node_fillStyle)
         .attr('stroke',dataObj._network.node_strokeStyle)
         .attr('transform', function(node) {
@@ -38,7 +38,19 @@ vq.CircVis.prototype._add_network_nodes = function (chr) {
                                     var i =d3.interpolate(0.2,1);
                                     return function(t) {return i(t)};
                                     });
-    node.exit().remove();
+    node.exit()
+    .transition()
+    .delay(100)
+        .duration(800)
+        .attrTween('r',function(a) {
+                                var i =d3.interpolate(dataObj._network.node_radius(a),dataObj._network.node_radius(a)*4);
+                                return function(t) {return i(t)};
+                                })
+        .attrTween('opacity',function() {
+                                    var i =d3.interpolate(1,0);
+                                    return function(t) {return i(t)};
+                                    })
+    .remove();
 };
 
 vq.CircVis.prototype._add_network_links= function(svg_obj) {
@@ -66,6 +78,11 @@ vq.CircVis.prototype._add_network_links= function(svg_obj) {
                                                 };
                             };
 
+    var opacityTween = function(begin,end) { return function(a) {
+                                    var i =d3.interpolate(begin(a),end(a));
+                                    return function(t) {return i(t)};
+                                    };
+                                };
 
     var edges = svg_obj.selectAll("path.link")
         .data(bundle(dataObj._network.links_array).map(function(b, index) { return _.extend(dataObj._network.links_array[index],{spline:b});}));
@@ -90,11 +107,16 @@ vq.CircVis.prototype._add_network_links= function(svg_obj) {
         .duration(800)
         .attr('visibility','visible')
         .attrTween('stroke-width',strokeWidthTween(function(a) { return dataObj._network.link_line_width(a)*3;},function(a) { return dataObj._network.link_line_width(a);}))
-        .attrTween('opacity',function(a) {
-                                    var i =d3.interpolate(0.2,dataObj._network.link_alpha(a));
-                                    return function(t) {return i(t)};
-                                    });
-        edges.exit().remove();
+        .attrTween('opacity',opacityTween(function() { return 0.2; },function(a) { return dataObj._network.link_alpha(a);})
+            );
+                                    
+        edges.exit()
+        .transition()
+        .delay(100)
+        .duration(800)
+         .attrTween('opacity',opacityTween(function(a) { return dataObj._network.link_alpha(a);},function() { return 0.0; }) )
+         .attrTween('stroke-width',strokeWidthTween(function(a) { return dataObj._network.link_line_width(a);},function(a) { return dataObj._network.link_line_width(a)*3;}))
+        .remove();
 
 
 };

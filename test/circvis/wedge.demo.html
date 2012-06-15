@@ -30,8 +30,9 @@
 
 <button id="1_random_edge">Add 1 Random Edges</button><br />
 <button id="50_random_edge">Add 50 Random Edges</button><br />
-<button id="50_remove">Remove 50 Random Edges</button><br />
+<!-- <button id="50_remove">Remove 50 Random Edges</button><br /> -->
 <button id="all_remove">Remove all Random Edges</button><br />
+<button id="all_clin_remove">Remove all Random Clinical Associations</button><br /> 
 
 Drag the circvis (on the rings) to rotate the entire display.<br/>
 
@@ -49,7 +50,7 @@ Drag the circvis (on the rings) to rotate the entire display.<br/>
         var cnv1 = Math.random()*500 >>> 0;
         //make a good start number with our without a good chromsome
         var start1 = chrom_attr[chr1] ? Math.random() * (chrom_attr[chr1].length - 50000) >>> 0 : 20;
-        return {label:'C:'+ source +':'+label+':'+chr1+':'+start1+':'+start1+50000+'::',chr:chr1,start:start1,end:start1
+        return {label:'C:'+ source +':'+label+':'+chr1+':'+start1+':'+(start1+50000)+'::',chr:chr1,start:start1,end:start1
                 + 50000,source:'+', mutation_count:mut1};
     }
 
@@ -87,8 +88,8 @@ function generateFeature() {
             }
     );
 
-    $('#50_remove').on('click', function() {
-            circle.removeEdges(50);
+    $('#all_clin_remove').on('click', function() {
+            circle.removeNodes(function(node) {return !_.isUndefined(node.clin_alias);});
     });
     $('#all_remove').on('click', function() {
             circle.removeEdges('all');
