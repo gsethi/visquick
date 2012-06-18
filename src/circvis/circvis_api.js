@@ -41,12 +41,18 @@ vq.CircVis.prototype._removeAllNetworkNodes = function() {
 
 vq.CircVis.prototype.removeNodes = function(node_array) {
     var that = this;
+    var chr_batch={};
     if (_.isFunction(node_array)) {
         node_array = _.filter(this.chromoData._network.nodes_array, node_array);
     }
     if (_.isArray(node_array)) {
         _.each(node_array, function(node) {
+            chr_batch[node.chr] = 1;
             that._removeNode(node);
+        });
+        _.each(_.keys(chr_batch), function(chr) {
+               that._add_ticks(chr);
+               that._add_network_nodes(chr);
         });
     }
     else if (_.isNumber(node_array) || _.isObject(node_array)){
@@ -67,8 +73,6 @@ vq.CircVis.prototype._removeNode = function(node) {
     this.chromoData._network.nodes_array = _.reject(this.chromoData._network.nodes_array,
             function(obj) { return that.same_feature(obj,node);});
     this._remove_wedge_data(node);
-    this._add_ticks(node.chr);
-    this._add_network_nodes(node.chr);
 };
 
 vq.CircVis.prototype.addEdges = function(edge_array) {
@@ -111,18 +115,18 @@ vq.CircVis.prototype._insertEdge = function(edge) {
     var that = this;
     var edge_arr=[];
 
-    //quit if either node has an unmappable locationß
-    _.each(nodes,function(node) {
-        if (!_.include(_.keys(that.chromoData._chrom.groups),node.chr)) {return null;}
-    });
+    //quit if either node has an unmappable location
+ if(_.any(nodes,function(a){return _.isNull(a) || 
+    !_.include(_.keys(that.chromoData._chrom.groups),a.chr); })) { 
+            console.log('Unmappable chromosome in edge.');
+            return;
+    }
     //insert/recover both nodes
     _.each(nodes,function(node) {
             edge_arr.push(that._insertNode(node));
         }
     );
-    if(_.any(edge_arr,function(a){return _.isNull(a);})) { console.log('Unmappable chromosome in edge.');
-        return;
-    }
+   
     //list of keys that aren't node1,node2
     var keys = _.chain(edge).keys().reject(function(a){return a=='node1'|| a== 'node2';}).value();
     //append the source,target nodes
