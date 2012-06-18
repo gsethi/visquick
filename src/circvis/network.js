@@ -1,7 +1,7 @@
 
 
 /** private **/
-vq.CircVis.prototype._add_network_nodes = function (chr) {
+vq.CircVis.prototype._drawNetworkNodes = function (chr) {
     var     dataObj = this.chromoData;
 
     var network_radius = dataObj._network.network_radius[chr];
@@ -53,7 +53,7 @@ vq.CircVis.prototype._add_network_nodes = function (chr) {
     .remove();
 };
 
-vq.CircVis.prototype._add_network_links= function(svg_obj) {
+vq.CircVis.prototype._drawNetworkLinks= function(svg_obj) {
 
     var dataObj = this.chromoData;
 

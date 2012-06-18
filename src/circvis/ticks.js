@@ -1,6 +1,6 @@
 
 /** private **/
-vq.CircVis.prototype._add_ticks = function(chr) {
+vq.CircVis.prototype._drawTicks = function(chr) {
     var that = this;
 
     var ideogram_obj = d3.select('.ideogram[data-region="'+chr+'"]');

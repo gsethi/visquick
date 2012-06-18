@@ -121,10 +121,10 @@ var ideograms = svg.selectAll('g.ideogram')
 
         function draw_ideogram_rings(d) {
             that._add_wedge( d);
-            that._add_ticks( d);
-            that._add_network_nodes( d);
+            that._drawTicks( d);
+            that._drawNetworkNodes( d);
         }
-    that._add_network_links(svg.insert('svg:g','.ideogram').attr('class','links'));
+    that._drawNetworkLinks(svg.insert('svg:g','.ideogram').attr('class','links'));
     _(_.range(0,dataObj._wedge.length)).each(that._draw_axes_ticklabels,that);
 
 };

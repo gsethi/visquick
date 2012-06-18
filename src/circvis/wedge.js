@@ -52,8 +52,8 @@ vq.CircVis.prototype._add_wedge = function(chr) {
     );
 
 
-        // var clip_obj = ideogram_obj.append('defs').append('svg:clipPath')
-        // .attr('')
+    // var clip_obj = ideogram_obj.append('defs').append('svg:clipPath')
+    // .attr('')
 
     wedge_obj.append("svg:g")
         .attr('class','data');
@@ -135,7 +135,15 @@ vq.CircVis.prototype._drawWedge_withRange = function(chr, wedge_index) {
 
 vq.CircVis.prototype._drawWedgeData = function(chr, wedge_index) {
     var that = this;
-    if (that.chromoData._wedge.length < wedge_index) {return;}
+
+    //draw all wedges if parameter is left out.
+    var all_wedges = _.isUndefined(wedge_index) || _.isNull(wedge_index);
+    //return if ill-defined wedge
+    if (!all_wedges && _.isNumber(wedge_index) && _.isFinite(wedge_index) &&
+        wedge_index >= that.chromoData._wedge.length) {
+        console.error('drawWedgeData: Invalid wedge #:' + wedge_index);
+        return;
+    }
 
     function drawWedge(index) {
         var wedge_params = that.chromoData._wedge[index];
@@ -150,7 +158,7 @@ vq.CircVis.prototype._drawWedgeData = function(chr, wedge_index) {
         data.on('mouseover',function(d) { wedge_params.hovercard.call(this,d);});
     }
 
-    if (_.isUndefined(wedge_index)) {
+    if (all_wedges) {
         _.each(_.range(0,that.chromoData._wedge.length),function(i) { drawWedge.call(that,i);});
         return;
     }
@@ -158,8 +166,6 @@ vq.CircVis.prototype._drawWedgeData = function(chr, wedge_index) {
     drawWedge.call(that,wedge_index);
 
 };
-
-
 
 
 vq.CircVis.prototype._drawWedgeData_histogram = function(chr, wedge_index) {
@@ -171,7 +177,7 @@ vq.CircVis.prototype._drawWedgeData_histogram = function(chr, wedge_index) {
 
     var histogramArc = function (point) {
         var _inner = wedge_params._innerRadius;
-     //   var _outer = wedge_params._thresholded_outerRadius(point[value_key]);
+        //   var _outer = wedge_params._thresholded_outerRadius(point[value_key]);
         var start = that.chromoData._ideograms[chr].theta(point.start);
         var end = that.chromoData._ideograms[chr].theta(point.end);
         return d3.svg.arc()
@@ -183,7 +189,7 @@ vq.CircVis.prototype._drawWedgeData_histogram = function(chr, wedge_index) {
     var hist = wedge_obj.select('g.data')
         .selectAll("path")
         .data(wedge_data,that.chromoData._network.node_key);
-        hist
+    hist
         .enter().append('svg:path')
         .attr('fill',wedge_params._fillStyle)
         .attr('stroke',wedge_params._strokeStyle)
@@ -201,7 +207,7 @@ vq.CircVis.prototype._drawWedgeData_histogram = function(chr, wedge_index) {
             return function(t) {return  i(t);}
         });
 
-        hist.exit()
+    hist.exit()
         .transition()
         .delay(100)
         .duration(800)
@@ -245,7 +251,7 @@ vq.CircVis.prototype._drawWedgeData_scatterplot = function(chr, wedge_index) {
             var i =d3.interpolate(0.2,1.0);
             return function(t) { return i(t);}
         });
-        scatter.exit().remove();
+    scatter.exit().remove();
 };
 
 vq.CircVis.prototype._drawWedgeData_band = function(chr, wedge_index) {
@@ -287,23 +293,23 @@ vq.CircVis.prototype._drawWedgeData_glyph = function(chr, wedge_index) {
         .enter().append('svg:path')
         .attr('fill',wedge_params._fillStyle)
         .attr('stroke',wedge_params._strokeStyle)
-        .attr("transform",function(point) { 
+        .attr("transform",function(point) {
             return "rotate(" + ((that.chromoData._ideograms[chr].theta(point.start) * 180 / Math.PI) - 90)+ ")translate(" +
-                wedge_params._glyph_distance(point) + ")";} )                 
-          .transition()
+                wedge_params._glyph_distance(point) + ")";} )
+        .transition()
         .delay(100)
         .duration(800)
         .attr('d',d3.svg.symbol()
-            .type(wedge_params._shape)
+        .type(wedge_params._shape)
         .size(Math.pow(wedge_params._radius(),2))
-        )
+    )
         .attrTween('opacity',function(a) {
             var i =d3.interpolate(0.2,1.0);
             return function(t) { return i(t);}
         });
     glyph.exit()
-    .transition()
-    .delay(100)
+        .transition()
+        .delay(100)
         .duration(800)
         .attrTween('opacity',function(a) {
             var i =d3.interpolate(1.0,0);
@@ -435,7 +441,6 @@ vq.CircVis.prototype._remove_wedge_data = function(node) {
     _.each(that.chromoData._ideograms[chr].wedge, function(wedge,index) {
         that.chromoData._ideograms[chr].wedge[index] = _.reject(wedge,
             function(obj) { return that.same_feature(obj,node);});
-        that._drawWedgeData(chr,index);
     });
 };
 
@@ -445,6 +450,5 @@ vq.CircVis.prototype._add_wedge_data = function(data) {
     _.each(that.chromoData._ideograms[chr].wedge, function(wedge,index) {
         if(_.isUndefined(data[that.chromoData._wedge[index]._value_key]) || that.chromoData._wedge[index]._plot_type =='karyotype') { return;}
         wedge.push(data);
-        that._drawWedgeData(chr,index);
     });
 };
