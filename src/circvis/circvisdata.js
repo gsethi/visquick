@@ -578,3 +578,13 @@ vq.models.CircVisData.prototype._removeEdge = function(edge) {
     }
 
 };
+
+vq.models.CircVisData.prototype._removeEdges = function(edge_arr) {
+    var that = this;
+    if (_.isArray(edge_arr)) {
+        this._network.links_array =
+            _.difference(that._network.links_array,edge_arr);
+    }
+
+};
+

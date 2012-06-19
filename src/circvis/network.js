@@ -10,11 +10,12 @@ vq.CircVis.prototype._drawNetworkNodes = function (chr) {
     if(ideogram_obj.select('g.nodes').empty()) {
         ideogram_obj.append('svg:g').attr('class','nodes');
     }
+    var arr = dataObj._network.nodes_array.filter(function(node) { return !node.children && node.chr == chr;});
 
     var node = ideogram_obj
         .select('g.nodes')
         .selectAll('circle.node')
-        .data(dataObj._network.nodes_array.filter(function(node) { return !node.children && node.chr == chr;}),dataObj._network.node_key);
+        .data(arr,dataObj._network.node_key);
 
     node.enter().append('svg:circle')
         .attr('class','node')
