@@ -67,6 +67,9 @@ vq.CircVis.prototype._render = function() {
         .attr("transform", 'translate(' + width / 2 + ',' + height / 2 + ')')
         .call(drag);
 
+        d3.select("#"+id + ' .circvis').insert('svg:defs');
+
+
 var ideograms = svg.selectAll('g.ideogram')
         .data(dataObj._chrom.keys)
         .enter().append('svg:g')
@@ -125,6 +128,9 @@ var ideograms = svg.selectAll('g.ideogram')
             that._drawNetworkNodes( d);
         }
     that._drawNetworkLinks(svg.insert('svg:g','.ideogram').attr('class','links'));
-    _(_.range(0,dataObj._wedge.length)).each(that._draw_axes_ticklabels,that);
+    _(_.range(0,dataObj._wedge.length)).each(function(ring_index) {
+        that._draw_axes_ticklabels(ring_index);
+        that._insertRingClipping(ring_index);
+    });
 
 };

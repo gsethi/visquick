@@ -18,6 +18,18 @@ vq.CircVis.prototype._drawWedgeContents = function(chr, wedge_index) {
     }
 };
 
+vq.CircVis.prototype._insertRingClipping = function(index) {
+    var outerRadius =  dataObj._wedge[index]._outerPlotRadius(index),
+    innerRadius = dataObj._wedge[index]._innerRadius(index);
+
+    var arc = d3.svg.arc()({innerRadius:innerRadius,outerRadius:outerRadius, startAngle:0,endAngle:2*Math.PI});
+
+    d3.select('svg .circvis defs').append('svg:clipPath')
+        .attr('id','ring_clip_'+index)
+        .append('svg:path')
+        .attr('d',arc);
+};
+
 /**private **/
 vq.CircVis.prototype._add_wedge = function(chr) {
     var that = this;
