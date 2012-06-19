@@ -161,10 +161,10 @@ vq.models.CircVisData.prototype._setupData = function() {
     var shorten = totalChromLength / 360 * this._chrom.gap_degrees;
 
     chrom_length_map = {};
-        _.each(chrom_length_array,function(obj) {
-            chrom_length_map[obj['chr_name'].toUpperCase()] = obj['chr_length'];
-            normalizedLength[obj['chr_name'].toUpperCase()] =  (obj['chr_length'] -shorten) / totalChromLength;
-        });
+    _.each(chrom_length_array,function(obj) {
+        chrom_length_map[obj['chr_name'].toUpperCase()] = obj['chr_length'];
+        normalizedLength[obj['chr_name'].toUpperCase()] =  (obj['chr_length'] -shorten) / totalChromLength;
+    });
 
     this.normalizedLength = normalizedLength;
 
@@ -199,15 +199,15 @@ vq.models.CircVisData.prototype._setupData = function() {
 
         }
         chrom_groups[d]={key:d, startAngle: startAngle[d], endAngle: startAngle[d] + 2 * Math.PI * normalizedLength[d], theta:theta[d],
-        angle: 2 * Math.PI * normalizedLength[d]};
+            angle: 2 * Math.PI * normalizedLength[d]};
     });
 
     this.theta = theta;
     this._ideograms={};
     _.each(that._chrom.keys, function(d) {
-            startAngle_map[d] =  startAngle[d] + rotation;
-                that._ideograms[d] = _.extend(chrom_groups[d],{wedge:[],_feature_angle : function(a) { return this.startAngle + this.theta(a); }});
-            });
+        startAngle_map[d] =  startAngle[d] + rotation;
+        that._ideograms[d] = _.extend(chrom_groups[d],{wedge:[],_feature_angle : function(a) { return this.startAngle + this.theta(a); }});
+    });
     this.startAngle_map = startAngle_map;
     this._chrom.groups = chrom_groups;
 
@@ -225,10 +225,10 @@ vq.models.CircVisData.prototype._setupData = function() {
             }
 
             cnv_map = {};
-             _.each(wedge._data, function(d) {
+            _.each(wedge._data, function(d) {
                 if (cnv_map[d.chr] === undefined) { cnv_map[d.chr] = [];}
-                    cnv_map[d.chr].push(d);
-                });
+                cnv_map[d.chr].push(d);
+            });
 
             wedge._chr = {};
             _.each(that._chrom.keys, function(d) {
@@ -247,19 +247,19 @@ vq.models.CircVisData.prototype._setupData = function() {
             wedge._innerRadius = wedge._outerPlotRadius - wedge._plot_height;
 
             that._chrom.keys.forEach(function(d) {
-                        that._ideograms[d]._outerRadius = (that._plot.height / 2) - (that.ticks.outer_padding + that.ticks.height);
-                        that._ideograms[d].wedge[index] = wedge._chr[d]; //?
+                that._ideograms[d]._outerRadius = (that._plot.height / 2) - (that.ticks.outer_padding + that.ticks.height);
+                that._ideograms[d].wedge[index] = wedge._chr[d]; //?
             });
 
             wedge.hovercard = vq.hovercard({
-                                            canvas_id : that._plot.id,
-                                            include_header : false,
-                                            include_footer : true,
-                                            self_hover : true,
-                                            timeout : that._plot.tooltip_timeout,
-                                            data_config : wedge._tooltipItems,
-                                            tool_config : wedge._tooltipLinks
-                                        });
+                canvas_id : that._plot.id,
+                include_header : false,
+                include_footer : true,
+                self_hover : true,
+                timeout : that._plot.tooltip_timeout,
+                data_config : wedge._tooltipItems,
+                tool_config : wedge._tooltipLinks
+            });
 
             if(wedge._plot_type =='karyotype') { return;}
 
@@ -270,27 +270,27 @@ vq.models.CircVisData.prototype._setupData = function() {
             wedge._min_plotValue = (wedge._min_plotValue === undefined) ? parseFloat(((-1 * deviation) + median).toFixed(2)) : wedge._min_plotValue;
             wedge._max_plotValue = (wedge._max_plotValue === undefined) ? parseFloat((deviation + median).toFixed(2)) : wedge._max_plotValue;
             wedge._range_mean = wedge._base_plotValue != null ? wedge._base_plotValue : (wedge._min_plotValue + wedge._max_plotValue) / 2;
-    wedge._y_linear = d3.scale.linear()
-        .domain([wedge._min_plotValue, wedge._max_plotValue])
-        .range([wedge._innerRadius,wedge._outerRadius - wedge._outer_padding]).nice();
+            wedge._y_linear = d3.scale.linear()
+                .domain([wedge._min_plotValue, wedge._max_plotValue])
+                .range([wedge._innerRadius,wedge._outerRadius - wedge._outer_padding]).nice();
 
-    wedge._y_axis = d3.scale.linear().domain([wedge._min_plotValue, wedge._max_plotValue]).range([wedge._innerRadius,wedge._outerPlotRadius]);
-    wedge._thresholded_innerRadius = function(d) { return Math.max(wedge._y_axis(Math.min(d,wedge._range_mean)),wedge._innerRadius); };
-    wedge._thresholded_outerRadius = function(d) { return Math.min(wedge._y_axis(Math.max(d,wedge._range_mean)),wedge._outerPlotRadius); };
-    wedge._thresholded_value_to_radius = function(d) { return Math.min(Math.max(wedge._y_axis(d),wedge._innerRadius),wedge._outerPlotRadius); };
-    wedge._thresholded_radius = function(d) { return Math.min(Math.max(d,wedge._innerRadius),wedge._outerPlotRadius); };
+            wedge._y_axis = d3.scale.linear().domain([wedge._min_plotValue, wedge._max_plotValue]).range([wedge._innerRadius,wedge._outerPlotRadius]);
+            wedge._thresholded_innerRadius = function(d) { return Math.max(wedge._y_axis(Math.min(d,wedge._range_mean)),wedge._innerRadius); };
+            wedge._thresholded_outerRadius = function(d) { return Math.min(wedge._y_axis(Math.max(d,wedge._range_mean)),wedge._outerPlotRadius); };
+            wedge._thresholded_value_to_radius = function(d) { return Math.min(Math.max(wedge._y_axis(d),wedge._innerRadius),wedge._outerPlotRadius); };
+            wedge._thresholded_radius = function(d) { return Math.min(Math.max(d,wedge._innerRadius),wedge._outerPlotRadius); };
 
-    wedge._thresholded_tile_innerRadius = function(c,d) { return wedge._innerRadius + (d._tile.height + d._tile.padding) * c.level;};
-    wedge._thresholded_tile_outerRadius = function(c,d) { return wedge._innerRadius + ((d._tile.height + d._tile.padding) * c.level) + d._tile.height;};
+            wedge._thresholded_tile_innerRadius = function(c,d) { return wedge._innerRadius + (d._tile.height + d._tile.padding) * c.level;};
+            wedge._thresholded_tile_outerRadius = function(c,d) { return wedge._innerRadius + ((d._tile.height + d._tile.padding) * c.level) + d._tile.height;};
             if (wedge._plot_type == 'glyph') {
                 wedge._glyph_distance = function(c) { return (((wedge._tile.height + wedge._tile.padding) * c.level)
                     + wedge._innerRadius );};
                 wedge._checked_endAngle = function(feature,chr) {
                     if (that._chrom.keys.length == 1) {
-                        return Math.min(that.startAngle_map[chr] + that.theta[chr](feature.end||feature.start+1),dataObj.startAngle_map[dataObj._chrom.keys[0]] + (Math.PI * 2));
+                        return Math.min(that.startAngle_map[chr] + that.theta[chr](feature.end||feature.start+1),that.startAngle_map[that._chrom.keys[0]] + (Math.PI * 2));
                     }
-                    else if (this.parent.index+1 == dataObj._chrom.keys.length) {
-                        return Math.min(that.startAngle_map[chr] + that.theta[chr](feature.end||feature.start+1),dataObj.startAngle_map[dataObj._chrom.keys[0]] + (Math.PI * 2));
+                    else if (this.parent.index+1 == that._chrom.keys.length) {
+                        return Math.min(that.startAngle_map[chr] + that.theta[chr](feature.end||feature.start+1),that.startAngle_map[that._chrom.keys[0]] + (Math.PI * 2));
                     }
                     else {return Math.min(that.startAngle_map[chr] + that.theta[chr](feature.end||feature.start+1),
                         that.startAngle_map[that._chrom.keys[(this.parent.index+1)%that._chrom.keys.length]]);
@@ -305,55 +305,58 @@ vq.models.CircVisData.prototype._setupData = function() {
     //------------------- NETWORK DATA
     var nodes = {};
     _.each(that._chrom.keys, function(d) {
-            nodes[d] = {};
+        nodes[d] = {};
     });
     var node_parent_map = {};
     var node_array = [{parent:null, chr:null, radius:0, angle:0,children:[]}];
     that._network.network_radius = {};
     chrom_keys_array.forEach(function(key,index) {
         var innerRadius = that._ideograms[key].wedge.length > 0 ? that._wedge[that._ideograms[key].wedge.length-1]._innerRadius :
-                    (that._plot.height / 2) - that.ticks.outer_padding - that.ticks.height;
+            (that._plot.height / 2) - that.ticks.outer_padding - that.ticks.height;
         var network_radius = that._network.network_radius[key] = innerRadius - that._network._outer_padding;
         node_parent_map[key] = index + 1;
         var node = {chr:key,parent:node_array[0],children:[],radius: network_radius / 2,
-                angle : (that._chrom.groups[key].startAngle + that._chrom.groups[key].endAngle)/2};
+            angle : (that._chrom.groups[key].startAngle + that._chrom.groups[key].endAngle)/2};
         node_array[0].children.push(node);
         node_array.push(node);
     });
-    
+
+    this._network.node_parent_map = node_parent_map;
+    this._network.base_nodes = _.map(node_array,function(node){return _.extend({},node);});
+
     var valid_chr = {};
     _.each(this._chrom.keys, function(a) { valid_chr[a] = 1; });
     var links_array = [];
     var length;
-   var index1,index2;
+    var index1,index2;
     var node_key = this._network.node_key;
     if (this._network != undefined && this._network.data != undefined) {
         this._network.data.forEach(function(d) {
             index1 = null, node1_key = node_key(d.node1),
-            index2 = null, node2_key = node_key(d.node2);
+                index2 = null, node2_key = node_key(d.node2);
             if (valid_chr[d.node1.chr] || valid_chr[d.node2.chr] ) return;
             if (nodes[node1_key] === undefined){
-                        var temp_node = d.node1;
-                        temp_node.nodeName = node1_key;                        
-                        temp_node.parent = node_array[node_parent_map[d.node1.chr]];
-                        node_array[node_parent_map[d.node1.chr]].children.push(temp_node);
-                        length = node_array.push(temp_node);
-                        index1 = length - 1;
-                        nodes[node1_key] = index1;
-                    } else {
-                        index1 = nodes[node1_key];
-                    }
-          if (nodes[node2_key] === undefined){
-                        var temp_node = d.node2;
-                        temp_node.nodeName = node2_key;                        
-                        temp_node.parent = node_array[node_parent_map[d.node2.chr]];
-                        node_array[node_parent_map[d.node2.chr]].children.push(temp_node);
-                        length = node_array.push(temp_node);
-                        index2 = length - 1;
-                        nodes[node2_key] = index2;
-                    } else {
-                        index2 = nodes[node2_key];
-                    }
+                var temp_node = d.node1;
+                temp_node.nodeName = node1_key;
+                temp_node.parent = node_array[node_parent_map[d.node1.chr]];
+                node_array[node_parent_map[d.node1.chr]].children.push(temp_node);
+                length = node_array.push(temp_node);
+                index1 = length - 1;
+                nodes[node1_key] = index1;
+            } else {
+                index1 = nodes[node1_key];
+            }
+            if (nodes[node2_key] === undefined){
+                var temp_node = d.node2;
+                temp_node.nodeName = node2_key;
+                temp_node.parent = node_array[node_parent_map[d.node2.chr]];
+                node_array[node_parent_map[d.node2.chr]].children.push(temp_node);
+                length = node_array.push(temp_node);
+                index2 = length - 1;
+                nodes[node2_key] = index2;
+            } else {
+                index2 = nodes[node2_key];
+            }
 
             if (index1 != null && index2 !=null) {
                 //copy out useful properties
@@ -373,23 +376,23 @@ vq.models.CircVisData.prototype._setupData = function() {
         node_array = [];
         links_array = [];
         this._network.link_hovercard  =  vq.hovercard({
-                            canvas_id : that._plot.id,
-                            include_header : false,
-                            include_footer : true,
-                            self_hover : true,
-                            timeout : that._plot.tooltip_timeout,
-                            data_config : that._network.link_tooltipItems,
-                            tool_config : that._network.link_tooltipLinks
-                        });
+            canvas_id : that._plot.id,
+            include_header : false,
+            include_footer : true,
+            self_hover : true,
+            timeout : that._plot.tooltip_timeout,
+            data_config : that._network.link_tooltipItems,
+            tool_config : that._network.link_tooltipLinks
+        });
         this._network.node_hovercard  =  vq.hovercard({
-                                  canvas_id : that._plot.id,
-                                  include_header : false,
-                                  include_footer : true,
-                                  self_hover : true,
-                                  timeout : that._plot.tooltip_timeout,
-                                  data_config : that._network.node_tooltipItems,
-                                  tool_config : that._network.node_tooltipLinks
-                              });
+            canvas_id : that._plot.id,
+            include_header : false,
+            include_footer : true,
+            self_hover : true,
+            timeout : that._plot.tooltip_timeout,
+            data_config : that._network.node_tooltipItems,
+            tool_config : that._network.node_tooltipLinks
+        });
     }
 
 //    Tick Data
@@ -404,9 +407,9 @@ vq.models.CircVisData.prototype._setupData = function() {
 
         var ticks_map = {};
         _.each(tick_array,function(d) {
-                ticks_map[d.chr] = d;
-            });
-            
+            ticks_map[d.chr] = d;
+        });
+
 
         this.ticks.data_map = {};
         _.each(that._chrom.keys, function(d) {
@@ -417,16 +420,161 @@ vq.models.CircVisData.prototype._setupData = function() {
         ticks_map = [];
 
         this.ticks.hovercard =  vq.hovercard({
-                    canvas_id : that._plot.id,
-                    include_header : false,
-                    include_footer : true,
-                    self_hover : true,
-                    timeout : that._plot.tooltip_timeout,
-                    data_config : that.ticks.tooltipItems,
-                    tool_config : that.ticks.tooltipLinks
-                });
+            canvas_id : that._plot.id,
+            include_header : false,
+            include_footer : true,
+            self_hover : true,
+            timeout : that._plot.tooltip_timeout,
+            data_config : that.ticks.tooltipItems,
+            tool_config : that.ticks.tooltipLinks
+        });
 
     }
     this.setDataReady(true);
 };
 
+
+vq.models.CircVisData.prototype._remove_wedge_data = function(node) {
+    var that = this;
+    var chr = node.chr;
+    _.each(this._ideograms[chr].wedge, function(wedge,index) {
+        that._ideograms[chr].wedge[index] = _.reject(wedge,
+            function(obj) { return that.same_feature(obj,node);});
+    });
+};
+
+vq.models.CircVisData.prototype._add_wedge_data = function(data) {
+    var that = this;
+    var chr = data.chr;
+    _.each(this._ideograms[chr].wedge, function(wedge,index) {
+        if(_.isUndefined(data[that._wedge[index]._value_key]) || that._wedge[index]._plot_type =='karyotype') { return;}
+        wedge.push(data);
+    });
+};
+
+vq.models.CircVisData.prototype.same_feature = function(n1,n2) {
+    return this._network.node_key(n1) ==  this._network.node_key(n2);
+};
+
+vq.models.CircVisData.prototype.same_edge= function(rf_assoc,circvis_assoc) {
+    return this.same_feature(rf_assoc.source,circvis_assoc.source) &&
+        this.same_feature(rf_assoc.target,circvis_assoc.target);
+};
+
+vq.models.CircVisData.prototype._add_tick_data = function(node) {
+    var that = this;
+    var tick;
+    if ( _.any(that.ticks.data_map[node.chr],
+        function(tick) { return that.same_feature(tick,node);})) {
+        tick = _.find(that.ticks.data_map[node.chr],
+            function(n) { return that.same_feature(n,node);});
+    }
+    else {
+        tick = node;
+        vq.utils.VisUtils.layoutTile(tick,that.ticks.data_map[tick.chr].length,
+            that.ticks.data_map[tick.chr],that.ticks.overlap_distance);
+        that.ticks.data_map[tick.chr].push(tick);
+    }
+
+    return tick;
+};
+
+vq.models.CircVisData.prototype._add_network_node = function(node) {
+    var that = this;
+    var node_parent_map = this._network.node_parent_map;
+    var new_node;
+    //previously loaded this node, pull it from the node_array
+    if ( _.any(that._network.nodes_array,
+        function(tick) { return that.same_feature(tick,node);})) {
+        new_node = _.find(that._network.nodes_array,
+            function(n) { return that.same_feature(n,node);});
+    } else {
+        var parent = _.find(that._network.nodes_array, function(n) { return n.chr == node.chr});
+        new_node = _.extend({parent:that._network.nodes_array[node_parent_map[node.chr]]},node);
+        parent.children.push(new_node);
+        that._network.nodes_array.push(new_node);
+    }
+    return new_node;
+};
+vq.models.CircVisData.prototype._remove_network_node = function(node) {
+    var that = this;
+    this._network.nodes_array = _.reject(this._network.nodes_array,
+        function(obj) { return that.same_feature(obj,node);});
+};
+vq.models.CircVisData.prototype._remove_tick_data = function(node) {
+    var that = this;
+    this.ticks.data_map[node.chr] = _.reject(this.ticks.data_map[node.chr],
+        function(obj) { return that.same_feature(obj,node);});
+};
+
+vq.models.CircVisData.prototype._insertNode = function(node) {
+    var that = this;
+    var new_node;
+
+    if (!_.include(_.keys(that._chrom.groups),node.chr)) {return null;}
+    //previously loaded this node, pull it from the node_array
+
+    this._add_tick_data(node);
+    new_node = this._add_network_node(node);
+    this._add_wedge_data(node);
+    return new_node;
+};
+
+vq.models.CircVisData.prototype._insertNodes = function(node_array) {
+    var that = this;
+       var nodes = [];
+    _.each(node_array, function(node) {
+                var insert_node = that._insertNode(node);
+                nodes.push(insert_node);
+            }
+        );
+
+    return nodes;
+};
+
+vq.models.CircVisData.prototype._removeNode = function(node) {
+    if (!_.isObject(node)) { return; }
+    this._remove_tick_data(node);
+    this._remove_network_node(node);
+    this._remove_wedge_data(node);
+};
+
+
+vq.models.CircVisData.prototype._insertEdge = function(edge) {
+    var nodes = [edge.node1,edge.node2];
+    var that = this;
+
+    //quit if either node has an unmappable location
+    if(_.any(nodes,function(a){return _.isNull(a) ||
+        !_.include(_.keys(that._chrom.groups),a.chr); })) {
+        console.log('Unmappable chromosome in edge.');
+        return null;
+    }
+    //insert/recover both nodes
+    var edge_arr = that._insertNodes([nodes[0],nodes[1]]);
+    if(_.any(edge_arr,function(a){return _.isNull(a);})) {
+        console.error('Unable to insert node for requested edge'); return null;
+    }
+
+    //list of keys that aren't node1,node2
+    var keys = _.chain(edge).keys().reject(function(a){return a=='node1'|| a== 'node2';}).value();
+    //append the source,target nodes
+    var insert_edge = _.chain(edge).pick(keys).extend({source:edge_arr[0],target:edge_arr[1]}).value();
+
+    //search for edge in current data
+    if (_.any(this._network.links_array,function(link) { return that.same_edge(insert_edge,link);})){
+        return null;//old link
+    }else {  //insert new edge
+        this._network.links_array.push(insert_edge);  //add it
+    }
+    return insert_edge;
+};
+
+vq.models.CircVisData.prototype._removeEdge = function(edge) {
+    var that = this;
+    if (_.isObject(edge)) {
+        this._network.links_array =
+            _.reject(this._network.links_array,function(link) { return that.same_edge(link,edge);});
+    }
+
+};

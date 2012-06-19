@@ -162,8 +162,9 @@ vq.CircVis.prototype._drawWedgeData = function(chr, wedge_index) {
         _.each(_.range(0,that.chromoData._wedge.length),function(i) { drawWedge.call(that,i);});
         return;
     }
-
-    drawWedge.call(that,wedge_index);
+    else {
+        drawWedge.call(that,wedge_index);
+    }
 
 };
 
@@ -435,20 +436,3 @@ vq.CircVis.prototype._draw_axes_ticklabels = function(wedge_index) {
 
 };
 
-vq.CircVis.prototype._remove_wedge_data = function(node) {
-    var that = this;
-    var chr = node.chr;
-    _.each(that.chromoData._ideograms[chr].wedge, function(wedge,index) {
-        that.chromoData._ideograms[chr].wedge[index] = _.reject(wedge,
-            function(obj) { return that.same_feature(obj,node);});
-    });
-};
-
-vq.CircVis.prototype._add_wedge_data = function(data) {
-    var that = this;
-    var chr = data.chr;
-    _.each(that.chromoData._ideograms[chr].wedge, function(wedge,index) {
-        if(_.isUndefined(data[that.chromoData._wedge[index]._value_key]) || that.chromoData._wedge[index]._plot_type =='karyotype') { return;}
-        wedge.push(data);
-    });
-};
