@@ -39,6 +39,7 @@ vq.CircVis.prototype.removeEdges = function(edge_array, ignore_nodes) {
     var remaining_nodes = this._edgeListToNodeList(this.chromoData._network.links_array);
     var nodes_to_remove = _.difference(removable,remaining_nodes);
     this.removeNodes(nodes_to_remove);
+
 };
 
 
