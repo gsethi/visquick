@@ -190,10 +190,10 @@ vq.utils.VisUtils.natural_order = function(a,b){return a-b};
 vq.utils.VisUtils.layoutChrTiles = function(tiles,overlap, max_level, treat_as_points) {
     var points = treat_as_points || Boolean(false);
     var new_tiles = [], chr_arr = [];
-    chr_arr = _.uniq(tiles, function(tile) { return tile.chr;});
+    chr_arr = _.uniq(_.pluck(tiles,'chr'));
     chr_arr.forEach(function(chr) {
-        new_tiles = _.union([new_tiles,
-                vq.utils.VisUtils.layoutTiles(tiles.filter(function(tile) { return tile.chr == chr;}),overlap,max_level,points)]);
+        new_tiles = _.union(new_tiles,
+                vq.utils.VisUtils.layoutTiles(tiles.filter(function(tile) { return tile.chr == chr;}),overlap,max_level,points));
     });
     tiles.forEach(function(obj) { vq.utils.VisUtils.copyTile(obj,new_tiles);});
     return tiles;

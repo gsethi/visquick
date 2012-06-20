@@ -77,7 +77,7 @@ vq.CircVis.prototype.removeNodes = function(node_array) {
         _.each(node_array, function(node) {
             that.chromoData._removeNode(node);
         });
-//        var chr = _.uniq(_.pluck(node_array,'chr'))[0];
+        this.chromoData._retileNodes();
         _.each(_.uniq(_.pluck(node_array,'chr')), function(chr) {
             that._drawTicks(chr);
             that._drawNetworkNodes(chr);

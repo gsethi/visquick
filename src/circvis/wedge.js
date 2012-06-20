@@ -19,8 +19,8 @@ vq.CircVis.prototype._drawWedgeContents = function(chr, wedge_index) {
 };
 
 vq.CircVis.prototype._insertRingClipping = function(index) {
-    var outerRadius =  dataObj._wedge[index]._outerPlotRadius(index),
-    innerRadius = dataObj._wedge[index]._innerRadius(index);
+    var outerRadius =  this.chromoData._wedge[index]._outerRadius,
+    innerRadius = this.chromoData._wedge[index]._innerRadius;
 
     var arc = d3.svg.arc()({innerRadius:innerRadius,outerRadius:outerRadius, startAngle:0,endAngle:2*Math.PI});
 
@@ -51,6 +51,7 @@ vq.CircVis.prototype._add_wedge = function(chr) {
         .enter()
         .append("svg:g")
         .attr("class",  "wedge")
+        .attr("clip-path",function(index) { return "url(#ring_clip_" + index + ")";})
         .attr('data-ring',function(index) { return index;});
 
     wedge_obj
@@ -209,7 +210,7 @@ vq.CircVis.prototype._drawWedgeData_histogram = function(chr, wedge_index) {
         .style('fill-opacity',1e-6)
         .style('stroke-opacity',1e-6)
         .transition()
-        .delay(100)
+        
         .duration(800)
         .attrTween('d',function(a) {
             var i =d3.interpolate({outerRadius:wedge_params._innerRadius},{outerRadius:wedge_params._thresholded_outerRadius(a[value_key])});
@@ -221,7 +222,7 @@ vq.CircVis.prototype._drawWedgeData_histogram = function(chr, wedge_index) {
 
     hist.exit()
         .transition()
-        .delay(100)
+        
         .duration(800)
         .attrTween('d',function(a) {
             var i =d3.interpolate({outerRadius:wedge_params._thresholded_outerRadius(a[value_key])},{outerRadius:wedge_params._innerRadius});
@@ -256,14 +257,14 @@ vq.CircVis.prototype._drawWedgeData_scatterplot = function(chr, wedge_index) {
         .type(wedge_params._shape)
         .size(Math.pow(wedge_params._radius(),2)) )
         .transition()
-        .delay(100)
+        
         .duration(800)
         .style('fill-opacity', 1)
         .style('stroke-opacity', 1);
 
     scatter.exit()
         .transition()
-        .delay(100)
+        
         .duration(800)
         .style('fill-opacity', 1e-6)
         .style('stroke-opacity', 1e-6)
@@ -293,7 +294,7 @@ vq.CircVis.prototype._drawWedgeData_band = function(chr, wedge_index) {
         .endAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.end);})
     )
         .transition()
-        .delay(100)
+        
         .duration(800)
         .style('fill-opacity', 1)
         .style('stroke-opacity', 1);
@@ -301,7 +302,7 @@ vq.CircVis.prototype._drawWedgeData_band = function(chr, wedge_index) {
     band
         .exit()
         .transition()
-        .delay(100)
+        
         .duration(800)
         .style('fill-opacity', 1e-6)
         .style('stroke-opacity', 1e-6)
@@ -329,20 +330,20 @@ vq.CircVis.prototype._drawWedgeData_glyph = function(chr, wedge_index) {
             return "rotate(" + ((that.chromoData._ideograms[chr].theta(point.start) * 180 / Math.PI) - 90)+ ")translate(" +
                 wedge_params._glyph_distance(point) + ")";} )
         .transition()
-        .delay(100)
+        
         .duration(800)
         .attr('d',d3.svg.symbol()
         .type(wedge_params._shape)
         .size(Math.pow(wedge_params._radius(),2))
     )
         .transition()
-        .delay(100)
+        
         .duration(800)
         .style('fill-opacity', 1)
         .style('stroke-opacity', 1);
     glyph.exit()
         .transition()
-        .delay(100)
+        
         .duration(800)
         .style('fill-opacity', 1e-6)
                 .style('stroke-opacity', 1e-6)
@@ -371,14 +372,14 @@ vq.CircVis.prototype._drawWedgeData_tile = function(chr, wedge_index) {
         .startAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.start);})
         .endAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.end);})
     ) .transition()
-        .delay(100)
+        
         .duration(800)
         .style('fill-opacity', 1)
         .style('stroke-opacity', 1);
 
     tile.exit()
         .transition()
-        .delay(100)
+        
         .duration(800)
         .style('fill-opacity', 1e-6)
                 .style('stroke-opacity', 1e-6)
@@ -407,14 +408,14 @@ vq.CircVis.prototype._drawWedgeData_karyotype = function(chr, wedge_index) {
         .endAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.end);})
     )
         .transition()
-        .delay(100)
+        
         .duration(800)
         .style('fill-opacity', 1)
         .style('stroke-opacity', 1);
 
     karyotype.exit()
         .transition()
-        .delay(100)
+        
         .duration(800)
         .style('fill-opacity', 1e-6)
                 .style('stroke-opacity', 1e-6)
@@ -455,10 +456,10 @@ vq.CircVis.prototype._drawWedgeData_heatmap = function(chr, wedge_index) {
         .endAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.end);})
     )
         .transition()
-        .delay(100)
+        
         .duration(800)
         .transition()
-        .delay(100)
+        
         .duration(800)
         .style('fill-opacity', 1)
         .style('stroke-opacity', 1)
@@ -470,7 +471,7 @@ vq.CircVis.prototype._drawWedgeData_heatmap = function(chr, wedge_index) {
 
     heat.exit()
         .transition()
-        .delay(100)
+        
         .duration(800)
         .style('fill-opacity', 1e-6)
                 .style('stroke-opacity', 1e-6)

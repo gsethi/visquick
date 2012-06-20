@@ -155,7 +155,7 @@
                 }
             },
             {   PLOT : {
-                height : 20,
+                height : 50,
                 type : 'glyph'
             } ,
                 DATA:{
@@ -176,7 +176,7 @@
                     radius:12,
                     legend_description : 'Clinical Associations',
                     listener : function() {return null;},
-                    outer_padding: 30,
+                    outer_padding: 5,
                     tooltip_items: clinical_hovercard_items_config,
                     tooltip_links: hovercard_links_config
                 }
@@ -232,6 +232,8 @@
             },
             OPTIONS: {
                 outer_padding : 10,
+                tile_nodes : Boolean(true),
+                node_overlap_distance: 3e8,
                 node_radius:6,
                 node_fill_style : tick_colors,
                 link_stroke_style : 'red',

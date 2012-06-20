@@ -43,7 +43,7 @@ Drag the circvis (on the rings) to rotate the entire display.<br/>
     function generateNode() {
         var source = ['GEXP','METH','CNVR','MIRN','GNAB'][(Math.random()*5) >>> 0];
         var label = _.chain(_.range(0,4)).reduce(function(a,b) { return a+chars[Math.random()*chars.length >>> 0];},'').value();
-        var in1 = Math.random()*(chrom_keys.length-1) >>> 0;
+        var in1 = Math.random()*(chrom_keys.length) >>> 0;
         //put in unmapped chromsomes sometimes
         var chr1 = chrom_keys[in1] + ['_random',''][+(Math.random() > 0.05)];
         var mut1 = Math.random()*6 >>> 0;

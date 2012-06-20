@@ -67,7 +67,7 @@ vq.CircVis.prototype._render = function() {
         .attr("transform", 'translate(' + width / 2 + ',' + height / 2 + ')')
         .call(drag);
 
-        d3.select("#"+id + ' .circvis').insert('svg:defs');
+        svg.insert('svg:defs');
 
 
 var ideograms = svg.selectAll('g.ideogram')

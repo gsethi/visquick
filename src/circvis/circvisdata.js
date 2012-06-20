@@ -236,11 +236,9 @@ vq.models.CircVisData.prototype._setupData = function() {
             });
             wedge._outerRadius =
                 (that._plot.height / 2) -
-                    (vq.sum(that._wedge.slice(0, index), function(a) {
-                        return a._plot_height;
-                    }) + vq.sum(that._wedge.slice(0, index), function(a) {
-                        return a._outer_padding;
-                    })) - (that.ticks.outer_padding + that.ticks.height);
+                    vq.sum(that._wedge.slice(0, index), function(a) {
+                        return a._plot_height + a._outer_padding;
+                    }) - (that.ticks.outer_padding + that.ticks.height);
 
             wedge._outerPlotRadius = wedge._outerRadius - wedge._outer_padding;
 
@@ -284,7 +282,7 @@ vq.models.CircVisData.prototype._setupData = function() {
             wedge._thresholded_tile_outerRadius = function(c,d) { return wedge._innerRadius + ((d._tile.height + d._tile.padding) * c.level) + d._tile.height;};
             if (wedge._plot_type == 'glyph') {
                 wedge._glyph_distance = function(c) { return (((wedge._tile.height + wedge._tile.padding) * c.level)
-                    + wedge._innerRadius );};
+                    + wedge._innerRadius + (wedge._radius(c)));};
                 wedge._checked_endAngle = function(feature,chr) {
                     if (that._chrom.keys.length == 1) {
                         return Math.min(that.startAngle_map[chr] + that.theta[chr](feature.end||feature.start+1),that.startAngle_map[that._chrom.keys[0]] + (Math.PI * 2));
@@ -522,14 +520,22 @@ vq.models.CircVisData.prototype._insertNode = function(node) {
 
 vq.models.CircVisData.prototype._insertNodes = function(node_array) {
     var that = this;
-       var nodes = [];
+    var nodes = [];
     _.each(node_array, function(node) {
-                var insert_node = that._insertNode(node);
-                nodes.push(insert_node);
-            }
-        );
-
+            var insert_node = that._insertNode(node);
+            nodes.push(insert_node);
+        }
+    );
+    this._retileNodes();
     return nodes;
+};
+
+vq.models.CircVisData.prototype._retileNodes = function() {
+    if (this._network.tile_nodes) {
+        var nodes = _.reject(this._network.nodes_array,function(node) { return node.children;});
+        nodes = vq.utils.VisUtils.layoutChrTiles(nodes ,this._network.node_overlap_distance);
+        this._network.nodes_array = _.union(this._network.base_nodes, nodes);
+    }
 };
 
 vq.models.CircVisData.prototype._removeNode = function(node) {

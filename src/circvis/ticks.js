@@ -28,7 +28,7 @@ vq.CircVis.prototype._drawTicks = function(chr) {
     var generateArcTween = function (point) {
         var _inner = inner(point);
         var _outer = outer(point);
-        var _theta = that.chromoData._ideograms[chr].theta(point.start);
+        var _theta = that.chromoData._ideograms[point.chr].theta(point.start);
         var _tick_angle = tick_angle(point);
         return d3.svg.arc()
             .innerRadius(function(multiplier) { return _inner - (multiplier *4);})
@@ -38,7 +38,7 @@ vq.CircVis.prototype._drawTicks = function(chr) {
                 return _theta + _tick_angle + (multiplier * Math.PI /  360);});
     };
 
-    var tick_key = dataObj._network.node_key; //.tick_key = function(tick) { return tick.chr+':'+tick.start + ':' + tick.end + ':' + tick[label_key]};
+    var tick_key = dataObj._network.node_key;
 
     if(ideogram_obj.select('g.ticks').empty()) {
         ideogram_obj
@@ -63,7 +63,6 @@ vq.CircVis.prototype._drawTicks = function(chr) {
             d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','hidden');
         })
         .transition()
-        .delay(100)
         .duration(800)
         .attrTween('d',function(a) {
             var i =d3.interpolate(4,0);
@@ -75,7 +74,6 @@ vq.CircVis.prototype._drawTicks = function(chr) {
 
     ticks.exit()
         .transition()
-        .delay(100)
         .duration(800)
         .attrTween('d',function(a) {
             var i =d3.interpolate(0,4);
