@@ -10,6 +10,7 @@ vq.CircVis.prototype._drawWedgeContents = function(chr, wedge_index) {
         case('karyotype'):
         case('tile'):
         case('band'):
+        case('heatmap'):
         case('glyph'):
             this._drawWedgeData(chr, wedge_index);
             break;

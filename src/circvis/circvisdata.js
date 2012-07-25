@@ -297,9 +297,46 @@ vq.models.CircVisData.prototype._setupData = function() {
             }
             delete wedge._data;
 
-
         }); //foreach
     }
+
+
+//    Tick Data
+
+    if (this.ticks != undefined && this.ticks._data_array != undefined && this.ticks._data_array != null) {
+        if (that.ticks.overlap_distance === undefined) {
+            var overlap_ratio = 7000000.0 / 3080419480;
+            that.ticks.overlap_distance = overlap_ratio * totalChromLength;
+        }
+        var tick_array = that.ticks.tile_ticks ? vq.utils.VisUtils.layoutChrTicks(that.ticks._data_array, that.ticks.overlap_distance) :
+            that.ticks._data_array;
+
+        var ticks_map = {};
+        _.each(tick_array,function(d) {
+            if (ticks_map[d.chr] === undefined) { ticks_map[d.chr] = new Array();}
+            ticks_map[d.chr].push(d);
+        });
+
+        this.ticks.data_map = {};
+        _.each(that._chrom.keys, function(d) {
+            that.ticks.data_map[d] =  ticks_map[d] === undefined ? [] : ticks_map[d];
+        });
+        this.ticks._data_array = [];
+        delete tick_array;
+        ticks_map = [];
+
+        this.ticks.hovercard =  vq.hovercard({
+            canvas_id : that._plot.id,
+            include_header : false,
+            include_footer : true,
+            self_hover : true,
+            timeout : that._plot.tooltip_timeout,
+            data_config : that.ticks.tooltipItems,
+            tool_config : that.ticks.tooltipLinks
+        });
+
+    }
+
     //------------------- NETWORK DATA
     var nodes = {};
     _.each(that._chrom.keys, function(d) {
@@ -321,58 +358,10 @@ vq.models.CircVisData.prototype._setupData = function() {
 
     this._network.node_parent_map = node_parent_map;
     this._network.base_nodes = _.map(node_array,function(node){return _.extend({},node);});
+  
+        this._network.nodes_array=node_array;
+        this._network.links_array=[];
 
-    var valid_chr = {};
-    _.each(this._chrom.keys, function(a) { valid_chr[a] = 1; });
-    var links_array = [];
-    var length;
-    var index1,index2;
-    var node_key = this._network.node_key;
-    if (this._network != undefined && this._network.data != undefined) {
-        this._network.data.forEach(function(d) {
-            index1 = null, node1_key = node_key(d.node1),
-                index2 = null, node2_key = node_key(d.node2);
-            if (valid_chr[d.node1.chr] || valid_chr[d.node2.chr] ) return;
-            if (nodes[node1_key] === undefined){
-                var temp_node = d.node1;
-                temp_node.nodeName = node1_key;
-                temp_node.parent = node_array[node_parent_map[d.node1.chr]];
-                node_array[node_parent_map[d.node1.chr]].children.push(temp_node);
-                length = node_array.push(temp_node);
-                index1 = length - 1;
-                nodes[node1_key] = index1;
-            } else {
-                index1 = nodes[node1_key];
-            }
-            if (nodes[node2_key] === undefined){
-                var temp_node = d.node2;
-                temp_node.nodeName = node2_key;
-                temp_node.parent = node_array[node_parent_map[d.node2.chr]];
-                node_array[node_parent_map[d.node2.chr]].children.push(temp_node);
-                length = node_array.push(temp_node);
-                index2 = length - 1;
-                nodes[node2_key] = index2;
-            } else {
-                index2 = nodes[node2_key];
-            }
-
-            if (index1 != null && index2 !=null) {
-                //copy out useful properties
-                var node = {source : index1, target : index2} ;
-                for (var p in d) {
-                    if (p != 'node1' && p!= 'node2') {
-                        node[p] = d[p];
-                    }
-                }
-                links_array.push(node);
-            }
-        });
-        this._network.nodes_array = this._network.tile_nodes ?  vq.utils.VisUtils.layoutChrTiles(node_array,that._network.node_overlap_distance) : node_array;
-        this._network.links_array = links_array;
-        this._network.data = 'loaded';
-        nodes = [];
-        node_array = [];
-        links_array = [];
         this._network.link_hovercard  =  vq.hovercard({
             canvas_id : that._plot.id,
             include_header : false,
@@ -391,43 +380,10 @@ vq.models.CircVisData.prototype._setupData = function() {
             data_config : that._network.node_tooltipItems,
             tool_config : that._network.node_tooltipLinks
         });
-    }
 
-//    Tick Data
+        var edges = _.filter(_.map(that._network.data, vq.models.CircVisData.prototype._insertEdge, that),
+        function(edge) { return !_.isNull(edge);});
 
-    if (this.ticks != undefined && this.ticks._data_array != undefined && this.ticks._data_array != null) {
-        if (that.ticks.overlap_distance === undefined) {
-            var overlap_ratio = 7000000.0 / 3080419480;
-            that.ticks.overlap_distance = overlap_ratio * totalChromLength;
-        }
-        var tick_array = that.ticks.tile_ticks ? vq.utils.VisUtils.layoutChrTicks(that.ticks._data_array, that.ticks.overlap_distance) :
-            that.ticks._data_array;
-
-        var ticks_map = {};
-        _.each(tick_array,function(d) {
-            ticks_map[d.chr] = d;
-        });
-
-
-        this.ticks.data_map = {};
-        _.each(that._chrom.keys, function(d) {
-            that.ticks.data_map[d] =  ticks_map[d] === undefined ? [] : ticks_map[d];
-        });
-        this.ticks._data_array = [];
-        delete tick_array;
-        ticks_map = [];
-
-        this.ticks.hovercard =  vq.hovercard({
-            canvas_id : that._plot.id,
-            include_header : false,
-            include_footer : true,
-            self_hover : true,
-            timeout : that._plot.tooltip_timeout,
-            data_config : that.ticks.tooltipItems,
-            tool_config : that.ticks.tooltipLinks
-        });
-
-    }
     this.setDataReady(true);
 };
 
