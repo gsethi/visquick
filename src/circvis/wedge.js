@@ -65,9 +65,6 @@ vq.CircVis.prototype._add_wedge = function(chr) {
     );
 
 
-    // var clip_obj = ideogram_obj.append('defs').append('svg:clipPath')
-    // .attr('')
-
     wedge_obj.append("svg:g")
         .attr('class','data');
 
@@ -119,28 +116,24 @@ vq.CircVis.prototype._drawWedge_withRange = function(chr, wedge_index) {
         var startAngle = p.startAngle;
         var endAngle = p.angle;
 
-        //interpolate position for radial line
-        var angles = _.range(0,endAngle,0.01);
         // generate ticks for y_axis
         var radii = wedge_params._y_linear.ticks(4);
-        //make a vector of pairs (theta,r)
-        var cross = _.map(radii, function(r) { return _.map(angles, function(theta) {return [theta,r];});});
-
-        wedge_obj.append("svg:g")
+          wedge_obj.append("svg:g")
             .attr('class','axes')
             .selectAll("path")
-            .data(cross)
+            .data(radii)
             .enter().append("svg:path")
-            .style("fill", "none")
+            .style("fill", "#ddd")
             .style("stroke", "#555")
             .style('stroke-width', '1.0px')
-            .attr('d',  d3.svg.line.radial()
-            .interpolate('cardinal')
-            .radius(function(d) { return wedge_params._y_linear(d[1]);})
-            .angle(function(d) { return d[0];})
-        );
-
+            .attr('d',d3.svg.arc()
+                .innerRadius(function(d) { return wedge_params._y_linear(d);})
+                .outerRadius(function(d) { return wedge_params._y_linear(d);})
+                .startAngle(startAngle)
+                .endAngle(endAngle)
+        ); 
     }
+
 
     that._drawWedgeData(chr, wedge_index);
 
