@@ -381,8 +381,7 @@ vq.models.CircVisData.prototype._setupData = function() {
             tool_config : that._network.node_tooltipLinks
         });
 
-        var edges = _.filter(_.map(that._network.data, vq.models.CircVisData.prototype._insertEdge, that),
-        function(edge) { return !_.isNull(edge);});
+        //var edges = _.filter(_.map(that._network.data, vq.models.CircVisData.prototype._insertEdge, that),function(edge) { return !_.isNull(edge);});
 
     this.setDataReady(true);
 };

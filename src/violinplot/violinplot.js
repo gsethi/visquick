@@ -51,7 +51,7 @@ vq.ViolinPlot = function() {
     this.selectedProbesetId('');
 
 };
-vq.ViolinPlot.prototype = pv.extend(vq.Vis);
+vq.ViolinPlot.prototype = vq.extend(vq.Vis);
 
 /** @name vq.ViolinPlot.selectedProbesetId **/
 
@@ -132,17 +132,17 @@ vq.ViolinPlot.prototype.draw = function(data) {
         var summary_map = {};
         var highest = -9999999,lowest = 9999999;
 	 if (typeof data_array[0][x] == 'number') data_array.sort(function(a,b) { return a[x]-b[x];} ); //sort numerically ascending
-         var xScale = pv.Scale.ordinal(data_array,function(val){return val[x];}).splitBanded(0, that.width(),0.8);
+         var xScale = d3.Scale.ordinal(data_array,function(val){return val[x];}).splitBanded(0, that.width(),0.8);
         var bandWidth = xScale.range().band / 2;
 
         data_summary.forEach(function(category) {
-            var minY = pv.min(category[y]);
-            var maxY = pv.max(category[y]);
+            var minY = d3.min(category[y]);
+            var maxY = d3.max(category[y]);
             var sampleCount = category[y].length;
 
             category.bottom = minY;
             category.top = maxY;
-            category.mean = pv.mean(category[y]);
+            category.mean = d3.mean(category[y]);
             if (sampleCount <=4) {
                 summary_map[category[x]] = category;
                 category.dist=[];
@@ -152,14 +152,14 @@ vq.ViolinPlot.prototype.draw = function(data) {
 		lowest = minY < lowest ? minY : lowest;
                 return;
             }
-            var quartiles = pv.Scale.quantile(category[y]).quantiles(4).quantiles();
+            var quartiles = d3.scale.quantile(category[y]).quantiles(4).quantiles();
             //Freedman-Diaconis' choice for bin size
             var setSize = 2 * (quartiles[3] - quartiles[1]) / Math.pow(sampleCount,0.33);
-            category.dist = pv.range(minY- 3*setSize/2,maxY+ 3*setSize/2,setSize).map(function(subset) {
+            category.dist = d3.range(minY- 3*setSize/2,maxY+ 3*setSize/2,setSize).map(function(subset) {
                         return {position : subset + setSize/2,
                             value : category[y].filter(function(val) { return val >= subset && val < subset + setSize;}).length/category[y].length};
             });
-            category.bandScale =  pv.Scale.linear(0,pv.max(category.dist,function(val) { return val.value;})).range(0,bandWidth);
+            category.bandScale =  d3.scale.linear().domain([0,d3.max(category.dist,function(val) { return val.value;})]).range([0,bandWidth]);
             highest = maxY+ 3*setSize/2 > highest ? maxY+ 3*setSize/2 : highest;
             lowest = minY- 3*setSize/2 < lowest ? minY- 3*setSize/2 : lowest;
             category.setSize=setSize;
@@ -174,7 +174,7 @@ vq.ViolinPlot.prototype.draw = function(data) {
 
         //start protovis code
 
-        var yScale = pv.Scale.linear(showMinY, showMaxY).range(0, that.height());
+        var yScale = d3.scale.linear().domain([showMinY, showMaxY]).range([0, that.height()]);
 
         //identify selected Probeset, if passed in.
         var selectedProbesetId;
