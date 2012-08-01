@@ -4,7 +4,7 @@
 vq.CircVis.prototype._drawNetworkNodes = function (chr) {
     var     dataObj = this.chromoData;
 
-    var network_radius = function(node) { return dataObj._network.network_radius[chr] - (node.level * 2 * dataObj._network.node_radius(node)); };
+    var network_radius = function(node) { return dataObj._network.network_radius[chr] - (dataObj._network.tile_nodes ? (node.level * 2 * dataObj._network.node_radius(node)) : 0); };
     var ideogram_obj = d3.select('.ideogram[data-region="'+chr+'"]');
 
     if(ideogram_obj.select('g.nodes').empty()) {
@@ -53,7 +53,7 @@ vq.CircVis.prototype._drawNetworkLinks= function() {
     var dataObj = this.chromoData;
 
     var bundle = d3.layout.bundle();
-    var network_radius = function(node) { return dataObj._network.network_radius[node.chr] - (node.level * 2 * dataObj._network.node_radius(node)); };
+    var network_radius = function(node) { return dataObj._network.network_radius[node.chr] - (dataObj._network.tile_nodes ? (node.level * 2 * dataObj._network.node_radius(node)) : 0); };
 
     var line = d3.svg.line.radial()
         .interpolate("bundle")

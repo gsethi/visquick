@@ -381,7 +381,8 @@ vq.models.CircVisData.prototype._setupData = function() {
             tool_config : that._network.node_tooltipLinks
         });
 
-        //var edges = _.filter(_.map(that._network.data, vq.models.CircVisData.prototype._insertEdge, that),function(edge) { return !_.isNull(edge);});
+        var edges = _.filter(_.map(that._network.data, vq.models.CircVisData.prototype._insertEdge, that),function(edge) { return !_.isNull(edge);});
+        this._retileNodes();
 
     this.setDataReady(true);
 };
@@ -481,7 +482,7 @@ vq.models.CircVisData.prototype._insertNodes = function(node_array) {
             nodes.push(insert_node);
         }
     );
-    this._retileNodes();
+    //this._retileNodes();
     return nodes;
 };
 
