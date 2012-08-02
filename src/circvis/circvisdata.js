@@ -158,12 +158,12 @@ vq.models.CircVisData.prototype._setupData = function() {
     });
 
 
-    var shorten = totalChromLength / 360 * this._chrom.gap_degrees;
+    var rescaleForGaps = 1-(this._chrom.gap_degrees * chrom_keys_array.length / 360);
 
     chrom_length_map = {};
     _.each(chrom_length_array,function(obj) {
         chrom_length_map[obj['chr_name'].toUpperCase()] = obj['chr_length'];
-        normalizedLength[obj['chr_name'].toUpperCase()] =  (obj['chr_length'] -shorten) / totalChromLength;
+        normalizedLength[obj['chr_name'].toUpperCase()] =  (obj['chr_length'] *rescaleForGaps) / totalChromLength;
     });
 
     this.normalizedLength = normalizedLength;

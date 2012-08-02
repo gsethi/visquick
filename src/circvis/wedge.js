@@ -499,7 +499,6 @@ vq.CircVis.prototype._drawWedgeData_heatmap = function(chr, wedge_index) {
 
     heat.exit()
         .transition()
-        
         .duration(800)
         .style('fill-opacity', 1e-6)
                 .style('stroke-opacity', 1e-6)

@@ -81,7 +81,7 @@ vq.CircVis.prototype._drawNetworkLinks= function() {
             return "link t_" + d.source.chr + " p_"+ d.target.chr;
         })
          .style('fill','none')
-         .style('stroke','steelblue')
+         .style('stroke',dataObj._network.link_strokeStyle)
         .style('stroke-width',function(a) { return dataObj._network.link_line_width(a) * 3;})
         .style('stroke-opacity',1e-6)
         .attr("d", function(link) { return line(link.spline);})
