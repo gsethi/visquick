@@ -157,13 +157,12 @@ vq.models.CircVisData.prototype._setupData = function() {
         return d['chr_length'];
     });
 
-
-    var shorten = totalChromLength / 360 * this._chrom.gap_degrees;
+   var rescaleForGaps = 1-(this._chrom.gap_degrees * chrom_keys_array.length / 360);
 
     chrom_length_map = {};
     _.each(chrom_length_array,function(obj) {
         chrom_length_map[obj['chr_name'].toUpperCase()] = obj['chr_length'];
-        normalizedLength[obj['chr_name'].toUpperCase()] =  (obj['chr_length'] -shorten) / totalChromLength;
+        normalizedLength[obj['chr_name'].toUpperCase()] =  (obj['chr_length'] *rescaleForGaps) / totalChromLength;
     });
 
     this.normalizedLength = normalizedLength;
@@ -358,6 +357,8 @@ vq.models.CircVisData.prototype._setupData = function() {
 
     this._network.node_parent_map = node_parent_map;
     this._network.base_nodes = _.map(node_array,function(node){return _.extend({},node);});
+    this._network.data_nodes_map=Object.create(null);
+    this._network.links_map=Object.create(null);
   
         this._network.nodes_array=node_array;
         this._network.links_array=[];
@@ -381,8 +382,9 @@ vq.models.CircVisData.prototype._setupData = function() {
             tool_config : that._network.node_tooltipLinks
         });
 
-        var edges = _.filter(_.map(that._network.data, vq.models.CircVisData.prototype._insertEdge, that),
-        function(edge) { return !_.isNull(edge);});
+        //var edges = _.filter(_.map(that._network.data, vq.models.CircVisData.prototype._insertEdge, that),
+        //function(edge) { return !_.isNull(edge);});
+    this._insertEdges(that._network.data);
 
     this.setDataReady(true);
 };
@@ -436,25 +438,46 @@ vq.models.CircVisData.prototype._add_tick_data = function(node) {
 vq.models.CircVisData.prototype._add_network_node = function(node) {
     var that = this;
     var node_parent_map = this._network.node_parent_map;
-    var new_node;
-    //previously loaded this node, pull it from the node_array
-    if ( _.any(that._network.nodes_array,
-        function(tick) { return that.same_feature(tick,node);})) {
-        new_node = _.find(that._network.nodes_array,
-            function(n) { return that.same_feature(n,node);});
-    } else {
-        var parent = _.find(that._network.nodes_array, function(n) { return n.chr == node.chr});
-        new_node = _.extend({parent:that._network.nodes_array[node_parent_map[node.chr]]},node);
-        parent.children.push(new_node);
-        that._network.nodes_array.push(new_node);
+
+    function include_node(node) {
+        var new_node;
+        var index = that._network.data_nodes_map[that._network.node_key(node)];
+        var parent = that._network.nodes_array[node_parent_map[node.chr]];
+        //previously loaded this node, pull it from the node_array
+        if (_.isUndefined(index)) {
+            new_node = _.extend({parent:parent},node);
+            parent.children.push(new_node);
+            that._network.data_nodes_map[that._network.node_key(node)] = that._network.nodes_array.push(new_node) - 1;   
+            return new_node;
+        }
+        else {
+            return that._network.nodes_array[index]
+        }
     }
-    return new_node;
+
+    if (_.isArray(node)) { return _.map(node,include_node,that);}
+    return include_node(node);
+
 };
+
+
 vq.models.CircVisData.prototype._remove_network_node = function(node) {
     var that = this;
-    this._network.nodes_array = _.reject(this._network.nodes_array,
-        function(obj) { return that.same_feature(obj,node);});
+
+    function remove_node(node) {
+        var new_node;
+        var index = this._network.data_nodes_map[this._network.node_key(node)];
+        //previously loaded this node, pull it from the node_array
+        if (_.isDefined(index)) {
+             that._network.nodes_array[index] = undefined;
+             that._network.data_nodes_map[that._network.node_key(node)] = undefined;
+        }
+    }
+
+    if (_.isArray(node)) { _.map(node,remove_node,that);}
+    else { remove_node(node); }
 };
+
 vq.models.CircVisData.prototype._remove_tick_data = function(node) {
     var that = this;
     this.ticks.data_map[node.chr] = _.reject(this.ticks.data_map[node.chr],
@@ -477,9 +500,9 @@ vq.models.CircVisData.prototype._insertNode = function(node) {
 vq.models.CircVisData.prototype._insertNodes = function(node_array) {
     var that = this;
     var nodes = [];
-    _.each(node_array, function(node) {
-            var insert_node = that._insertNode(node);
-            nodes.push(insert_node);
+    var insert_nodes = that.add_network_node(node_array);
+    _.each(insert_nodes, function(node) {
+             that._add_wedge_data(node);
         }
     );
     this._retileNodes();
@@ -499,6 +522,28 @@ vq.models.CircVisData.prototype._removeNode = function(node) {
     this._remove_tick_data(node);
     this._remove_network_node(node);
     this._remove_wedge_data(node);
+};
+
+vq.models.CircVisData.prototype._insertEdges = function(edge_array) {
+    var that = this;
+    var node_array = _.flatten(_.map(edge_array, function(edge) { return [edge.node1,edge.node2];}));
+    this._add_network_node(node_array);
+
+    function insert_edge(edge) {
+        var node_key = this._network.node_key;
+        var node1 = edge.node1, node2 = edge.node2;
+        var node1_key = node_key(node1), node2_key = node_key(node2);
+        var edge_key =node1_key +'_'+ node2_key;
+        var index = this._network.links_map[edge_key];
+
+        if (_.isUndefined(index)) { //link does not yet exist
+            var insert_edge = _.extend( {source:that._network.nodes_array[that._network.data_nodes_map[node1_key]],
+                target:that._network.nodes_array[that._network.data_nodes_map[node2_key]] }
+                , edge);
+            this._network.links_map[edge_key] = this._network.links_array.push(insert_edge) -1;  //add it
+            }
+        }
+        _.map(edge_array,insert_edge,that);
 };
 
 

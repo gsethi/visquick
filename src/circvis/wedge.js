@@ -130,7 +130,7 @@ vq.CircVis.prototype._drawWedge_withRange = function(chr, wedge_index) {
             .attr('d',d3.svg.arc()
                 .innerRadius(function(d) { return wedge_params._y_linear(d);})
                 .outerRadius(function(d) { return wedge_params._y_linear(d);})
-                .startAngle(startAngle)
+                .startAngle(0)
                 .endAngle(endAngle)
         ); 
     }

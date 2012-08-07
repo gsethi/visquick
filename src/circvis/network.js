@@ -4,7 +4,8 @@
 vq.CircVis.prototype._drawNetworkNodes = function (chr) {
     var     dataObj = this.chromoData;
 
-    var network_radius = function(node) { return dataObj._network.network_radius[chr] - (node.level * 2 * dataObj._network.node_radius(node)); };
+    var network_radius = dataObj._network.tile_nodes ? function(node) { return dataObj._network.network_radius[chr] - (node.level * 2 * dataObj._network.node_radius(node)); } :
+    function(node) { return dataObj._network.network_radius[chr];};
     var ideogram_obj = d3.select('.ideogram[data-region="'+chr+'"]');
 
     if(ideogram_obj.select('g.nodes').empty()) {
@@ -53,7 +54,8 @@ vq.CircVis.prototype._drawNetworkLinks= function() {
     var dataObj = this.chromoData;
 
     var bundle = d3.layout.bundle();
-    var network_radius = function(node) { return dataObj._network.network_radius[node.chr] - (node.level * 2 * dataObj._network.node_radius(node)); };
+        var network_radius = dataObj._network.tile_nodes ? function(node) { return dataObj._network.network_radius[node.chr] - (node.level * 2 * dataObj._network.node_radius(node)); } :
+        function(node) { return dataObj._network.network_radius[node.chr];};
 
     var line = d3.svg.line.radial()
         .interpolate("bundle")
@@ -70,18 +72,13 @@ vq.CircVis.prototype._drawNetworkLinks= function() {
     var edges = d3.select('g.links').selectAll("path.link")
         .data(bundle(dataObj._network.links_array).map(function(b, index) { return _.extend(dataObj._network.links_array[index],{spline:b});}));
 
-//        edges.transition()
-//        .delay(100)
-//        .duration(800)
-//        .attr('d', function(link) { return line(link.spline);});
-
         edges
         .enter().insert("svg:path")
         .attr("class", function(d) {
             return "link t_" + d.source.chr + " p_"+ d.target.chr;
         })
-         .style('fill','none')
-         .style('stroke','steelblue')
+        .style('fill','none')
+        .style('stroke',dataObj._network.link_strokeStyle)
         .style('stroke-width',function(a) { return dataObj._network.link_line_width(a) * 3;})
         .style('stroke-opacity',1e-6)
         .attr("d", function(link) { return line(link.spline);})
@@ -93,7 +90,7 @@ vq.CircVis.prototype._drawNetworkLinks= function() {
         .duration(800)
         .style('stroke-width',dataObj._network.link_line_width)
         .style('stroke-opacity',dataObj._network.link_alpha);
-//
+
         edges.exit()
         .transition()
         .duration(800)
