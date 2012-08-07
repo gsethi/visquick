@@ -83,14 +83,14 @@ vq.models.CircVisData.prototype.setDataModel = function() {
         {label : '_network.min_node_linkDegree', id: 'NETWORK.OPTIONS.min_node_linkdegree', cast : Number, defaultValue :  0 },
         {label : '_network.node_overlap_distance', id: 'NETWORK.OPTIONS.node_overlap_distance', cast : Number, defaultValue :  12000000.0},
         {label : '_network.tile_nodes', id: 'NETWORK.OPTIONS.tile_nodes', cast : Boolean, defaultValue : false },
+        {label : 'ticks._data_array', id: 'TICKS.DATA.data_array',  optional : true },
         {label : 'ticks.tooltipItems', id: 'TICKS.OPTIONS.tooltip_items', defaultValue :  { Chr : 'chr', Start : 'start', End : 'end', Label:'value'} },
         {label : 'ticks.tooltipLinks', id: 'TICKS.OPTIONS.tooltip_links',  defaultValue : {} },
         {label : 'ticks.label_map', id: 'TICKS.OPTIONS.label_map', defaultValue:[
             {key:'',label:''}
         ]},
-
+        {label : 'ticks.render_ticks', id: 'TICKS.OPTIONS.render_ticks', cast : Boolean ,defaultValue: Boolean(true)},
         {label : 'ticks.label_key', id: 'TICKS.OPTIONS.label_key', defaultValue:'value',cast: String},
-        {label : 'ticks._data_array', id: 'TICKS.DATA.data_array',  optional : true },
         {label : 'ticks.height', id: 'TICKS.OPTIONS.height', cast : Number, defaultValue: 60 },
         {label : 'ticks.wedge_width', id: 'TICKS.OPTIONS.wedge_width', cast : Number, defaultValue: 0.2 },
         {label : 'ticks.wedge_height', id: 'TICKS.OPTIONS.wedge_height', cast : Number, defaultValue: 10 },
@@ -308,7 +308,7 @@ vq.models.CircVisData.prototype._setupData = function() {
             var overlap_ratio = 7000000.0 / 3080419480;
             that.ticks.overlap_distance = overlap_ratio * totalChromLength;
         }
-        var tick_array = that.ticks.tile_ticks ? vq.utils.VisUtils.layoutChrTicks(that.ticks._data_array, that.ticks.overlap_distance) :
+        var tick_array = that.ticks.render_ticks && that.ticks.tile_ticks ? vq.utils.VisUtils.layoutChrTicks(that.ticks._data_array, that.ticks.overlap_distance) :
             that.ticks._data_array;
 
         var ticks_map = {};

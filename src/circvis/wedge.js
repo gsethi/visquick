@@ -176,7 +176,7 @@ vq.CircVis.prototype._drawWedgeData = function(chr, wedge_index) {
 };
 
 
-vq.CircVis.prototype._drawWedgeData_histogram = function(chr, wedge_index) {
+vq.CircVis.prototype._drawWedgeData_barchart = function(chr, wedge_index) {
     var that = this;
     var wedge_params = that.chromoData._wedge[wedge_index];
     var wedge_data = that.chromoData._ideograms[chr].wedge[wedge_index];
@@ -216,7 +216,6 @@ vq.CircVis.prototype._drawWedgeData_histogram = function(chr, wedge_index) {
 
     hist.exit()
         .transition()
-        
         .duration(800)
         .attrTween('d',function(a) {
             var i =d3.interpolate({outerRadius:wedge_params._thresholded_outerRadius(a[value_key])},{outerRadius:wedge_params._innerRadius});
@@ -227,6 +226,8 @@ vq.CircVis.prototype._drawWedgeData_histogram = function(chr, wedge_index) {
         .style('stroke-opacity',1e-6)
         .remove();
 };
+
+vq.CircVis.prototype._drawWedgeData_histogram = vq.CircVis.prototype._drawWedgeData_barchart;
 
 vq.CircVis.prototype._drawWedgeData_scatterplot = function(chr, wedge_index) {
     var that = this;
@@ -248,17 +249,15 @@ vq.CircVis.prototype._drawWedgeData_scatterplot = function(chr, wedge_index) {
             return "rotate(" + ((that.chromoData._ideograms[chr].theta(point.start) * 180 / Math.PI) - 90)+ ")translate(" +
                 wedge_params._thresholded_value_to_radius(point[value_key]) + ")";} )
         .attr('d',d3.svg.symbol()
-        .type(wedge_params._shape)
-        .size(Math.pow(wedge_params._radius(),2)) )
+            .type(wedge_params._shape)
+            .size(Math.pow(wedge_params._radius(),2)) )
         .transition()
-        
         .duration(800)
         .style('fill-opacity', 1)
         .style('stroke-opacity', 1);
 
     scatter.exit()
         .transition()
-        
         .duration(800)
         .style('fill-opacity', 1e-6)
         .style('stroke-opacity', 1e-6)
@@ -267,31 +266,32 @@ vq.CircVis.prototype._drawWedgeData_scatterplot = function(chr, wedge_index) {
 
 vq.CircVis.prototype._drawWedgeData_line = function(chr, wedge_index) {
     var that = this;
-    var DEG_TO_RADIANS = 180/Math.PI;
     var wedge_params = that.chromoData._wedge[wedge_index];
-    var wedge_data = that.chromoData._ideograms[chr].wedge[wedge_index];
+    var wedge_data = _.sortBy(that.chromoData._ideograms[chr].wedge[wedge_index],'start');
     var value_key = wedge_params._value_key;
     var wedge_obj = d3.select('.ideogram[data-region="'+chr+'"] .wedge[data-ring="'+wedge_index+'"]');
 
-    var scatter = wedge_obj.select('g.data')
+    var line = d3.svg.line.radial()
+            .interpolate('basis')
+            .tension(0.8)
+            .radius(function(point) { return wedge_params._thresholded_value_to_radius(point[value_key]);})
+            .angle(function(point) { return that.chromoData._ideograms[chr].theta(point.start);});
+
+    var line_plot = wedge_obj.select('g.data')
         .selectAll("path")
-        .data(wedge_data,that.chromoData._network.node_key);
-    scatter
+        .data([wedge_data]);
+    line_plot
         .enter().append('svg:path')
         .style('fill',wedge_params._fillStyle)
         .style('stroke',wedge_params._strokeStyle)
-        .style('fill-opacity', 1e-6)
+        .style('fill-opacity', 1e-6) //leave opacity at 0
         .style('stroke-opacity', 1e-6)
-        .attr('d',d3.svg.line.radial()
-            .radius(function(point) { return wedge_params._thresholded_value_to_radius(point[value_key]);})
-                .angle(function(point) { return (that.chromoData._ideograms[chr].theta(point.start) * DEG_TO_RADIANS) - 90})
-        )
+        .attr('d',line)
         .transition()
         .duration(800)
-        .style('fill-opacity', 1)
         .style('stroke-opacity', 1);
 
-    scatter.exit()
+    line_plot.exit()
         .transition()
         .duration(800)
         .style('fill-opacity', 1e-6)
@@ -435,8 +435,7 @@ vq.CircVis.prototype._drawWedgeData_karyotype = function(chr, wedge_index) {
         .startAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.start);})
         .endAngle(function(point) { return that.chromoData._ideograms[chr].theta(point.end);})
     )
-        .transition()
-        
+        .transition()     
         .duration(800)
         .style('fill-opacity', 1)
         .style('stroke-opacity', 1);

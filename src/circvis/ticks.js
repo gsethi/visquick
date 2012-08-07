@@ -2,10 +2,12 @@
 /** private **/
 vq.CircVis.prototype._drawTicks = function(chr) {
     var that = this;
-
-    var ideogram_obj = d3.select('.ideogram[data-region="'+chr+'"]');
     var dataObj = that.chromoData;
 
+    if(!dataObj.ticks.render_ticks) { return;}
+
+    var ideogram_obj = d3.select('.ideogram[data-region="'+chr+'"]');
+    
     var outerRadius  = (dataObj._plot.height / 2);
     var outerTickRadius = outerRadius - dataObj.ticks.outer_padding;
     var innerRadius = outerTickRadius - dataObj.ticks.height;
