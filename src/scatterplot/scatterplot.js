@@ -58,12 +58,14 @@ vq.ScatterPlot.prototype.draw = function(data) {
 
     var x = dataObj.COLUMNID.x;
     var y = dataObj.COLUMNID.y;
+    var value = dataObj.COLUMNID.value;
 
     var width = dataObj._plot.width;
     var height = dataObj._plot.height;
 
     this.x = x;
     this.y = y;
+    this.value = value;
 
     this.data_array = dataObj.data;
 
@@ -137,7 +139,12 @@ vq.ScatterPlot.prototype.getRegressData = function(scaleInfo) {
 
     var regress = dataObj._regression;
 
-    if (regress=='linear') {
+    if (regress == 'none') {
+        return {
+            type: regress
+        };
+    }
+    else if (regress == 'linear') {
         var valid_data = this.data.data.filter(function(d, e, f) {
                 return (d[y] && d[x]);
             }),
@@ -156,21 +163,21 @@ vq.ScatterPlot.prototype.getRegressData = function(scaleInfo) {
             slope = ((valid_data.length * sum_xy) - (sum_x * sum_y)) / ((valid_data.length * sum_x2) - (sum_x * sum_x));
 
         var intercept = (sum_y - slope * sum_x) / valid_data.length;
+
+        var line_minX = scaleInfo.showMinX * 0.95;
+        var line_maxX = scaleInfo.showMaxX * 1.05;
+        var line_maxY = slope * line_maxX + intercept;
+        var line_minY = slope * line_minX + intercept;
+
+        var lineArray = d3.scale.linear().domain([line_minX, line_maxX]).range([line_minY, line_maxY]);
+
+        return {
+            type: regress,
+            minX: line_minX,
+            maxX: line_maxX,
+            scale: lineArray
+        };
     }
-
-    var line_minX = scaleInfo.showMinX * 0.95;
-    var line_maxX = scaleInfo.showMaxX * 1.05;
-    var line_maxY = slope * line_maxX + intercept;
-    var line_minY = slope * line_minX + intercept;
-
-    var lineArray = d3.scale.linear().domain([line_minX, line_maxX]).range([line_minY, line_maxY]);
-
-    return {
-        type: regress,
-        minX: line_minX,
-        maxX: line_maxX,
-        scale: lineArray
-    };
 };
 
 vq.ScatterPlot.prototype._render = function() {
@@ -347,6 +354,11 @@ vq.ScatterPlot.prototype.updateData = function(disableTransition) {
         .attr("r", dataObj._radius)
         .call(_.bind(this.setDefaultSymbolStyle, this))
         .style("opacity", 1e-6);
+
+    dots_enter.append("title")
+        .text(function(d) {
+            return dataObj.COLUMNLABEL.value + ' ' + d[that.value];
+        });
 
     if (enable) {
         dots_enter = dots_enter.transition()
@@ -566,7 +578,6 @@ vq.models.ScatterPlotData.prototype.setDataModel = function () {
         {label : 'COLUMNID.value', id: 'valuecolumnid',cast : String, defaultValue : 'VALUE'},
         {label : 'COLUMNLABEL.x', id: 'xcolumnlabel',cast : String, defaultValue : ''},
         {label : 'COLUMNLABEL.y', id: 'ycolumnlabel',cast : String, defaultValue : ''},
-        {label : 'COLUMNLABEL.value', id: 'valuecolumnlabel',cast : String, defaultValue : ''},
         {label : 'COLUMNLABEL.value', id: 'valuecolumnlabel',cast : String, defaultValue : ''},
         {label : 'tooltipItems', id: 'tooltip_items', defaultValue : {
             X : 'X', Y : 'Y', Value : 'VALUE'            }  },
