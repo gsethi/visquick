@@ -49,7 +49,7 @@
             };
 
             var updateScatterPlot = function(data_array) {
-                $('#div_visualization').reset_data(data_array);
+                $('#div_visualization').scatterplot('reset_data', data_array);
             };
 
             $(document).ready(function() {
@@ -64,7 +64,6 @@
                     DATATYPE : "vq.models.ScatterPlotData",
                     CONTENTS : {
                         PLOT : {
-                            container: document.getElementById("div_visualization"),
                             width : 768, height: 768,
                             dblclick_notifier : function() {},
                             vertical_padding : 80,
@@ -94,11 +93,11 @@
                 $("#btn-update-data").on("click", updateBtnHandler);
 
                 $("#btn-toggle-brush").on("click", function() {
-                    $('#div_visualization').enable_brush();
+                    $('#div_visualization').scatterplot('enable_brush');
                 });
 
                 $("#btn-toggle-zoom").on("click", function() {
-                    $('#div_visualization').enable_zoom();
+                    $('#div_visualization').scatterplot('enable_zoom');
                 });
             });
         </script>
