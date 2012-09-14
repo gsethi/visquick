@@ -2,7 +2,7 @@
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Visquick scatterplot demo</title>
+        <title>VisQuick/jQuery scatterplot demo</title>
 
         <link href="../../assets/css/vq.css" type="text/css" rel="stylesheet" />
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
@@ -12,6 +12,7 @@
         <script type="text/javascript" src="../../lib/science/science.js"></script>
 
         <script type="text/javascript" src="../../src/scatterplot/scatterplot.js"></script>
+        <script type="text/javascript" src="../../src/scatterplot/scatterplot.jquery.js"></script>
         <script type="text/javascript" language="javascript" src="http://vis.systemsbiology.net/visquick/examples/scatterplot/js/data/mass_spec.json"></script>
         <style type="text/css">
             .extent {
@@ -22,9 +23,7 @@
         </style>
     </head>
     <body>
-        <div id="div_visualization" style="display:block;float:none;">
-
-        </div>
+        <div id="div_visualization" style="display:block;float:none;"></div>
         <div>
             <ul>
                 <li><button id="btn-update-data">Update plot data</button></li>
@@ -49,15 +48,24 @@
                 return data;
             };
 
-            var getScatterPlot = _.once(function(data_array) {
-                var sp =  new vq.ScatterPlot();
+            var updateScatterPlot = function(data_array) {
+                $('#div_visualization').reset_data(data_array);
+            };
+
+            $(document).ready(function() {
+                var updateBtnHandler = function() {
+                    var data = dataGen(50);
+                    updateScatterPlot(data);
+                };
+
+                var data_array = dataGen(50);
 
                 var plot_data = {
                     DATATYPE : "vq.models.ScatterPlotData",
                     CONTENTS : {
                         PLOT : {
                             container: document.getElementById("div_visualization"),
-                            width : 1024, height: 1024,
+                            width : 768, height: 768,
                             dblclick_notifier : function() {},
                             vertical_padding : 80,
                             horizontal_padding: 80,
@@ -81,33 +89,17 @@
                     }
                 };
 
-                $("#btn-toggle-brush").on("click", function() {
-                    sp.enableBrush();
-                });
-
-                $("#btn-toggle-zoom").on("click", function() {
-                    sp.enableZoom();
-                });
-
-                sp.draw(plot_data);
-                return sp;
-            });
-
-            var updateScatterPlot = function(data_array) {
-                var sp = getScatterPlot(data_array);
-
-                sp.resetData(data_array);
-            };
-
-            $(document).ready(function() {
-                var updateBtnHandler = function() {
-                    var data = dataGen(50);
-                    updateScatterPlot(data);
-                };
+                $('#div_visualization').scatterplot(plot_data);
 
                 $("#btn-update-data").on("click", updateBtnHandler);
 
-                updateBtnHandler();
+                $("#btn-toggle-brush").on("click", function() {
+                    $('#div_visualization').enable_brush();
+                });
+
+                $("#btn-toggle-zoom").on("click", function() {
+                    $('#div_visualization').enable_zoom();
+                });
             });
         </script>
     </body>
