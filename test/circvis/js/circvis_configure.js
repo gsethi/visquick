@@ -39,6 +39,12 @@
         return color_scale[type] || color_scale['other'];
     };
 
+    var fill_style = d3.scale.linear().domain([0,6]).range(['blue','red']);
+
+    function heatmap_scale(feature) {
+        return fill_style(feature['mutation_count']);
+    }
+
     var label_map = {'METH' : 'DNA Methylation',
         'CNVR': 'Copy Number Variation Region',
         'MIRN' :'mircoRNA',
@@ -185,7 +191,7 @@
                 PLOT : {
 
                     height : 50,
-                    type : 'histogram'
+                    type : 'barchart'
                 },
                 DATA:{
                     data_array : [],//link_density,
@@ -204,6 +210,32 @@
                     tooltip_items: hovercard_items_config,
                     tooltip_links: hovercard_links_config,
                     fill_style: 'orange',
+                    listener : function() {return null;}
+                }
+            },
+            {
+                PLOT : {
+
+                    height : 50,
+                    type : 'heatmap'
+                },
+                DATA:{
+                    data_array : [],//link_density,
+                    value_key : 'mutation_count'
+                },
+                OPTIONS: {
+                    legend_label : 'Mutation Count',
+                    legend_description : 'Mutation Count',
+                    min_value : 0,
+                    max_value : 6,
+                    base_value : 0,
+                    radius : 6,
+                    outer_padding: 10,
+                    stroke_style : heatmap_scale,
+                    line_width:1,
+                    tooltip_items: hovercard_items_config,
+                    tooltip_links: hovercard_links_config,
+                    fill_style: heatmap_scale,
                     listener : function() {return null;}
                 }
             }
@@ -261,9 +293,9 @@
 
     circvis = {};
     circvis.plot = function(div) {
-        var circle_vis = new vq.CircVis();
         var dataObject ={DATATYPE : "vq.models.CircVisData", CONTENTS : data(div) };
-        circle_vis.draw(dataObject);
+        var circle_vis = new vq.CircVis(dataObject);
+        circle_vis();
         return circle_vis;
     }
 

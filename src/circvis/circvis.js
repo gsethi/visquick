@@ -1,35 +1,28 @@
 //circvis.wedge.js
 
 
-vq.CircVis = function() {
-    vq.Vis.call(this);
-};
-vq.CircVis.prototype = vq.extend(vq.Vis);
+// vq.CircVis = function() {
+//     vq.Vis.call(this);
+// };
+// vq.CircVis.prototype = vq.extend(vq.Vis);
 
-/**
- *
- *  Constructs the Circvis model and adds the SVG tags to the defined DOM element.
- *
- * @param {JSON Object} circvis_object - the object defined above.
- */
-vq.CircVis.prototype.draw = function(data) {
+var CircVis = function(data) {
+  var chromoData = new vq.models.CircVisData(data);
 
-    var vis_data = new vq.models.CircVisData(data);
+  var circvis = function() {
 
-    if (vis_data.isDataReady()) {
-        this.chromoData = vis_data;
-        this._render();
+    if (chromoData.isDataReady()) {
+        _render();
     } else {
         console.warn('Invalid data input.  Check data for missing or improperly formatted values.');
     }
+    return this;
 };
 
-vq.CircVis.prototype._render = function() {
+   var _render = function() {
 
-    var that = this;
-
-    var dataObj = this.chromoData;
-    var width = dataObj._plot.width, height = dataObj._plot.height;
+    var width = chromoData._plot.width, 
+       height = chromoData._plot.height;
 
     function dragmove(d,u) {
         var transform = d3.transform(d3.select(this).attr('transform'));
@@ -55,9 +48,9 @@ vq.CircVis.prototype._render = function() {
         .on("drag", dragmove)
         .on("dragend", dragend);
 
-    var id = dataObj._plot.id;
+    var id = chromoData._plot.id;
 
-    var svg = d3.select(dataObj._plot.container)        
+    var svg = d3.select(chromoData._plot.container)        
         .append('svg:svg')
         .attr('id', id)
         .attr('width', width)
@@ -71,21 +64,21 @@ vq.CircVis.prototype._render = function() {
 
 
 var ideograms = svg.selectAll('g.ideogram')
-        .data(dataObj._chrom.keys)
+        .data(chromoData._chrom.keys)
         .enter().append('svg:g')
             .attr('class','ideogram')
             .attr('data-region',function(d) { return d;})
             .attr('opacity',1.0)
-            .attr('transform',function(key) { return 'rotate(' + dataObj._chrom.groups[key].startAngle * 180 / Math.PI + ')';})
+            .attr('transform',function(key) { return 'rotate(' + chromoData._chrom.groups[key].startAngle * 180 / Math.PI + ')';})
             .each(draw_ideogram_rings);
 //calculate label placement as halfway along tick radial segment
-    var outerRadius  = (dataObj._plot.height / 2);
-    var outerTickRadius = outerRadius - dataObj.ticks.outer_padding;
-    var innerRadius = outerTickRadius - dataObj.ticks.height;
+    var outerRadius  = (chromoData._plot.height / 2);
+    var outerTickRadius = outerRadius - chromoData.ticks.outer_padding;
+    var innerRadius = outerTickRadius - chromoData.ticks.height;
     var label_height = (outerTickRadius + innerRadius) / 2;
 
            ideograms.append('text')
-            .attr('transform',function(key) { return 'rotate(' + (dataObj._chrom.groups[key].endAngle - dataObj._chrom.groups[key].startAngle)
+            .attr('transform',function(key) { return 'rotate(' + (chromoData._chrom.groups[key].endAngle - chromoData._chrom.groups[key].startAngle)
                    * 180 / Math.PI / 2 +
                    ' )translate(0,-'+label_height+')';})
              .attr('class','region_label')
@@ -97,18 +90,18 @@ var ideograms = svg.selectAll('g.ideogram')
                .each(function() { $(this).disableSelection();})
             .on('mouseover',function ideogram_label_click(obj){
                    var half_arc_genome = {};
-                   var region_length = dataObj.normalizedLength[obj];
+                   var region_length = chromoData.normalizedLength[obj];
                    var new_length = 1.0 - region_length;
-                   var num_regions = _.size(dataObj.normalizedLength);
-                   _.each(dataObj.normalizedLength,function(value,key,list){
+                   var num_regions = _.size(chromoData.normalizedLength);
+                   _.each(chromoData.normalizedLength,function(value,key,list){
                         half_arc_genome[key] = value / new_length / 2;
                    });
                    half_arc_genome[obj] = 0.5;
                });
-    if(!_.isNull(dataObj._chrom.radial_grid_line_width)&&
-                dataObj._chrom.radial_grid_line_width > 0) {
+    if(!_.isNull(chromoData._chrom.radial_grid_line_width)&&
+                chromoData._chrom.radial_grid_line_width > 0) {
 
-        var network_radius = dataObj._network.network_radius;
+        var network_radius = chromoData._network.network_radius;
                 ideograms.selectAll('path.radial_lines')
                     .data(function(chr) {
                         return [[{x:0,y:-1*outerTickRadius},{x:0,y:-1*network_radius[chr]}]];
@@ -123,14 +116,16 @@ var ideograms = svg.selectAll('g.ideogram')
    }
 
         function draw_ideogram_rings(d) {
-            that._add_wedge( d);
-            that._drawTicks( d);
-            that._drawNetworkNodes( d);
+            _add_wedge( d);
+            _drawTicks( d);
+            _drawNetworkNodes( d);
         }
-    that._drawNetworkLinks(svg.insert('svg:g','.ideogram').attr('class','links'));
-    _(_.range(0,dataObj._wedge.length)).each(function(ring_index) {
-        that._draw_axes_ticklabels(ring_index);
-        that._insertRingClipping(ring_index);
+    _drawNetworkLinks(svg.insert('svg:g','.ideogram').attr('class','links'));
+    _(_.range(0,chromoData._wedge.length)).each(function(ring_index) {
+        _draw_axes_ticklabels(ring_index);
+        _insertRingClipping(ring_index);
     });
+
+    return this;
 
 };

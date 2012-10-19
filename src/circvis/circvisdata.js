@@ -445,7 +445,7 @@ vq.models.CircVisData.prototype._add_network_node = function(node) {
         var index = that._network.data_nodes_map[that._network.node_key(node)];
         var parent = that._network.nodes_array[node_parent_map[node.chr]];
         //previously loaded this node, pull it from the node_array
-        if (_.isUndefined(index)) {
+        if (_.isUndefined(index) && !_.isUndefined(parent)) {
             new_node = _.extend({parent:parent},node);
             parent.children.push(new_node);
             that._network.data_nodes_map[that._network.node_key(node)] = that._network.nodes_array.push(new_node) - 1;   
@@ -456,8 +456,8 @@ vq.models.CircVisData.prototype._add_network_node = function(node) {
         }
     }
 
-    if (_.isArray(node)) { return _.map(node,include_node,that);}
-    return include_node(node);
+    if (_.isArray(node)) { return _.compact(_.map(node,include_node,that));}
+    return include_node.call(that,node);
 
 };
 
@@ -469,20 +469,21 @@ vq.models.CircVisData.prototype._remove_network_node = function(node) {
         var new_node;
         var index = this._network.data_nodes_map[this._network.node_key(node)];
         //previously loaded this node, pull it from the node_array
-        if (_.isDefined(index)) {
-             that._network.nodes_array[index] = undefined;
-             that._network.data_nodes_map[that._network.node_key(node)] = undefined;
+        if (!_.isUndefined(index)) {
+             that._network.nodes_array= that._network.nodes_array.splice(index,1);
+             delete that._network.data_nodes_map[that._network.node_key(node)];
         }
     }
 
     if (_.isArray(node)) { _.map(node,remove_node,that);}
-    else { remove_node(node); }
+    else { remove_node.call(that,node); }
 };
 
 vq.models.CircVisData.prototype._remove_tick_data = function(node) {
     var that = this;
     this.ticks.data_map[node.chr] = _.reject(this.ticks.data_map[node.chr],
         function(obj) { return that.same_feature(obj,node);});
+    return this;
 };
 
 vq.models.CircVisData.prototype._insertNode = function(node) {
@@ -501,21 +502,23 @@ vq.models.CircVisData.prototype._insertNode = function(node) {
 vq.models.CircVisData.prototype._insertNodes = function(node_array) {
     var that = this;
     var nodes = [];
-    var insert_nodes = that.add_network_node(node_array);
+    var insert_nodes = that._add_network_node(node_array);
     _.each(insert_nodes, function(node) {
              that._add_wedge_data(node);
         }
     );
-    //this._retileNodes();
-    return nodes;
+    this._retileNodes();
+    return insert_nodes;
 };
 
 vq.models.CircVisData.prototype._retileNodes = function() {
+    var that = this;
     if (this._network.tile_nodes) {
-        var nodes = _.reject(this._network.nodes_array,function(node) { return node.children;});
-        nodes = vq.utils.VisUtils.layoutChrTiles(nodes ,this._network.node_overlap_distance);
-        this._network.nodes_array = _.union(this._network.base_nodes, nodes);
+        var nodes = _.reject(that._network.nodes_array,function(node) { return node.children;});
+        nodes = vq.utils.VisUtils.layoutChrTiles(nodes ,that._network.node_overlap_distance);
+        that._network.nodes_array = _.union(that._network.base_nodes, nodes);
     }
+    return this;
 };
 
 vq.models.CircVisData.prototype._removeNode = function(node) {
@@ -559,7 +562,7 @@ vq.models.CircVisData.prototype._insertEdge = function(edge) {
         return null;
     }
     //insert/recover both nodes
-    var edge_arr = that._insertNodes([nodes[0],nodes[1]]);
+    var edge_arr = _.map([nodes[0],nodes[1]],that._insertNode,that);
     if(_.any(edge_arr,function(a){return _.isNull(a);})) {
         console.error('Unable to insert node for requested edge'); return null;
     }
