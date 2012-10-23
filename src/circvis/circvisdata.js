@@ -21,8 +21,21 @@ vq.models.CircVisData.prototype.setDataModel = function() {
         {label: '_plot.width', id: 'PLOT.width', defaultValue: 400},
         {label: '_plot.height', id: 'PLOT.height', defaultValue: 400},
         {label : '_plot.container', id:'PLOT.container', optional : true},
-        {label: 'vertical_padding', id: 'PLOT.vertical_padding', defaultValue: 0},
-        {label: 'horizontal_padding', id: 'PLOT.horizontal_padding', defaultValue: 0},
+        {label: '_plot.vertical_padding', id: 'PLOT.vertical_padding', defaultValue: 0},
+        {label: '_plot.horizontal_padding', id: 'PLOT.horizontal_padding', defaultValue: 0},
+        {label : '_plot.enable_pan', id: 'PLOT.enable_pan', cast: Boolean, defaultValue : false },
+        {label : '_plot.enable_zoom', id: 'PLOT.enable_zoom', cast: Boolean, defaultValue : false },
+        {label : '_plot.show_legend', id: 'PLOT.show_legend', cast: Boolean, defaultValue : false },
+        {label : '_plot.legend_corner', id: 'PLOT.legend_corner', cast: String, defaultValue : 'ne' },
+        {label : '_plot.legend_radius', id: 'PLOT.legend_radius', cast: Number, defaultValue : 25 },
+        {label : '_plot.legend_show_rings', id: 'PLOT.legend_show_rings', cast: Boolean, defaultValue : true },
+        {label : '_plot.rotate_degrees', id: 'PLOT.rotate_degrees', cast: Number, defaultValue : 0 },
+        {label : '_plot.tooltip_timeout', id: 'PLOT.tooltip_timeout', cast: Number, defaultValue : 200 },
+
+        {label: '_data.features', id: 'DATA.features', defaultValue: []},
+        {label: '_data.edges', id: 'DATA.edges', defaultValue: []},       
+        {label: '_data.hash', id: 'DATA.hash', defaultValue: []},       
+
         {label : '_chrom.keys', id: 'GENOME.DATA.key_order', defaultValue : ["1","2","3","4","5","6","7","8","9","10",
             "11","12","13","14","15","16","17","18","19","20","21","22","X","Y"] },
         {label : '_chrom.length', id: 'GENOME.DATA.key_length', defaultValue : [] },
@@ -35,16 +48,6 @@ vq.models.CircVisData.prototype.setDataModel = function() {
             return null;
         }},
 
-        {label : '_plot.enable_pan', id: 'PLOT.enable_pan', cast: Boolean, defaultValue : false },
-        {label : '_plot.enable_zoom', id: 'PLOT.enable_zoom', cast: Boolean, defaultValue : false },
-        {label : '_plot.show_legend', id: 'PLOT.show_legend', cast: Boolean, defaultValue : false },
-        {label : '_plot.legend_corner', id: 'PLOT.legend_corner', cast: String, defaultValue : 'ne' },
-        {label : '_plot.legend_radius', id: 'PLOT.legend_radius', cast: Number, defaultValue : 25 },
-        {label : '_plot.legend_show_rings', id: 'PLOT.legend_show_rings', cast: Boolean, defaultValue : true },
-        {label : '_plot.rotate_degrees', id: 'PLOT.rotate_degrees', cast: Number, defaultValue : 0 },
-        {label : '_plot.tooltip_timeout', id: 'PLOT.tooltip_timeout', cast: Number, defaultValue : 200 },
-        {label : '_network.data', id: 'NETWORK.DATA.data_array',  optional : true },
-        //{label : '_network.radius', id: 'NETWORK.OPTIONS.network_radius', cast : Number, defaultValue : 100 },
         {label : '_network._outer_padding', id: 'NETWORK.OPTIONS.outer_padding',  optional : true },
         {label : '_network.node_listener', id: 'NETWORK.OPTIONS.node_listener', cast: Function, defaultValue : function() {
             return null;
@@ -72,9 +75,6 @@ vq.models.CircVisData.prototype.setDataModel = function() {
         {label : '_network.node_radius', id: 'NETWORK.OPTIONS.node_radius', cast : vq.utils.VisUtils.wrapProperty, defaultValue : function() {
             return 3;
         } },
-        {label : '_network.node_key', id: 'NETWORK.OPTIONS.node_key', cast : Function, defaultValue : function(node) {
-            return node['chr'];
-        } },
         {label : '_network.node_highlightMode', id: 'NETWORK.OPTIONS.node_highlight_mode', cast : String, defaultValue : 'brighten' },
         {label : '_network.node_tooltipFormat', id: 'NETWORK.OPTIONS.node_tooltipFormat', cast : vq.utils.VisUtils.wrapProperty, defaultValue : vq.utils.VisUtils.network_node_title },
         {label : '_network.node_tooltipItems', id: 'NETWORK.OPTIONS.node_tooltip_items', defaultValue :  { Chr : 'chr', Start : 'start', End : 'end'} },
@@ -83,7 +83,7 @@ vq.models.CircVisData.prototype.setDataModel = function() {
         {label : '_network.min_node_linkDegree', id: 'NETWORK.OPTIONS.min_node_linkdegree', cast : Number, defaultValue :  0 },
         {label : '_network.node_overlap_distance', id: 'NETWORK.OPTIONS.node_overlap_distance', cast : Number, defaultValue :  12000000.0},
         {label : '_network.tile_nodes', id: 'NETWORK.OPTIONS.tile_nodes', cast : Boolean, defaultValue : false },
-        {label : 'ticks._data_array', id: 'TICKS.DATA.data_array',  optional : true },
+        
         {label : 'ticks.tooltipItems', id: 'TICKS.OPTIONS.tooltip_items', defaultValue :  { Chr : 'chr', Start : 'start', End : 'end', Label:'value'} },
         {label : 'ticks.tooltipLinks', id: 'TICKS.OPTIONS.tooltip_links',  defaultValue : {} },
         {label : 'ticks.label_map', id: 'TICKS.OPTIONS.label_map', defaultValue:[
@@ -214,27 +214,22 @@ vq.models.CircVisData.prototype._setupData = function() {
 //    Ring Data
 
     if (this._wedge != undefined) {
+        var _data = [], cnv_map = {};
         _.each(this._wedge,function(wedge, index) {
-
+            var _globalData = !!~wedge._data.length; // are we using the global dataset?
             if (wedge._plot_type == 'tile' || wedge._plot_type == 'glyph') {
                 var max_tile_level = wedge._tile.show_all_tiles ?
                     Math.floor((wedge._plot_height - (wedge._radius() * 4)) / (wedge._tile.height + wedge._tile.padding)) :
                     undefined;
-                wedge._data = (wedge._plot_type == 'tile' ? vq.utils.VisUtils.layoutChrTiles(wedge._data, wedge._tile.overlap_distance, max_tile_level) :
+                _data = (wedge._plot_type == 'tile' ? vq.utils.VisUtils.layoutChrTiles(wedge._data, wedge._tile.overlap_distance, max_tile_level) :
                     vq.utils.VisUtils.layoutChrTicks(wedge._data, wedge._tile.overlap_distance, max_tile_level));
+                wedge._layout = _data.map(function(f) {var obj; return obj[wedge._hash(f)] = f.level;}); //layout is a sparse map of id to level
             }
+        });
 
-            cnv_map = {};
-            _.each(wedge._data, function(d) {
-                if (cnv_map[d.chr] === undefined) { cnv_map[d.chr] = [];}
-                cnv_map[d.chr].push(d);
-            });
+        wedge._chr = _globalData ? that._data.that.__.groupBy(wedge._data,'chr');
 
-            wedge._chr = {};
-            _.each(that._chrom.keys, function(d) {
-                wedge._chr[d] =  cnv_map[d] === undefined ? [] : _.extend(cnv_map[d],chrom_groups[d]);
-            });
-            wedge._outerRadius =
+        wedge._outerRadius =
                 (that._plot.height / 2) -
                     vq.sum(that._wedge.slice(0, index), function(a) {
                         return a._plot_height + a._outer_padding;
@@ -246,7 +241,7 @@ vq.models.CircVisData.prototype._setupData = function() {
 
             that._chrom.keys.forEach(function(d) {
                 that._ideograms[d]._outerRadius = (that._plot.height / 2) - (that.ticks.outer_padding + that.ticks.height);
-                that._ideograms[d].wedge[index] = wedge._chr[d]; //?
+                that._ideograms[d].wedge[index] = {wedge._chr[d]; }
             });
 
             wedge.hovercard = vq.hovercard({
@@ -303,13 +298,12 @@ vq.models.CircVisData.prototype._setupData = function() {
 
 //    Tick Data
 
-    if (this.ticks != undefined && this.ticks._data_array != undefined && this.ticks._data_array != null) {
         if (that.ticks.overlap_distance === undefined) {
             var overlap_ratio = 7000000.0 / 3080419480;
             that.ticks.overlap_distance = overlap_ratio * totalChromLength;
         }
-        var tick_array = that.ticks.render_ticks && that.ticks.tile_ticks ? vq.utils.VisUtils.layoutChrTicks(that.ticks._data_array, that.ticks.overlap_distance) :
-            that.ticks._data_array;
+        var ticks = that.ticks.tile_ticks ? vq.utils.VisUtils.layoutChrTicks(that._data.features, that.ticks.overlap_distance) :
+            
 
         var ticks_map = {};
         _.each(tick_array,function(d) {
@@ -334,8 +328,6 @@ vq.models.CircVisData.prototype._setupData = function() {
             data_config : that.ticks.tooltipItems,
             tool_config : that.ticks.tooltipLinks
         });
-
-    }
 
     //------------------- NETWORK DATA
     var nodes = {};

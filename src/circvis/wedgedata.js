@@ -20,12 +20,10 @@ vq.models.CircVisData.WedgeData.prototype = vq.extend(vq.models.VisData);
 
 vq.models.CircVisData.WedgeData.prototype.setDataModel = function() {
     this._dataModel = [
-        {label : '_data', id: 'DATA.data_array', defaultValue : [
-            {"chr": "1", "end": 12784268, "start": 644269,
-                "value": -0.058664}
-        ]},
-        {label : '_value_key', id: 'DATA.value_key', defaultValue : 'value',cast: String },
-        {label : '_hash', id: 'DATA.hash', defaultValue : 'label',cast: String },
+        {label : '_data', id: 'DATA.data_array', defaultValue : [   ]},
+        {label : '_value_key', id: 'DATA.value_key', defaultValue : 'value',cast: String },  //value to plot
+        {label : '_hash', id: 'DATA.hash', defaultValue : function(f) { return 'label';} ,cast: vq.utils.VisUtils.wrapProperty }, //unique identifier
+       
         {label : 'listener', id: 'OPTIONS.listener', defaultValue :  function(a, b) {
         } },
         {label : '_plot_type', id: 'PLOT.type', defaultValue : 'histogram' },
@@ -34,9 +32,8 @@ vq.models.CircVisData.WedgeData.prototype.setDataModel = function() {
             return 'red';
         } },
         {label : '_strokeStyle', id: 'OPTIONS.stroke_style', cast : vq.utils.VisUtils.wrapProperty, defaultValue : function(d) {
-            return 'black';
-        } },
-         {label : '_lineWidth', id: 'OPTIONS.line_width', cast : Number, defaultValue : 0.5 },
+            return 'black'; } },
+        {label : '_lineWidth', id: 'OPTIONS.line_width', cast : Number, defaultValue : 0.5 },
         {label : '_shape', id: 'OPTIONS.shape', cast : vq.utils.VisUtils.wrapProperty, defaultValue : function(d) {
             return 'circle';
         } },
@@ -50,6 +47,7 @@ vq.models.CircVisData.WedgeData.prototype.setDataModel = function() {
         {label : '_legend_label', id: 'OPTIONS.legend_label', cast: String, defaultValue : '' },
         {label : '_legend_desc', id: 'OPTIONS.legend_description', cast: String, defaultValue : '' },
         {label : '_draw_axes', id: 'OPTIONS.draw_axes', cast: Boolean, defaultValue : true },
+        {label : '_draw_axes', id: 'OPTIONS.show_tooltips', cast: Boolean, defaultValue : true },
         {label : '_tooltipFormat', id: 'OPTIONS.tooltipFormat', cast :vq.utils.VisUtils.wrapProperty,
             defaultValue : function(c, d) {
                 return "Chr " + d + "\nStart: " + c.start + "\nEnd: " + c.end;
