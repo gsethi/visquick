@@ -52,7 +52,7 @@ vq.CubbyHole = function() {
     this.selectedProbesetId('');
 
 };
-vq.CubbyHole.prototype = pv.extend(vq.Vis);
+vq.CubbyHole.prototype = vq.extend(vq.Vis);
 
 vq.CubbyHole.prototype
         .property('selectedProbesetId');
@@ -112,8 +112,8 @@ vq.CubbyHole.prototype.draw = function(data) {
         var value = dataObj.COLUMNID.value;
 
         var data_array = dataObj.data;
-        var xScale = pv.Scale.ordinal(dataObj.sortOrderX).splitBanded(0, that.width(),0.8);
-        var yScale = pv.Scale.ordinal(dataObj.sortOrderY).splitBanded(0, that.height(),0.8);
+        var xScale =d3.Scale.ordinal(dataObj.sortOrderX).splitBanded(0, that.width(),0.8);
+        var yScale = d3.Scale.ordinal(dataObj.sortOrderY).splitBanded(0, that.height(),0.8);
         var bandWidth = xScale.range().band / 2;
         var bandHeight = yScale.range().band / 2;
         var padHeight = bandHeight /4;
@@ -128,18 +128,18 @@ vq.CubbyHole.prototype.draw = function(data) {
             selectedProbesetId = this._selectedProbesetId;
         }
 
-        var vis = new pv.Panel()
-                .width(that.width())
-                .height(that.height())
-                .bottom(that.vertical_padding())
-                .top(that.vertical_padding())
-                .left(that.horizontal_padding())
-                .right(that.horizontal_padding())
-                .strokeStyle("#aaa")
-                .events("all")
-                .event("mousemove", pv.Behavior.point())
-                .canvas(div);
+        var point= new Function();  // on mouse move
 
+        var vis = d3.select(div).append('svg')
+                    .attr('width',that.width())
+                    .attr('height',that.height())
+                    .style('padding-bottom',that.vertical_padding())
+                    .style('padding-top',that.vertical_padding())
+                    .style('padding-left',horizontal_padding())
+                    .style('padding-right',horizontal_padding())
+                .append('g')
+                .call(point);
+                
         //y-axis ticks
         vis.add(pv.Rule)
                 .data(yScale.domain())
@@ -189,10 +189,10 @@ vq.CubbyHole.prototype.draw = function(data) {
             .overflow("hidden");
 
         var strokeStyle = function(data) {
-            return pv.color(dataObj._strokeStyle(data));
+            return dataObj._strokeStyle(data);
         };
         var fillStyle = function(data) {
-            return pv.color(dataObj._fillStyle(data));
+            return dataObj._fillStyle(data);
         };
         var violinPanel =  panel.add(pv.Panel)
             .strokeStyle(null)
