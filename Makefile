@@ -74,7 +74,8 @@ vq.stemplot.js: \
 	src/stemplot/stemplot.js
 
 vq.scatterplot.js: \
-	src/scatterplot/scatterplot.js
+	src/scatterplot/scatterplot.js \
+	src/scatterplot/scatterplot.jquery.js 
 
 vq.flexscroll.js: \
 	src/flexscroll/flexscroll.js

@@ -1,4 +1,4 @@
-!function($) {
+(function($) {
     var methods = {
       init : function( options ) {
           return this.each(function() {
@@ -49,4 +49,4 @@
           $.error( 'Method ' +  method + ' does not exist on jQuery.scatterplot' );
       }
     };
-}(window.jQuery);
+})(window.jQuery);
