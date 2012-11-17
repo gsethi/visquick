@@ -17,6 +17,7 @@
 
 
     <script type="text/javascript" src="js/circvis_configure.js"></script>
+    <script type="text/javascript" src="js/data_generate.js"></script>
 
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -41,7 +42,7 @@ Drag the circvis (on the rings) to rotate the entire display.<br/>
 <script type="text/javascript">
 
     $('#50_random_edge').on('click',function() {
-                var associations = _.map(_.range(30),fg.generateAssociation);
+                var associations = _.map(_.range(30),function() { return fg.generateAssociation(0);},fg);
                 addRFAssociation(associations);
             }
     );
@@ -50,9 +51,6 @@ Drag the circvis (on the rings) to rotate the entire display.<br/>
             }
     );
 
-    $('#all_clin_remove').on('click', function() {
-            circle.removeNodes(function(node) {return !_.isUndefined(node.clin_alias);});
-    });
     $('#all_remove').on('click', function() {
             circle.removeEdges('all');
     });
@@ -60,7 +58,8 @@ Drag the circvis (on the rings) to rotate the entire display.<br/>
     var fg = new FeatureGenerator({
         nodes: {
             fields: [
-            {property:'mut', max:400, roundOff:true}
+            {property:'mutation_count', max:400, roundOff:true},
+            {property:'annotated_type', max:5, roundOff:true}
             ]
         },
         edges: {
@@ -70,23 +69,10 @@ Drag the circvis (on the rings) to rotate the entire display.<br/>
         }
     });
 
-    var associations = _.map(_.range(30),fg.generateAssociation);
+    var associations = _.map(_.range(30),fg.generateAssociation,fg);
 
-    function addRFAssociation(array) {
-        var edges = [],
-            nodes =[];
-            array = _.isArray(array) ? array : [array];
-                _.each(array, function(assoc){
-                    if (_.isEmpty(assoc.node1.chr)) {
-                        nodes.push(_.extend(assoc.node2,{clin_alias:assoc.node1.label}));
-                        return;
-                    }
-                    else {
-                        edges.push(assoc);
-                    }        
-                });
-                circle.addEdges(edges);
-                circle.addNodes(nodes);
+    function addRFAssociation(edges) {
+                  circle.addEdges(edges);
     }
 
 

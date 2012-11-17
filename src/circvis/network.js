@@ -3,7 +3,9 @@
 /** private **/
 var _drawNetworkNodes = function (chr) {
 
-    var network_radius = chromoData._network.tile_nodes ? function(node) { return chromoData._network.network_radius[chr] - (node.level * 2 * chromoData._network.node_radius(node)); } :
+    var hash = chromoData._data.hash;
+    var level = function(node) { return chromoData._network.layout[hash(node)];};
+    var network_radius = chromoData._network.tile_nodes ? function(node) { return chromoData._network.network_radius[chr] - (level(node) * 2 * chromoData._network.node_radius(node)); } :
     function(node) { return chromoData._network.network_radius[chr];};
 
     var ideogram_obj = d3.select('.ideogram[data-region="'+chr+'"]');
@@ -11,12 +13,11 @@ var _drawNetworkNodes = function (chr) {
     if(ideogram_obj.select('g.nodes').empty()) {
         ideogram_obj.append('svg:g').attr('class','nodes');
     }
-    var arr = chromoData._network.nodes_array.filter(function(node) { return !node.children && node.chr == chr;});
-
+    
     var node = ideogram_obj
         .select('g.nodes')
         .selectAll('circle.node')
-        .data(chromoData._network.nodes_array.filter(function(node) { return !node.children && node.chr == chr;}),chromoData._network.node_key);
+        .data(_.where(chromoData._data.features,{chr:chr}),hash);
 
     var node_enter = node.enter(),
         node_exit = node.exit();
@@ -51,9 +52,11 @@ var _drawNetworkNodes = function (chr) {
 
 var _drawNetworkLinks= function() {
 
+    var hash = chromoData._data.hash;
+    var level = function(node) { return chromoData._network.layout[hash(node)];};
     var bundle = d3.layout.bundle();
 
-    var network_radius = chromoData._network.tile_nodes ? function(node) { return chromoData._network.network_radius[node.chr] - (node.level * 2 * chromoData._network.node_radius(node)); } :
+    var network_radius = chromoData._network.tile_nodes ? function(node) { return chromoData._network.network_radius[node.chr] - (level(node) * 2 * chromoData._network.node_radius(node)); } :
         function(node) { return chromoData._network.network_radius[node.chr];};
 
     var line = d3.svg.line.radial()

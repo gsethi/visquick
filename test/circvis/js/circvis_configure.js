@@ -54,6 +54,8 @@
         'SAMP': 'Tumor Sample'
     };
 
+    var types = Object.keys(label_map);
+
     var hovercard_items_config = {Feature:function(feature) { var label = feature.label.split(':'); return label[2] + 
     ' (<span style="color:'+type_color(feature_type(feature))+'">' +
         label_map[feature_type(feature)] + '</span>)';},
@@ -112,6 +114,12 @@
 
     _.each(links, function(item){hovercard_links_config[item.label]=item;});
     var data = function(div) { return {
+
+        DATA: {
+            features: [],
+            edges: [],
+            hash : function(feature) { return feature.label}
+        },
         PLOT: {
             container: div,
             width : width,
@@ -161,25 +169,23 @@
                 }
             },
             {   PLOT : {
-                height : 50,
+                height : 60,
                 type : 'glyph'
-            } ,
+                } ,
                 DATA:{
-                    data_array : [],//cnv
-                    value_key:'clin_alias',
-                    hash:function(point) { return point.label + '_' + point.clin_alias;}
+                    value_key:'annotated_type',
                 },
                 OPTIONS: {
-                    tile_height:10,
-                    tile_padding:6,
-                    tile_overlap_distance:10000000,
+                    tile_height: 10,
+                    tile_padding: 4,
+                    tile_overlap_distance: 100000000,
                     tile_show_all_tiles : true,
-                    fill_style:function(feature) { return type_color(clin_type(feature));},
-                    stroke_style:null,
-                    line_width:3,
+                    fill_style : function(feature) { return type_color(types[feature.annotated_type]);},
+                    stroke_style : null,
+                    line_width : 3,
                     legend_label : 'Clinical Associations',
-                    shape:clinical_shape,
-                    radius:12,
+                    shape : clinical_shape,
+                    radius : 9,
                     legend_description : 'Clinical Associations',
                     listener : function() {return null;},
                     outer_padding: 5,
@@ -194,7 +200,6 @@
                     type : 'barchart'
                 },
                 DATA:{
-                    data_array : [],//link_density,
                     value_key : 'mutation_count'
                 },
                 OPTIONS: {
@@ -220,7 +225,6 @@
                     type : 'heatmap'
                 },
                 DATA:{
-                    data_array : [],//link_density,
                     value_key : 'mutation_count'
                 },
                 OPTIONS: {
@@ -240,11 +244,7 @@
                 }
             }
         ],
-
         TICKS : {
-            DATA: {
-                data_array:[]
-            },
             OPTIONS : {
                 wedge_height: 15,
                 wedge_width:0.7,

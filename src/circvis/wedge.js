@@ -191,7 +191,7 @@ var _drawWedgeData_array = {
 
     var hist = wedge_obj.select('g.data')
         .selectAll("path")
-        .data(wedge_data,wedge_params._hash());
+        .data(wedge_data,wedge_params._hash);
     hist
         .enter().append('svg:path')
         .style('fill',wedge_params._fillStyle)
@@ -232,7 +232,7 @@ var _drawWedgeData_array = {
 
     var scatter = wedge_obj.select('g.data')
         .selectAll("path")
-        .data(wedge_data,wedge_params._hash());
+        .data(wedge_data,wedge_params._hash);
     scatter
         .enter().append('svg:path')
         .style('fill',wedge_params._fillStyle)
@@ -357,7 +357,7 @@ var _drawWedgeData_array = {
     var wedge_obj = d3.select('.ideogram[data-region="'+chr+'"] .wedge[data-ring="'+wedge_index+'"]');
     var band = wedge_obj.select('g.data')
         .selectAll("path")
-        .data(wedge_data,wedge_params._hash());
+        .data(wedge_data,wedge_params._hash);
     band
         .enter().append('svg:path')
         .style('fill',wedge_params._fillStyle)
@@ -395,7 +395,7 @@ var _drawWedgeData_array = {
 
     var glyph = wedge_obj.select('g.data')
         .selectAll("path")
-        .data(wedge_data,wedge_params._hash());
+        .data(wedge_data,wedge_params._hash);
     glyph
         .enter().append('svg:path')
         .style('fill',wedge_params._fillStyle)
@@ -419,7 +419,6 @@ var _drawWedgeData_array = {
         .style('stroke-opacity', 1);
     glyph.exit()
         .transition()
-        
         .duration(800)
         .style('fill-opacity', 1e-6)
                 .style('stroke-opacity', 1e-6)
@@ -435,7 +434,7 @@ var _drawWedgeData_array = {
 
     var tile = wedge_obj.select('g.data')
         .selectAll("path")
-        .data(wedge_data,wedge_params._hash());
+        .data(wedge_data,wedge_params._hash);
     tile
         .enter().append('svg:path')
         .style('fill',wedge_params._fillStyle)
@@ -470,7 +469,7 @@ var _drawWedgeData_array = {
     var wedge_obj = d3.select('.ideogram[data-region="'+chr+'"] .wedge[data-ring="'+wedge_index+'"]');
     var karyotype = wedge_obj.select('g.data')
         .selectAll("path")
-        .data(wedge_data,wedge_params._hash());
+        .data(wedge_data,wedge_params._hash);
     karyotype
         .enter().append('svg:path')
         .style('fill',function(point) { return point[value_key];})
@@ -516,7 +515,7 @@ var _drawWedgeData_array = {
 
     var heat = wedge_obj.select('g.data')
         .selectAll("path")
-        .data(wedge_data,wedge_params._hash());
+        .data(wedge_data,wedge_params._hash);
     heat
         .enter().append('svg:path')
         .style('fill',wedge_params._fillStyle)

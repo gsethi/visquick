@@ -223,11 +223,11 @@ vq.utils.VisUtils.layoutChrTicks = function(tiles,overlap,max_level) {
 vq.utils.VisUtils.layoutTiles = function(tiles,overlap,max_level, treat_as_points){
     var points = treat_as_points || Boolean(false);
     var new_tiles = new Array(tiles.length);
-    new_tiles = tiles.map(function(b) { _.extend(b,{tile_length : (b.end - b.start)});  // generate a tile length property
+    new_tiles = _.map(tiles,function(b) { return _.extend({},b,{tile_length : (b.end - b.start)});});  // generate a tile length property
     new_tiles = new_tiles.sort(function(a,b) { return (a.tile_length < b.tile_length) ? -1 :
             (a.tile_length > b.tile_length) ? 1 : a.start < b.start ? -1 : 1 ;}).reverse();         //sort all tiles by tile length
     if (new_tiles.length) {new_tiles[0].level = 0;}
-    new_tiles.forEach(function(tile,index,array) {
+    _.each(new_tiles,function(tile,index,array) {
             vq.utils.VisUtils.layoutTile(tile,index,array,overlap,max_level,treat_as_points);
     });
     return new_tiles;

@@ -1,7 +1,6 @@
 /*EDGES*/
 
-circvis.addEdges = function(edge_array,ignore_nodes) {
-    var ignore = _.isBoolean(ignore_nodes) ? ignore_nodes : Boolean(false);
+circvis.addEdges = function(edge_array) {
     var edges;
     if (_.isArray(edge_array)) {
         edges = this._insertEdges(edge_array);
@@ -9,12 +8,12 @@ circvis.addEdges = function(edge_array,ignore_nodes) {
     else {
         edges = this._insertEdges([edge_array]);
     }
-    _drawNetworkLinks();
-
-    if (ignore) { return;}
 
     var nodes = _.flatten(_.map(edges, function(edge) { return [edge.source,edge.target];}));
     this.addNodes(nodes);
+
+    _drawNetworkLinks();
+
 };
 
 circvis.removeEdges = function(edge_array, ignore_nodes) {
@@ -30,8 +29,6 @@ circvis.removeEdges = function(edge_array, ignore_nodes) {
         chromoData._removeEdge(edge_array);
     }
 
-    _drawNetworkLinks();
-
     if(ignore) {return;}
 
     var removable = _edgeListToNodeList(edge_array);
@@ -39,6 +36,7 @@ circvis.removeEdges = function(edge_array, ignore_nodes) {
     var nodes_to_remove = _.difference(removable,remaining_nodes);
     this.removeNodes(nodes_to_remove);
 
+    _drawNetworkLinks();
 };
 
 
@@ -70,14 +68,14 @@ circvis.addNodes = function(node_array) {
 circvis.removeNodes = function(node_array) {
     var that = this;
     if (_.isFunction(node_array)) {
-        node_array = _.filter(chromoData._network.nodes_array, node_array);
+        node_array = _.filter(chromoData._data.features, node_array);
     }
 
     if (_.isArray(node_array)) {
         _.each(node_array, function(node) {
             chromoData._removeNode(node);
         });
-        chromoData._retileNodes();
+        chromoData._retile();
         _.each(_.uniq(_.pluck(node_array,'chr')), function(chr) {
             _drawTicks(chr);
             _drawNetworkNodes(chr);

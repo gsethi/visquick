@@ -7,7 +7,7 @@ vq.models.CircVisData = function(data) {
     this.setDataModel();
 
     if (this.getDataType() == 'vq.models.CircVisData') {
-        this._build_data(this.getContents())
+        this._build_data(this.getContents());
     } else {
         console.warn('Unrecognized JSON object.  Expected vq.models.CircVisData object.');
     }
@@ -148,7 +148,7 @@ vq.models.CircVisData.prototype._setupData = function() {
     _.each(chrom_keys_array,function(val,index){chrom_keys_order[val]=index;});
 
     chrom_length_array = this._chrom.length.filter(function(d) {
-        return chrom_keys_order[d['chr_name']] != null;
+        return chrom_keys_order[d['chr_name']] !== null;
     });
     chrom_length_array.sort(function(c, d) {
         return chrom_keys_order[c['chr_name']] - chrom_keys_order[d['chr_name']] > 0;
@@ -185,7 +185,7 @@ vq.models.CircVisData.prototype._setupData = function() {
         theta[d] = d3.scale.linear().domain([0, chrom_length_map[d.toUpperCase()]])
             .range([0, 2 * Math.PI * normalizedLength[d]]);
 
-        if (that._chrom.reverse_list != undefined &&
+        if (that._chrom.reverse_list !== undefined &&
             that._chrom.reverse_list.filter(
                 function(c) {
                     return c == d;
@@ -204,31 +204,47 @@ vq.models.CircVisData.prototype._setupData = function() {
 
     this.theta = theta;
     this._ideograms={};
+    this._data.chr = {};
     _.each(that._chrom.keys, function(d) {
         startAngle_map[d] =  startAngle[d] + rotation;
         that._ideograms[d] = _.extend(chrom_groups[d],{wedge:[],_feature_angle : function(a) { return this.startAngle + this.theta(a); }});
+        that._data.chr[d] = [];
     });
     this.startAngle_map = startAngle_map;
     this._chrom.groups = chrom_groups;
 
+//Global Data
+
+    if (this._data.features,length) {     
+       this._data.chr = _.groupBy(this._data.features,'chr');
+    } 
+
 //    Ring Data
 
-    if (this._wedge != undefined) {
+    if (this._wedge !== undefined) {
         var _data = [], cnv_map = {};
-        _.each(this._wedge,function(wedge, index) {
-            var _globalData = !!~wedge._data.length; // are we using the global dataset?
+        _.each(this._wedge, function(wedge, index) {
+             // are we using the global dataset?
+             wedge._globalData = true;
+            if(  wedge._globalData = !Boolean(wedge._data.length)) {
+                wedge._data = that._data.features;
+                }
+            wedge._hash = _.isUndefined(wedge._hash) ? that._data.hash : wedge._hash;
+
             if (wedge._plot_type == 'tile' || wedge._plot_type == 'glyph') {
-                var max_tile_level = wedge._tile.show_all_tiles ?
-                    Math.floor((wedge._plot_height - (wedge._radius() * 4)) / (wedge._tile.height + wedge._tile.padding)) :
+                var max_tile_level = 
+                wedge._tile.show_all_tiles ?
+                    Math.floor((wedge._plot_height - (wedge._radius() * 2)) / (wedge._tile.height + wedge._tile.padding)) :
                     undefined;
-                _data = (wedge._plot_type == 'tile' ? vq.utils.VisUtils.layoutChrTiles(wedge._data, wedge._tile.overlap_distance, max_tile_level) :
+                _data = (wedge._plot_type == 'tile' ? 
+                    vq.utils.VisUtils.layoutChrTiles(wedge._data, wedge._tile.overlap_distance, max_tile_level) :
                     vq.utils.VisUtils.layoutChrTicks(wedge._data, wedge._tile.overlap_distance, max_tile_level));
-                wedge._layout = _data.map(function(f) {var obj; return obj[wedge._hash(f)] = f.level;}); //layout is a sparse map of id to level
+                wedge._layout = {};
+                _.each(_data,function(f) { wedge._layout[wedge._hash(f)] = f.level;}); //layout is a sparse map of id to level
             }
-        });
 
-        wedge._chr = _globalData ? that._data.that.__.groupBy(wedge._data,'chr');
-
+        wedge._chr = wedge._globalData ? that._data.chr : _.groupBy(wedge._data,'chr');
+                    
         wedge._outerRadius =
                 (that._plot.height / 2) -
                     vq.sum(that._wedge.slice(0, index), function(a) {
@@ -239,9 +255,9 @@ vq.models.CircVisData.prototype._setupData = function() {
 
             wedge._innerRadius = wedge._outerPlotRadius - wedge._plot_height;
 
-            that._chrom.keys.forEach(function(d) {
-                that._ideograms[d]._outerRadius = (that._plot.height / 2) - (that.ticks.outer_padding + that.ticks.height);
-                that._ideograms[d].wedge[index] = {wedge._chr[d]; }
+            _.each(that._chrom.keys, function(d) {
+                that._ideograms[d]._outerRadius = ( that._plot.height / 2 ) -  that.ticks.outer_padding + that.ticks.height;
+                that._ideograms[d].wedge[index] = wedge._chr[d];
             });
 
             wedge.hovercard = vq.hovercard({
@@ -273,10 +289,10 @@ vq.models.CircVisData.prototype._setupData = function() {
             wedge._thresholded_value_to_radius = function(d) { return Math.min(Math.max(wedge._y_axis(d),wedge._innerRadius),wedge._outerPlotRadius); };
             wedge._thresholded_radius = function(d) { return Math.min(Math.max(d,wedge._innerRadius),wedge._outerPlotRadius); };
 
-            wedge._thresholded_tile_innerRadius = function(c,d) { return wedge._innerRadius + (d._tile.height + d._tile.padding) * c.level;};
-            wedge._thresholded_tile_outerRadius = function(c,d) { return wedge._innerRadius + ((d._tile.height + d._tile.padding) * c.level) + d._tile.height;};
+            wedge._thresholded_tile_innerRadius = function(c,d) { return wedge._innerRadius + (d._tile.height + d._tile.padding) * wedge._layout[wedge._hash(c)];};
+            wedge._thresholded_tile_outerRadius = function(c,d) { return wedge._innerRadius + ((d._tile.height + d._tile.padding) * wedge._layout[wedge._hash(c)]) + d._tile.height;};
             if (wedge._plot_type == 'glyph') {
-                wedge._glyph_distance = function(c) { return (((wedge._tile.height + wedge._tile.padding) * c.level)
+                wedge._glyph_distance = function(c) { return (((wedge._tile.height + wedge._tile.padding) * wedge._layout[wedge._hash(c)])
                     + wedge._innerRadius + (wedge._radius(c)));};
                 wedge._checked_endAngle = function(feature,chr) {
                     if (that._chrom.keys.length == 1) {
@@ -298,27 +314,22 @@ vq.models.CircVisData.prototype._setupData = function() {
 
 //    Tick Data
 
-        if (that.ticks.overlap_distance === undefined) {
-            var overlap_ratio = 7000000.0 / 3080419480;
-            that.ticks.overlap_distance = overlap_ratio * totalChromLength;
+        
+        if (that.ticks.tile_ticks) {
+            if (that.ticks.overlap_distance === undefined) {
+                var overlap_ratio = 7000000.0 / 3080419480;
+                that.ticks.overlap_distance = overlap_ratio * totalChromLength;
+            }
+        
+            var _tickData = 
+                    vq.utils.VisUtils.layoutChrTicks(this._data.features, that.ticks.overlap_distance);
+            var layout = this.ticks._layout = {};
+            var hash = that._data.hash;
+            _.each(_tickData,function(f) {layout[hash(f)] = f.level;}); 
         }
-        var ticks = that.ticks.tile_ticks ? vq.utils.VisUtils.layoutChrTicks(that._data.features, that.ticks.overlap_distance) :
-            
 
-        var ticks_map = {};
-        _.each(tick_array,function(d) {
-            if (ticks_map[d.chr] === undefined) { ticks_map[d.chr] = new Array();}
-            ticks_map[d.chr].push(d);
-        });
-
-        this.ticks.data_map = {};
-        _.each(that._chrom.keys, function(d) {
-            that.ticks.data_map[d] =  ticks_map[d] === undefined ? [] : ticks_map[d];
-        });
-        this.ticks._data_array = [];
-        delete tick_array;
-        ticks_map = [];
-
+        this.ticks.data_map = that._data.chr;     
+        
         this.ticks.hovercard =  vq.hovercard({
             canvas_id : that._plot.id,
             include_header : false,
@@ -377,7 +388,7 @@ vq.models.CircVisData.prototype._setupData = function() {
 
         //var edges = _.filter(_.map(that._network.data, vq.models.CircVisData.prototype._insertEdge, that),
         //function(edge) { return !_.isNull(edge);});
-    this._insertEdges(that._network.data);
+    this._insertEdges(that._data.edges);
 
     this.setDataReady(true);
 };
@@ -387,8 +398,10 @@ vq.models.CircVisData.prototype._remove_wedge_data = function(node) {
     var that = this;
     var chr = node.chr;
     _.each(this._ideograms[chr].wedge, function(wedge,index) {
+     if (wedge._globalData) {
         that._ideograms[chr].wedge[index] = _.reject(wedge,
             function(obj) { return that.same_feature(obj,node);});
+    }
     });
 };
 
@@ -396,13 +409,15 @@ vq.models.CircVisData.prototype._add_wedge_data = function(data) {
     var that = this;
     var chr = data.chr;
     _.each(this._ideograms[chr].wedge, function(wedge,index) {
+        if (wedge._globalData) {
         if(_.isUndefined(data[that._wedge[index]._value_key]) || that._wedge[index]._plot_type =='karyotype') { return;}
         wedge.push(data);
+        }
     });
 };
 
 vq.models.CircVisData.prototype.same_feature = function(n1,n2) {
-    return this._network.node_key(n1) ==  this._network.node_key(n2);
+    return this._data.hash(n1) ==  this._data.hash(n2);
 };
 
 vq.models.CircVisData.prototype.same_edge= function(rf_assoc,circvis_assoc) {
@@ -410,41 +425,51 @@ vq.models.CircVisData.prototype.same_edge= function(rf_assoc,circvis_assoc) {
         this.same_feature(rf_assoc.target,circvis_assoc.target);
 };
 
-vq.models.CircVisData.prototype._add_tick_data = function(node) {
+vq.models.CircVisData.prototype._retileWedge = function() {
     var that = this;
-    var tick;
-    if ( _.any(that.ticks.data_map[node.chr],
-        function(tick) { return that.same_feature(tick,node);})) {
-        tick = _.find(that.ticks.data_map[node.chr],
-            function(n) { return that.same_feature(n,node);});
-    }
-    else {
-        tick = node;
-        vq.utils.VisUtils.layoutTile(tick,that.ticks.data_map[tick.chr].length,
-            that.ticks.data_map[tick.chr],that.ticks.overlap_distance);
-        that.ticks.data_map[tick.chr].push(tick);
-    }
-
-    return tick;
+    _.each(this._wedge,function(wedge,index) {
+        var data = wedge._globalData ? that._data.features : wedge._data;
+        if (wedge._plot_type == 'tile' || wedge._plot_type == 'glyph') {
+                var max_tile_level = 
+                wedge._tile.show_all_tiles ?
+                    Math.floor((wedge._plot_height - (wedge._radius() * 2)) / (wedge._tile.height + wedge._tile.padding)) :
+                    undefined;
+                var _data = (wedge._plot_type == 'tile' ? 
+                    vq.utils.VisUtils.layoutChrTiles(data, wedge._tile.overlap_distance, max_tile_level) :
+                    vq.utils.VisUtils.layoutChrTicks(data, wedge._tile.overlap_distance, max_tile_level));
+                wedge._layout = {};
+                _.each(_data,function(f) { wedge._layout[wedge._hash(f)] = f.level;}); //layout is a sparse map of id to level
+            }
+  });
 };
 
-vq.models.CircVisData.prototype._add_network_node = function(node) {
+
+vq.models.CircVisData.prototype._retileTicks = function() {
+    var that = this;
+    var tick;
+    var _tickData = 
+        vq.utils.VisUtils.layoutChrTicks(this._data.features, this.ticks.overlap_distance);
+    var layout = this.ticks._layout = {};
+    var hash = that._data.hash;
+    _.each(_tickData,function(f) {layout[hash(f)] = f.level;}); 
+};
+
+vq.models.CircVisData.prototype._format_network_node = function(node) {
     var that = this;
     var node_parent_map = this._network.node_parent_map;
+    var hash = this._data.hash;
 
     function include_node(node) {
         var new_node;
-        var index = that._network.data_nodes_map[that._network.node_key(node)];
         var parent = that._network.nodes_array[node_parent_map[node.chr]];
         //previously loaded this node, pull it from the node_array
-        if (_.isUndefined(index) && !_.isUndefined(parent)) {
+        if ( !_.isUndefined(parent)) {
             new_node = _.extend({parent:parent},node);
             parent.children.push(new_node);
-            that._network.data_nodes_map[that._network.node_key(node)] = that._network.nodes_array.push(new_node) - 1;   
             return new_node;
         }
         else {
-            return that._network.nodes_array[index]
+            return null;
         }
     }
 
@@ -454,81 +479,91 @@ vq.models.CircVisData.prototype._add_network_node = function(node) {
 };
 
 
-vq.models.CircVisData.prototype._remove_network_node = function(node) {
+vq.models.CircVisData.prototype._remove_layouts = function(node) {
     var that = this;
+    var hash = this._data.hash(node);
 
-    function remove_node(node) {
-        var new_node;
-        var index = this._network.data_nodes_map[this._network.node_key(node)];
-        //previously loaded this node, pull it from the node_array
-        if (!_.isUndefined(index)) {
-             that._network.nodes_array= that._network.nodes_array.splice(index,1);
-             delete that._network.data_nodes_map[that._network.node_key(node)];
-        }
-    }
+    delete this.ticks._layout[hash];
+    delete this._network.layout[hash];
 
-    if (_.isArray(node)) { _.map(node,remove_node,that);}
-    else { remove_node.call(that,node); }
+    _.each(this._wedge, function(wedge){
+        if (wedge._layout && wedge._layout[hash]) { delete wedge._layout[hash];}
+    });
+
 };
 
-vq.models.CircVisData.prototype._remove_tick_data = function(node) {
+vq.models.CircVisData.prototype._remove_feature = function(node) {
     var that = this;
-    this.ticks.data_map[node.chr] = _.reject(this.ticks.data_map[node.chr],
-        function(obj) { return that.same_feature(obj,node);});
+    var feature_index= -1;
+     _.each(this._data.chr[node.chr],
+        function(obj,index) { if (that.same_feature(obj,node)) { feature_index = index;} 
+    });
+
+    this._data.chr[node.chr].splice(feature_index,1);
+
+    feature_index = -1;
+     _.each(this._data.features,
+        function(obj,index) { if (that.same_feature(obj,node)) { feature_index = index;} 
+    });
+
+    this._data.features.splice(feature_index,1);
     return this;
 };
 
 vq.models.CircVisData.prototype._insertNode = function(node) {
     var that = this;
     var new_node;
-
+    var hash = this._data.hash;
     if (!_.include(_.keys(that._chrom.groups),node.chr)) {return null;}
-    //previously loaded this node, pull it from the node_array
-
-    this._add_tick_data(node);
-    new_node = this._add_network_node(node);
-    this._add_wedge_data(node);
-    return new_node;
+    
+    if (new_node = _.find(that._data.features,function(feature) { return hash(feature) === hash(node);}) ) {
+        return new_node;
+    } else {
+        that._data.features.push(node);
+        that._data.chr[node.chr].push(node);
+    }
+    return node;
 };
 
 vq.models.CircVisData.prototype._insertNodes = function(node_array) {
     var that = this;
     var nodes = [];
-    var insert_nodes = that._add_network_node(node_array);
-    _.each(insert_nodes, function(node) {
-             that._add_wedge_data(node);
-        }
-    );
-    this._retileNodes();
+    var insert_nodes = _.map(node_array,this._insertNode, this);
+    this._retile();
     return insert_nodes;
 };
+vq.models.CircVisData.prototype._retile = function() {
+    this._retileNodes();
+    this._retileTicks();
+    this._retileWedge();
+    return this;
+}
+
 
 vq.models.CircVisData.prototype._retileNodes = function() {
     var that = this;
-    if (this._network.tile_nodes) {
-        var nodes = _.reject(that._network.nodes_array,function(node) { return node.children;});
-        nodes = vq.utils.VisUtils.layoutChrTiles(nodes ,that._network.node_overlap_distance);
-        that._network.nodes_array = _.union(that._network.base_nodes, nodes);
+    if (this._network.tile_nodes && this._data.features.length) {
+        nodes = vq.utils.VisUtils.layoutChrTiles(that._data.features ,that._network.node_overlap_distance);
+        this._network.layout = {};
+         _.each(nodes,function(f) { that._network.layout[that._data.hash(f)] = f.level;});
     }
     return this;
 };
 
 vq.models.CircVisData.prototype._removeNode = function(node) {
     if (!_.isObject(node)) { return; }
-    this._remove_tick_data(node);
-    this._remove_network_node(node);
-    this._remove_wedge_data(node);
+    this._remove_feature(node);
+    this._remove_layouts(node);
 };
 
 vq.models.CircVisData.prototype._insertEdges = function(edge_array) {
     var that = this;
     var node_array = _.flatten(_.map(edge_array, function(edge) { return [edge.node1,edge.node2];}));
-    this._add_network_node(node_array);
 
     function insert_edge(edge) {
-        var node_key = this._network.node_key;
+        var hash = this._data.hash;
         var node1 = edge.node1, node2 = edge.node2;
-        var node1_key = node_key(node1), node2_key = node_key(node2);
+        var node1_key = hash(node1), node2_key = hash(node2);
         var edge_key =node1_key +'_'+ node2_key;
         var index = this._network.links_map[edge_key];
 
@@ -550,7 +585,7 @@ vq.models.CircVisData.prototype._insertEdge = function(edge) {
     //quit if either node has an unmappable location
     if(_.any(nodes,function(a){return _.isNull(a) ||
         !_.include(_.keys(that._chrom.groups),a.chr); })) {
-        console.log('Unmappable chromosome in edge.');
+        console.log('Unmappable chromosome in edge: 1:'+ nodes[0].chr + ', 2:' + nodes[1].chr);
         return null;
     }
     //insert/recover both nodes
@@ -561,6 +596,8 @@ vq.models.CircVisData.prototype._insertEdge = function(edge) {
 
     //list of keys that aren't node1,node2
     var keys = _.chain(edge).keys().reject(function(a){return a=='node1'|| a== 'node2';}).value();
+    edge_arr = _.map(edge_arr,this._format_network_node,this);
+
     //append the source,target nodes
     var insert_edge = _.chain(edge).pick(keys).extend({source:edge_arr[0],target:edge_arr[1]}).value();
 

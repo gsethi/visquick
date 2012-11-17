@@ -4,22 +4,20 @@ var _drawTicks = function(chr) {
     var that = this;
 
     if(!chromoData.ticks.render_ticks) { return;}
-
+    var hash = chromoData._data.hash;
     var ideogram_obj = d3.select('.ideogram[data-region="'+chr+'"]');
-    
+    var level = function(node) {return chromoData.ticks._layout[hash(node)]; }
     var outerRadius  = (chromoData._plot.height / 2);
     var outerTickRadius = outerRadius - chromoData.ticks.outer_padding;
     var innerRadius = outerTickRadius - chromoData.ticks.height;
     var inner = chromoData.ticks.tile_ticks ?  function(feature) {
         return innerRadius +
-            (feature.level * (chromoData.ticks.wedge_height * 1.3)) ;} :
+            (level(feature) * (chromoData.ticks.wedge_height * 1.3)) ;} :
         function(feature) { return innerRadius;};
 
     var outer = function(feature) { return inner(feature) + chromoData.ticks.wedge_height;};
-    var label_key = chromoData.ticks.label_key;
-
-    var tick_fill = function(c) { return chromoData.ticks.fill_style(c,label_key);};
-    var tick_stroke = function(c) { return chromoData.ticks.stroke_style(c,label_key);};
+    var tick_fill = function(c) { return chromoData.ticks.fill_style(c,hash);};
+    var tick_stroke = function(c) { return chromoData.ticks.stroke_style(c,hash);};
     var tick_angle = function(tick) { var angle = tick_length / inner(tick); return  isNodeActive(tick) ? angle * 2 : angle; };
     var isNodeActive = function(c) { return true;};
 
@@ -48,20 +46,20 @@ var _drawTicks = function(chr) {
     }
 
     var ticks = ideogram_obj.select('g.ticks').selectAll('path')
-        .data(chromoData.ticks.data_map[chr],tick_key);
+        .data(chromoData._data.chr[chr],chromoData._data.hash);
 
     ticks.enter().append('path')
-        .attr('class',function(tick) { return tick[label_key];})
+        .attr('class',function(tick) { return tick[hash];})
         .style('fill',tick_fill)
         .style('stroke',tick_stroke)
         .style('fill-opacity', 1e-6)
                 .style('stroke-opacity', 1e-6)
         .on('mouseover',function(d){
-            d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','visible');
+            d3.select('text[data-label=\''+d[hash]+'\']').attr('visibility','visible');
             chromoData.ticks.hovercard.call(this,d);
         })
         .on('mouseout',function(d){
-            d3.select('text[data-label=\''+d[label_key]+'\']').attr('visibility','hidden');
+            d3.select('text[data-label=\''+d[hash]+'\']').attr('visibility','hidden');
         })
         .transition()
         .duration(800)
