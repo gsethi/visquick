@@ -28,6 +28,7 @@ circvis.removeEdges = function(edge_array, ignore_nodes) {
     else if ( _.isObject(edge_array)){
         chromoData._removeEdge(edge_array);
     }
+    _drawNetworkLinks();
 
     if(ignore) {return;}
 
@@ -36,7 +37,7 @@ circvis.removeEdges = function(edge_array, ignore_nodes) {
     var nodes_to_remove = _.difference(removable,remaining_nodes);
     this.removeNodes(nodes_to_remove);
 
-    _drawNetworkLinks();
+    
 };
 
 
