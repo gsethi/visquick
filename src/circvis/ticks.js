@@ -23,11 +23,12 @@ var _drawTicks = function(chr) {
 
     var tick_width = Math.PI / 180 * chromoData.ticks.wedge_width;
     var tick_length = tick_width * innerRadius;
+    var center = vq.utils.VisUtils.tileCenter;
 
     var generateArcTween = function (point) {
         var _inner = inner(point);
         var _outer = outer(point);
-        var _theta = chromoData._ideograms[point.chr].theta(point.start);
+        var _theta = chromoData._ideograms[point.chr].theta(center(point));
         var _tick_angle = tick_angle(point);
         return d3.svg.arc()
             .innerRadius(function(multiplier) { return _inner - (multiplier *4);})
@@ -81,6 +82,10 @@ var _drawTicks = function(chr) {
         })
         .style('fill-opacity', 1e-6)
                 .style('stroke-opacity', 1e-6)
-        .remove();
+        .remove()
+        .each("end",remove_tick_layout);
+};
 
+var remove_tick_layout = function(node) {
+    delete chromoData.ticks._layout[chromoData._data.hash(node)];
 };

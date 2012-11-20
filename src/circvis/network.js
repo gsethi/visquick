@@ -5,6 +5,7 @@ var _drawNetworkNodes = function (chr) {
 
     var hash = chromoData._data.hash;
     var level = function(node) { return chromoData._network.layout[hash(node)];};
+    var center = vq.utils.VisUtils.tileCenter;
     var network_radius = chromoData._network.tile_nodes ? function(node) { return chromoData._network.network_radius[chr] - (level(node) * 2 * chromoData._network.node_radius(node)); } :
     function(node) { return chromoData._network.network_radius[chr];};
 
@@ -32,7 +33,7 @@ var _drawNetworkNodes = function (chr) {
         .style('fill-opacity',1e-6)
         .style('stroke-opacity',1e-6)
         .attr('transform', function(node) {
-            return 'rotate('+ ((chromoData._ideograms[chr].theta(node.start) / Math.PI * 180) - 90) +')translate(' + network_radius(node) + ')';
+            return 'rotate('+ ((chromoData._ideograms[chr].theta(center(node)) / Math.PI * 180) - 90) +')translate(' + network_radius(node) + ')';
         })
         .on('mouseover',function(d){chromoData._network.node_hovercard.call(this,d);})
         .transition()
@@ -47,12 +48,19 @@ var _drawNetworkNodes = function (chr) {
         .attr('r',function(a) {return chromoData._network.node_radius(a)*4; })
         .style('fill-opacity',1e-6)
                 .style('stroke-opacity',1e-6)
-       .remove();
+       .remove()
+       .each("end",remove_node_layout);
+};
+
+
+var remove_node_layout = function(node) {
+    delete chromoData._network.layout[chromoData._data.hash(node)];
 };
 
 var _drawNetworkLinks= function() {
 
     var hash = chromoData._data.hash;
+    var center = vq.utils.VisUtils.tileCenter;
     var level = function(node) { return chromoData._network.layout[hash(node)];};
     var bundle = d3.layout.bundle();
 
@@ -68,7 +76,7 @@ var _drawNetworkLinks= function() {
         })
         .angle(function(d) { return d.angle !== undefined ?
             d.angle :
-            chromoData._ideograms[d.chr]._feature_angle(d.start);
+            chromoData._ideograms[d.chr]._feature_angle(center(d));
         });
 
     var edges = d3.select('g.links').selectAll("path.link")

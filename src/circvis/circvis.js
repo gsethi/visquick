@@ -70,7 +70,7 @@ var ideograms = svg.selectAll('g.ideogram')
             .attr('data-region',function(d) { return d;})
             .attr('opacity',1.0)
             .attr('transform',function(key) { return 'rotate(' + chromoData._chrom.groups[key].startAngle * 180 / Math.PI + ')';})
-            .each(draw_ideogram_rings);
+            .each(draw_ideogram);
 //calculate label placement as halfway along tick radial segment
     var outerRadius  = (chromoData._plot.height / 2);
     var outerTickRadius = outerRadius - chromoData.ticks.outer_padding;
@@ -115,12 +115,10 @@ var ideograms = svg.selectAll('g.ideogram')
                     );
    }
 
-        function draw_ideogram_rings(d) {
-            _add_wedge( d);
-            _drawTicks( d);
-            _drawNetworkNodes( d);
-        }
-    _drawNetworkLinks(svg.insert('svg:g','.ideogram').attr('class','links'));
+     
+    if (chromoData._network._doRender) {
+           _drawNetworkLinks(svg.insert('svg:g','.ideogram').attr('class','links'));
+    }
     _(_.range(0,chromoData._wedge.length)).each(function(ring_index) {
         _draw_axes_ticklabels(ring_index);
         _insertRingClipping(ring_index);
@@ -128,4 +126,20 @@ var ideograms = svg.selectAll('g.ideogram')
 
     return this;
 
+};
+
+var draw_ideogram = function(d) {
+        _add_wedge(d);
+        draw_ideogram_data(d);
+};
+
+var draw_ideogram_data = function(d) {
+      if (chromoData._chrom.groups[d] === undefined) { return;}
+        _(_.range(0,chromoData._wedge.length)).each(function(ring) {
+          _drawWedgeData(d,ring);
+        });
+            _drawTicks( d);
+          if ( chromoData._network._doRender) {
+             _drawNetworkNodes( d);
+          }
 };

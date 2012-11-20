@@ -47,8 +47,8 @@ vq.models.CircVisData.prototype.setDataModel = function() {
         {label : '_chrom.listener', id: 'GENOME.OPTIONS.listener', cast: Function, defaultValue : function() {
             return null;
         }},
-
-        {label : '_network._outer_padding', id: 'NETWORK.OPTIONS.outer_padding',  optional : true },
+        {label : '_network._doRender', id: 'NETWORK.OPTIONS.render',  defaultValue: true, cast: Boolean },
+        {label : '_network._outer_padding', id: 'NETWORK.OPTIONS.outer_padding',  defaultValue: 0, cast: Number },
         {label : '_network.node_listener', id: 'NETWORK.OPTIONS.node_listener', cast: Function, defaultValue : function() {
             return null;
         } },
@@ -311,9 +311,7 @@ vq.models.CircVisData.prototype._setupData = function() {
         }); //foreach
     }
 
-
 //    Tick Data
-
         
         if (that.ticks.tile_ticks) {
             if (that.ticks.overlap_distance === undefined) {
@@ -360,9 +358,6 @@ vq.models.CircVisData.prototype._setupData = function() {
     });
 
     this._network.node_parent_map = node_parent_map;
-    this._network.base_nodes = _.map(node_array,function(node){return _.extend({},node);});
-    this._network.data_nodes_map=Object.create(null);
-    this._network.links_map=Object.create(null);
   
         this._network.nodes_array=node_array;
         this._network.links_array=[];
@@ -420,9 +415,9 @@ vq.models.CircVisData.prototype.same_feature = function(n1,n2) {
     return this._data.hash(n1) ==  this._data.hash(n2);
 };
 
-vq.models.CircVisData.prototype.same_edge= function(rf_assoc,circvis_assoc) {
-    return this.same_feature(rf_assoc.source,circvis_assoc.source) &&
-        this.same_feature(rf_assoc.target,circvis_assoc.target);
+vq.models.CircVisData.prototype.same_edge= function(edge1,edge2) {
+    return this.same_feature(edge1.source,edge2.source) &&
+        this.same_feature(edge1.target,edge2.target);
 };
 
 vq.models.CircVisData.prototype._retileWedge = function() {
@@ -499,14 +494,14 @@ vq.models.CircVisData.prototype._remove_feature = function(node) {
         function(obj,index) { if (that.same_feature(obj,node)) { feature_index = index;} 
     });
 
-    this._data.chr[node.chr].splice(feature_index,1);
+    if (!!~feature_index)    this._data.chr[node.chr].splice(feature_index,1);
 
     feature_index = -1;
      _.each(this._data.features,
         function(obj,index) { if (that.same_feature(obj,node)) { feature_index = index;} 
     });
 
-    this._data.features.splice(feature_index,1);
+    if (!!~feature_index) this._data.features.splice(feature_index,1);
     return this;
 };
 
@@ -553,28 +548,11 @@ vq.models.CircVisData.prototype._retileNodes = function() {
 vq.models.CircVisData.prototype._removeNode = function(node) {
     if (!_.isObject(node)) { return; }
     this._remove_feature(node);
-    this._remove_layouts(node);
 };
 
 vq.models.CircVisData.prototype._insertEdges = function(edge_array) {
     var that = this;
-    var node_array = _.flatten(_.map(edge_array, function(edge) { return [edge.node1,edge.node2];}));
-
-    function insert_edge(edge) {
-        var hash = this._data.hash;
-        var node1 = edge.node1, node2 = edge.node2;
-        var node1_key = hash(node1), node2_key = hash(node2);
-        var edge_key =node1_key +'_'+ node2_key;
-        var index = this._network.links_map[edge_key];
-
-        if (_.isUndefined(index)) { //link does not yet exist
-            var insert_edge = _.extend( {source:that._network.nodes_array[that._network.data_nodes_map[node1_key]],
-                target:that._network.nodes_array[that._network.data_nodes_map[node2_key]] }
-                , edge);
-            this._network.links_map[edge_key] = this._network.links_array.push(insert_edge) -1;  //add it
-            }
-        }
-        _.map(edge_array,insert_edge,that);
+    _.each(edge_array,this._insertEdge,that);
 };
 
 
@@ -614,7 +592,8 @@ vq.models.CircVisData.prototype._removeEdge = function(edge) {
     var that = this;
     if (_.isObject(edge)) {
         this._network.links_array =
-            _.reject(this._network.links_array,function(link) { return that.same_edge(link,edge);});
+            _.reject(this._network.links_array,function(link) { return that.same_edge(link,_.extend({},edge,
+                {source:edge.node1,target:edge.node2}));});
     }
 
 };
@@ -627,4 +606,3 @@ vq.models.CircVisData.prototype._removeEdges = function(edge_arr) {
     }
 
 };
-

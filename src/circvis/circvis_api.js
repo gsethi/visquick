@@ -58,11 +58,7 @@ circvis.addNodes = function(node_array) {
         nodes = chromoData._insertNodes([node_array]);
     }
     nodes = _.reject(nodes,function(n) {return _.isNull(n);});
-    _.each(_.uniq(_.pluck(nodes,'chr')), function(chr) {
-               _drawTicks(chr);
-               _drawNetworkNodes(chr);
-               _drawWedgeData(chr);
-           });
+    _.each(_.uniq(_.pluck(nodes,'chr')), draw_ideogram_data);
 };
 
 circvis.removeNodes = function(node_array) {
@@ -75,19 +71,14 @@ circvis.removeNodes = function(node_array) {
         _.each(node_array, function(node) {
             chromoData._removeNode(node);
         });
-        chromoData._retile();
-        _.each(_.uniq(_.pluck(node_array,'chr')), function(chr) {
-            _drawTicks(chr);
-            _drawNetworkNodes(chr);
-            _drawWedgeData(chr);
-        });
+        _.each(_.uniq(_.pluck(node_array,'chr')), draw_ideogram_data);
     }
     else if (_.isObject(node_array)){
         chromoData._removeNode(node_array);
-        _drawTicks(node_array.chr);
-        _drawNetworkNodes(node_array.chr);
-        _drawWedgeData(node_array.chr);
+        draw_ideogram_data(node_array.chr);
     }
+    //retiling too soon will break the exit transition.. need to retile later when data is not being changed.
+    // chromoData._retile();
 
 };
 
@@ -95,5 +86,5 @@ circvis.removeNodes = function(node_array) {
 /*Utils*/
 
  function _edgeListToNodeList (edges) {
-    return _.uniq(_.flatten(_.chain(edges).map(function(edge){return [edge.source,edge.target];}).value()));
+    return _.uniq(_.flatten(_.chain(edges).map(function(edge){return [edge.source || edge.node1,edge.target || edge.node2];}).value()));
 };

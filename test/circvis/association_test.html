@@ -30,31 +30,54 @@
 <body>
 
 <button id="1_random_edge">Add 1 Random Edges</button><br />
-<button id="50_random_edge">Add 50 Random Edges</button><br />
-<!-- <button id="50_remove">Remove 50 Random Edges</button><br /> -->
-<button id="all_remove">Remove all Random Edges</button><br />
-<button id="all_clin_remove">Remove all Random Clinical Associations</button><br /> 
+<button id="30_random_edge">Add 30 Random Edges</button><br />
+<button id="30_edges_remove">Remove 30 Random Edges</button><br />
+<button id="all_edges_remove">Remove all Random Edges</button><br /><br />
+<button id="30_nodes_add">Add 30 Nodes</button><br /> 
+<button id="30_nodes_remove">Remove 30 Nodes</button><br /> 
 
 Drag the circvis (on the rings) to rotate the entire display.<br/>
 
 <div id="wedge" style="font: 10px sans-serif;margin:10px;"></div>
 
 <script type="text/javascript">
+var features = [];
 
-    $('#50_random_edge').on('click',function() {
-                var associations = _.map(_.range(30),function() { return fg.generateAssociation(0);},fg);
-                addRFAssociation(associations);
+var associations = [];
+
+    $('#30_random_edge').on('click',function() {
+                var new_associations = _.map(_.range(30),function() { return fg.generateAssociation(0);},fg);
+                addRFAssociations(new_associations);
+                associations = associations.concat(new_associations);
             }
     );
     $('#1_random_edge').on('click',function() {
-                addRFAssociation(fg.generateAssociation());
+                var new_association = fg.generateAssociation()
+                addRFAssociations(new_association);
+                associations.push(new_association);
             }
     );
 
-    $('#all_remove').on('click', function() {
-            circle.removeEdges('all');
+      $('#30_edges_remove').on('click', function() {
+            if(associations.length) {circle.removeEdges(associations.splice(-30,30));}
     });
-  
+
+
+    $('#all_edges_remove').on('click', function() {
+            circle.removeEdges('all');
+            associations = [];
+    });
+
+
+    $('#30_nodes_add').on('click', function() {
+                var new_features = _.map(_.range(30),function() { return fg.generateFeature(0);},fg);
+                addFeatures(new_features);
+                features = features.concat(new_features);
+    });
+
+      $('#30_nodes_remove').on('click', function() {
+            if (features.length) { circle.removeNodes(features.splice(-30,30)); }
+    });
     var fg = new FeatureGenerator({
         nodes: {
             fields: [
@@ -71,8 +94,15 @@ Drag the circvis (on the rings) to rotate the entire display.<br/>
 
     var associations = _.map(_.range(30),fg.generateAssociation,fg);
 
-    function addRFAssociation(edges) {
+    console.log('edges are stored in the variable "associations".');
+    console.log('extra nodes are stored in the variable "features".');
+
+    function addRFAssociations(edges) {
                   circle.addEdges(edges);
+    }
+
+    function addFeatures(nodes) {
+            circle.addNodes(nodes);
     }
 
 

@@ -147,52 +147,52 @@
         },
 
         WEDGE:[
-            {
-                PLOT : {
-                    height : 35,
-                    type : 'karyotype'
-                } ,
-                DATA:{
-                    data_array : cytoband
-                },
-                OPTIONS: {
+            // {
+            //     PLOT : {
+            //         height : 35,
+            //         type : 'karyotype'
+            //     } ,
+            //     DATA:{
+            //         data_array : cytoband
+            //     },
+            //     OPTIONS: {
 
-                    legend_label : 'Cytogenic Bands',
-                    legend_description : 'Cytogenic Bands',
-                    listener : function() {return null;},
-                    outer_padding: 15,
-                    stroke_style:'rgba(200,200,200,0.5)',
-                    line_width:'0.5px',
-                    tooltip_items:{'Cytogenic Band':'label',
-                        "Location": function(feature) { return 'Chr ' + feature.chr + ' ' + feature.start + (feature.end ? '-' + feature.end : '');}
-                    }
-                }
-            },
-            {   PLOT : {
-                height : 60,
-                type : 'glyph'
-                } ,
-                DATA:{
-                    value_key:'annotated_type',
-                },
-                OPTIONS: {
-                    tile_height: 10,
-                    tile_padding: 4,
-                    tile_overlap_distance: 100000000,
-                    tile_show_all_tiles : true,
-                    fill_style : function(feature) { return type_color(types[feature.annotated_type]);},
-                    stroke_style : null,
-                    line_width : 3,
-                    legend_label : 'Clinical Associations',
-                    shape : clinical_shape,
-                    radius : 9,
-                    legend_description : 'Clinical Associations',
-                    listener : function() {return null;},
-                    outer_padding: 5,
-                    tooltip_items: clinical_hovercard_items_config,
-                    tooltip_links: hovercard_links_config
-                }
-            },
+            //         legend_label : 'Cytogenic Bands',
+            //         legend_description : 'Cytogenic Bands',
+            //         listener : function() {return null;},
+            //         outer_padding: 15,
+            //         stroke_style:'rgba(200,200,200,0.5)',
+            //         line_width:'0.5px',
+            //         tooltip_items:{'Cytogenic Band':'label',
+            //             "Location": function(feature) { return 'Chr ' + feature.chr + ' ' + feature.start + (feature.end ? '-' + feature.end : '');}
+            //         }
+            //     }
+            // },
+            // {   PLOT : {
+            //     height : 60,
+            //     type : 'glyph'
+            //     } ,
+            //     DATA:{
+            //         value_key:'annotated_type',
+            //     },
+            //     OPTIONS: {
+            //         tile_height: 10,
+            //         tile_padding: 4,
+            //         tile_overlap_distance: 100000000,
+            //         tile_show_all_tiles : true,
+            //         fill_style : function(feature) { return type_color(types[feature.annotated_type]);},
+            //         stroke_style : null,
+            //         line_width : 3,
+            //         legend_label : 'Clinical Associations',
+            //         shape : clinical_shape,
+            //         radius : 9,
+            //         legend_description : 'Clinical Associations',
+            //         listener : function() {return null;},
+            //         outer_padding: 5,
+            //         tooltip_items: clinical_hovercard_items_config,
+            //         tooltip_links: hovercard_links_config
+            //     }
+            // },
             {
                 PLOT : {
 
@@ -257,12 +257,12 @@
                 tooltip_links: hovercard_links_config
             }
         },
-
         NETWORK:{
             DATA:{
                 data_array : []//
             },
             OPTIONS: {
+                render: true,
                 outer_padding : 10,
                 tile_nodes : Boolean(true),
                 node_overlap_distance: 3e8,

@@ -262,6 +262,11 @@ vq.utils.VisUtils._isOverlapping = function(tile1,tile2,overlap, treat_as_points
     return ((tile1.start-overlap) <= tile2.end && (tile1.end + overlap) >= tile2.start);
 };
 
+vq.utils.VisUtils.tileCenter = function(tile) {
+  if (!(_.isFinite(tile.end + tile.start)) && _.isNumber(tile.start)) { return tile.start;}
+  return (tile.end + tile.start) >>> 1; // divide by 2 and drop fraction/sign.
+};
+
 //taken from PrototypeJS
 
 

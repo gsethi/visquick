@@ -228,6 +228,7 @@ var _drawWedgeData_array = {
     var wedge_params = chromoData._wedge[wedge_index];
     var wedge_data = chromoData._ideograms[chr].wedge[wedge_index];
     var value_key = wedge_params._value_key;
+    var center = vq.utils.VisUtils.tileCenter;
     var wedge_obj = d3.select('.ideogram[data-region="'+chr+'"] .wedge[data-ring="'+wedge_index+'"]');
 
     var scatter = wedge_obj.select('g.data')
@@ -240,7 +241,7 @@ var _drawWedgeData_array = {
         .style('fill-opacity', 1e-6)
         .style('stroke-opacity', 1e-6)
         .attr("transform",function(point) {
-            return "rotate(" + ((chromoData._ideograms[chr].theta(point.start) * 180 / Math.PI) - 90)+ ")translate(" +
+            return "rotate(" + ((chromoData._ideograms[chr].theta(center(point)) * 180 / Math.PI) - 90)+ ")translate(" +
                 wedge_params._thresholded_value_to_radius(point[value_key]) + ")";} )
         .attr('d',d3.svg.symbol()
             .type(wedge_params._shape)
@@ -263,13 +264,14 @@ var _drawWedgeData_array = {
     var wedge_params = chromoData._wedge[wedge_index];
     var wedge_data = _.sortBy(chromoData._ideograms[chr].wedge[wedge_index],'start');
     var value_key = wedge_params._value_key;
+    var center = vq.utils.VisUtils.tileCenter;
     var wedge_obj = d3.select('.ideogram[data-region="'+chr+'"] .wedge[data-ring="'+wedge_index+'"]');
 
     var line = d3.svg.line.radial()
             .interpolate('basis')
             .tension(0.8)
             .radius(function(point) { return wedge_params._thresholded_value_to_radius(point[value_key]);})
-            .angle(function(point) { return chromoData._ideograms[chr].theta(point.start);});
+            .angle(function(point) { return chromoData._ideograms[chr].theta(center(point));});
 
     var line_plot = wedge_obj.select('g.data')
         .selectAll("path")
@@ -298,13 +300,14 @@ var _drawWedgeData_array = {
     var wedge_params = chromoData._wedge[wedge_index];
     var wedge_data = _.sortBy(chromoData._ideograms[chr].wedge[wedge_index],'start');
     var value_key = wedge_params._value_key;
+    var center = vq.utils.VisUtils.tileCenter;
     var wedge_obj = d3.select('.ideogram[data-region="'+chr+'"] .wedge[data-ring="'+wedge_index+'"]');
 
     var line = d3.svg.line.radial()
             .interpolate('basis')
             .tension(0.8)
             .radius(function(point) { return wedge_params._thresholded_value_to_radius(point[value_key]);})
-            .angle(function(point) { return chromoData._ideograms[chr].theta(point.start);});
+            .angle(function(point) { return chromoData._ideograms[chr].theta(center(point));});
 
 
     var area = d3.svg.area.radial()
@@ -312,7 +315,7 @@ var _drawWedgeData_array = {
             .tension(0.8)
             .innerRadius(function(point) { return  wedge_params._thresholded_innerRadius(point[value_key]);})
             .outerRadius(function(point) { return wedge_params._thresholded_outerRadius(point[value_key]);})
-            .angle(function(point) { return chromoData._ideograms[chr].theta(point.start);});
+            .angle(function(point) { return chromoData._ideograms[chr].theta(center(point));});
 
 
     var line_plot = wedge_obj.select('g.data')
@@ -387,7 +390,7 @@ var _drawWedgeData_array = {
 },
 
  'glyph' : function (chr, wedge_index) {
-
+    var center = vq.utils.VisUtils.tileCenter;
     var wedge_params = chromoData._wedge[wedge_index];
     var wedge_data = chromoData._ideograms[chr].wedge[wedge_index];
     var value_key = wedge_params._value_key;
@@ -403,7 +406,7 @@ var _drawWedgeData_array = {
         .style('fill-opacity', 1e-6)
                 .style('stroke-opacity', 1e-6)
         .attr("transform",function(point) {
-            return "rotate(" + ((chromoData._ideograms[chr].theta(point.start) * 180 / Math.PI) - 90)+ ")translate(" +
+            return "rotate(" + ((chromoData._ideograms[chr].theta(center(point)) * 180 / Math.PI) - 90)+ ")translate(" +
                 wedge_params._glyph_distance(point) + ")";} )
         .transition()
         
@@ -422,7 +425,8 @@ var _drawWedgeData_array = {
         .duration(800)
         .style('fill-opacity', 1e-6)
                 .style('stroke-opacity', 1e-6)
-        .remove();
+        .remove()        
+        .each("end",function(n) { remove_wedge_layout(n,wedge);});
 },
 
  'tile' : function(chr, wedge_index) {
@@ -458,7 +462,8 @@ var _drawWedgeData_array = {
         .duration(800)
         .style('fill-opacity', 1e-6)
                 .style('stroke-opacity', 1e-6)
-        .remove();
+        .remove()
+        .each("end",function(n) { remove_wedge_layout(n,wedge);});
 },
 
  'karyotype' : function (chr, wedge_index) {
@@ -579,4 +584,8 @@ function _draw_axes_ticklabels (wedge_index) {
             .text(function(a) { return a;});
     }
 
+};
+
+function remove_wedge_layout(node,wedge) {
+    delete wedge._layout[wedge._hash(node)];
 };
