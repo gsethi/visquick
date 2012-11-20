@@ -128,9 +128,7 @@
             horizontal_padding: 10,
             enable_pan : false,
             enable_zoom : false,
-            show_legend: true,
-            legend_corner : 'ne',
-            legend_radius  : 45
+            show_legend: false
         },
 
         GENOME: {
@@ -250,8 +248,6 @@
                 wedge_width:0.7,
                 overlap_distance:10000000, //tile ticks at specified base pair distance
                 height : 120,
-                display_legend : true,
-                legend_corner : 'nw',
                 fill_style : tick_colors,
                 tooltip_items: hovercard_items_config,
                 tooltip_links: hovercard_links_config
@@ -265,7 +261,7 @@
                 render: true,
                 outer_padding : 10,
                 tile_nodes : Boolean(true),
-                node_overlap_distance: 3e8,
+                node_overlap_distance: 3e7,
                 node_radius:6,
                 node_fill_style : tick_colors,
                 link_stroke_style : 'red',

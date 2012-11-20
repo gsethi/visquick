@@ -35,11 +35,8 @@ circvis.removeEdges = function(edge_array, ignore_nodes) {
     var removable = _edgeListToNodeList(edge_array);
     var remaining_nodes = _edgeListToNodeList(chromoData._network.links_array);
     var nodes_to_remove = _.difference(removable,remaining_nodes);
-    this.removeNodes(nodes_to_remove);
-
-    
+    this.removeNodes(nodes_to_remove);    
 };
-
 
 circvis._insertEdges = function(edge_array) {
     //return the array of edges inserted
@@ -50,16 +47,15 @@ circvis._insertEdges = function(edge_array) {
 /* NODES*/
 
 circvis.addNodes = function(node_array) {
-    var nodes;
+    
     var that = this;
     if (_.isArray(node_array)) {
-       nodes = chromoData._insertNodes(node_array);
+       chromoData._insertNodes(node_array);
     }
     else {
-        nodes = chromoData._insertNodes([node_array]);
+        chromoData._insertNodes([node_array]);
     }
-    nodes = _.reject(nodes,function(n) {return _.isNull(n);});
-    _.each(_.uniq(_.pluck(nodes,'chr')), draw_ideogram_data);
+    _.each(_.uniq(_.pluck(node_array,'chr')), draw_ideogram_data);
 };
 
 circvis.removeNodes = function(node_array) {

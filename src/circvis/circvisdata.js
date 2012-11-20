@@ -344,16 +344,16 @@ vq.models.CircVisData.prototype._setupData = function() {
         nodes[d] = {};
     });
     var node_parent_map = {};
-    var node_array = [{parent:null, chr:null, radius:0, angle:0,children:[]}];
+    var node_array = [{parent:null, chr:null, radius:0, angle:0}];
     that._network.network_radius = {};
+    that._network.layout = {};
     chrom_keys_array.forEach(function(key,index) {
         var innerRadius = that._ideograms[key].wedge.length > 0 ? that._wedge[that._ideograms[key].wedge.length-1]._innerRadius :
             (that._plot.height / 2) - that.ticks.outer_padding - that.ticks.height;
         var network_radius = that._network.network_radius[key] = innerRadius - that._network._outer_padding;
         node_parent_map[key] = index + 1;
-        var node = {chr:key,parent:node_array[0],children:[],radius: network_radius / 2,
+        var node = {chr:key,parent:node_array[0],radius: network_radius / 2,
             angle : (that._chrom.groups[key].startAngle + that._chrom.groups[key].endAngle)/2};
-        node_array[0].children.push(node);
         node_array.push(node);
     });
 
@@ -444,7 +444,7 @@ vq.models.CircVisData.prototype._retileTicks = function() {
     var tick;
     var _tickData = 
         vq.utils.VisUtils.layoutChrTicks(this._data.features, this.ticks.overlap_distance);
-    var layout = this.ticks._layout = {};
+    var layout = this.ticks._layout;
     var hash = that._data.hash;
     _.each(_tickData,function(f) {layout[hash(f)] = f.level;}); 
 };
@@ -460,7 +460,7 @@ vq.models.CircVisData.prototype._format_network_node = function(node) {
         //previously loaded this node, pull it from the node_array
         if ( !_.isUndefined(parent)) {
             new_node = _.extend({parent:parent},node);
-            parent.children.push(new_node);
+            // parent.children.push(new_node);
             return new_node;
         }
         else {
@@ -527,19 +527,18 @@ vq.models.CircVisData.prototype._insertNodes = function(node_array) {
     this._retile();
     return insert_nodes;
 };
+
 vq.models.CircVisData.prototype._retile = function() {
     this._retileNodes();
     this._retileTicks();
     this._retileWedge();
     return this;
-}
-
+};
 
 vq.models.CircVisData.prototype._retileNodes = function() {
     var that = this;
     if (this._network.tile_nodes && this._data.features.length) {
         nodes = vq.utils.VisUtils.layoutChrTiles(that._data.features ,that._network.node_overlap_distance);
-        this._network.layout = {};
          _.each(nodes,function(f) { that._network.layout[that._data.hash(f)] = f.level;});
     }
     return this;
@@ -591,20 +590,20 @@ vq.models.CircVisData.prototype._insertEdge = function(edge) {
 vq.models.CircVisData.prototype._removeEdge = function(edge) {
     var that = this;
     if (_.isObject(edge)) {
-        this._network.links_array =
-            _.reject(this._network.links_array,function(link) { 
-                return that.same_edge(link,_.extend(
-                            {},{source:edge.node1,target:edge.node2},edge)
-                );
+        var edge_index = -1;
+            _.each(this._network.links_array,function(link,index) { 
+                if (that.same_edge(link,_.extend(
+                            {},{source:edge.node1,target:edge.node2},edge))) {
+                edge_index = index;
+                }
             });
+        if (edge_index) this._network.links_array.splice(edge_index,1);
     }
 };
 
 vq.models.CircVisData.prototype._removeEdges = function(edge_arr) {
     var that = this;
     if (_.isArray(edge_arr)) {
-        this._network.links_array =
-            _.difference(that._network.links_array,edge_arr);
+        _.each(edge_arr, this._removeEdge,this);
     }
-
 };

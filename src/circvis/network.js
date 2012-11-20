@@ -48,8 +48,8 @@ var _drawNetworkNodes = function (chr) {
         .attr('r',function(a) {return chromoData._network.node_radius(a)*4; })
         .style('fill-opacity',1e-6)
                 .style('stroke-opacity',1e-6)
-       .remove()
-       .each("end",remove_node_layout);
+       .remove();
+       // .each("end",remove_node_layout);
 };
 
 
@@ -72,15 +72,17 @@ var _drawNetworkLinks= function() {
         .tension(.65)
         .radius(function(d) { return d.radius !== undefined ?
             d.radius :
-            network_radius(d)
+            network_radius(d);
         })
         .angle(function(d) { return d.angle !== undefined ?
             d.angle :
             chromoData._ideograms[d.chr]._feature_angle(center(d));
         });
 
+    var new_data = bundle(chromoData._network.links_array).map(function(b, index) { return _.extend(chromoData._network.links_array[index],{spline:b});});
+
     var edges = d3.select('g.links').selectAll("path.link")
-        .data(bundle(chromoData._network.links_array).map(function(b, index) { return _.extend(chromoData._network.links_array[index],{spline:b});}));
+        .data(new_data);
 
         edges
         .enter().insert("svg:path")
