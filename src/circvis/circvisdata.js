@@ -592,10 +592,12 @@ vq.models.CircVisData.prototype._removeEdge = function(edge) {
     var that = this;
     if (_.isObject(edge)) {
         this._network.links_array =
-            _.reject(this._network.links_array,function(link) { return that.same_edge(link,_.extend({},edge,
-                {source:edge.node1,target:edge.node2}));});
+            _.reject(this._network.links_array,function(link) { 
+                return that.same_edge(link,_.extend(
+                            {},{source:edge.node1,target:edge.node2},edge)
+                );
+            });
     }
-
 };
 
 vq.models.CircVisData.prototype._removeEdges = function(edge_arr) {
