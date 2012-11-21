@@ -85,7 +85,7 @@
 	        //make a good start number with our without a good chromsome
 	        var start1 = this.chrom_attr[chr1] ? Math.random() * (this.chrom_attr[chr1].length - 50000) >>> 0 : 20;
 	        var feature = {label:'N:'+ source +':'+label+':'+chr1+':'+start1+':'+(start1+50000)+'::',chr:chr1,start:start1,end:start1
-	                + 50000,source:'+'};
+	                + 50000,source:source};
 	        other_fields.forEach(function(field) {
 	                	feature[field.property] = field.value;
 	        	 });
