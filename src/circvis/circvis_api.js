@@ -1,5 +1,38 @@
 /*EDGES*/
 
+circvis.size = function(width, height) {
+    var w, h;
+
+    if (width.length && width.length == 2) { //use 1st argument as array of sizes
+        w = width[0];
+        h = width[1];
+    }
+    else if (arguments.length == 1) { //set both to 1st argument
+        w = h = width;
+    } else {
+        w = width;
+        h = height;
+    }
+
+    var width_scale = w / chromoData._plot.width;
+    var height_scale =  h / chromoData._plot.height;
+    var svg = d3.select('#' + chromoData._plot.id).select('.circvis');
+        var transform = d3.transform(svg.attr('transform'));
+        var translate = transform.translate;
+        var scale = transform.scale;
+        var rotation = transform.rotate;
+        var actual_width = (width / 2 * scale[0]), actual_height = (height / 2 * scale[1]);
+
+    svg.transition().duration(500)
+    .attr('transform','translate(' + w/2 + ',' + h/2 + ')scale(' + width_scale + ',' + height_scale + ')rotate(' + rotation + ')');
+
+
+    d3.select('#' + chromoData._plot.id).transition().duration(500)
+    .attr('width',w)
+    .attr('height',h);
+
+};
+
 circvis.addEdges = function(edge_array) {
     var edges;
     if (_.isArray(edge_array)) {

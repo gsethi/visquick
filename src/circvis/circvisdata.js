@@ -134,7 +134,7 @@ vq.models.CircVisData.prototype._setupData = function() {
     this.normalizedLength,this.theta = [],this.startAngle_map = {};
 
     var that = this;
-    this._plot.id = vq.utils.VisUtils.guid();
+    this._plot.id = 'C' + vq.utils.VisUtils.guid(); // div id must start with letter
 
 //  Ideogram Data
 

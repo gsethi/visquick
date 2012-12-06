@@ -29,16 +29,15 @@ var CircVis = function(data) {
         var translate = transform.translate;
         var scale = transform.scale;
         var rotation = transform.rotate;
-        var actual_width = (width /2*scale[0]), actual_height = (height /2*scale[1]);
+        var actual_width = (width / 2 * scale[0]), actual_height = (height / 2 * scale[1]);
         var p = [d3.event.x - actual_width, d3.event.y -actual_height];
         var q = [d3.event.x - d3.event.dx - actual_width, d3.event.y - d3.event.dy - actual_height];
         function cross(a, b) { return a[0] * b[1] - a[1] * b[0]; }
         function dot(a, b) { return a[0] * b[0] + a[1] * b[1]; }
         var angle = Math.atan2(cross(q,p),dot(q,p)) * 180 / Math.PI;
         rotation += angle;
-        d3.select(this).attr('transform','translate(' + translate[0]+','+translate[1]+')scale('+scale+')rotate('+rotation+')');
+        d3.select(this).attr('transform','translate(' + translate[0] + ',' + translate[1] + ')scale(' + scale + ')rotate(' + rotation + ')');
     }
-
 
     function dragstart(d,u) {}
     function dragend(d,u) {}
@@ -62,8 +61,7 @@ var CircVis = function(data) {
 
         svg.insert('svg:defs');
 
-
-var ideograms = svg.selectAll('g.ideogram')
+    var ideograms = svg.selectAll('g.ideogram')
         .data(chromoData._chrom.keys)
         .enter().append('svg:g')
             .attr('class','ideogram')
